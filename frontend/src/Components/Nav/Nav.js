@@ -1,18 +1,17 @@
 import React, { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom"; // Import Link
 import "./Nav.css";
 import logo from "../../assets/logo.png";
-import profilePic from "../../assets/profile.jpg"; // Add your profile pic here
+import profilePic from "../../assets/profile.jpg";
 
 function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
   const dropdownRef = useRef(null);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const toggleDropdown = () => setDropdownOpen(!dropdownOpen);
 
-  // Close dropdown if clicked outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -34,11 +33,12 @@ function Nav() {
 
         {/* Navigation Links */}
         <ul className={`nav-links ${menuOpen ? "nav-active" : ""}`}>
-          <li><a href="Home">Dashboard</a></li>
-          <li><a href="#projects">Projects</a></li>
-          <li><a href="#tasks">Tasks</a></li>
+          <li><Link to="/">Dashboard</Link></li>
+          <li><Link to="/project">Projects</Link></li>
+          <li><Link to="/assign-tasks">Tasks</Link></li>
           <li><a href="#budget">Budget</a></li>
           <li><a href="#inventory">Inventory</a></li>
+          <li><Link to="/documents">Documents</Link></li> 
           <li><a href="#messages">Messages</a></li>
           <li><a href="#reports">Reports</a></li>
           <li><a href="#settings">Settings</a></li>
