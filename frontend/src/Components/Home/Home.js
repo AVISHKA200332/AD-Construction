@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import Nav from "../Nav/Nav";
+import Footer from "../Footer/Footer";
 import './Home.css';
 
 function Home() {
-  // Dashboard state and handlers
+  const [role] = useState('Admin'); // role is fixed here
+
   const [tasks, setTasks] = useState({
     todo: ['Inspect site A', 'Order cement'],
     inProgress: ['Foundation work'],
@@ -11,14 +13,16 @@ function Home() {
   });
 
   const onDragStart = (e, task, from) => {
+    if (!['Admin', 'Manager'].includes(role)) return;
     e.dataTransfer.setData('task', task);
     e.dataTransfer.setData('from', from);
   };
 
   const onDrop = (e, to) => {
+    if (!['Admin', 'Manager'].includes(role)) return;
+
     const task = e.dataTransfer.getData('task');
     const from = e.dataTransfer.getData('from');
-
     if (from === to) return;
 
     setTasks(prev => {
@@ -29,42 +33,16 @@ function Home() {
     });
   };
 
-  const onDragOver = (e) => e.preventDefault();
-
   return (
     <div>
       <Nav />
-      <h1>Hi ITP</h1>
 
-      {/* Dashboard content starts here */}
       <div className="dashboard">
-        {/* Sidebar */}
-        <aside className="sidebar">
-          <h2>AD Construction</h2>
-          <nav>
-            <ul>
-              {['Dashboard', 'Projects', 'Tasks', 'Budget', 'Inventory', 'Messages', 'Reports', 'Settings'].map(item => (
-                <li
-                  key={item}
-                >
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </nav>
-        </aside>
-
-        {/* Main content */}
         <main className="main-content">
           <header className="header">
-            <input
-              type="text"
-              placeholder="Search projects..."
-            />
-            <div className="profile">Admin ▼</div>
+            <input type="text" placeholder="Search projects..." />
           </header>
 
-          {/* Summary Cards */}
           <section className="summary-cards">
             {[
               { title: 'Active Projects', value: '8 projects', progress: 65, label: '65% complete' },
@@ -77,7 +55,7 @@ function Home() {
                 <p>{value}</p>
                 {progress !== undefined && (
                   <>
-                    <progress value={progress} max="100" style={{ width: '100%', margin: '0.5rem 0' }} />
+                    <progress value={progress} max="100" />
                     {label && <small>{label}</small>}
                   </>
                 )}
@@ -85,19 +63,22 @@ function Home() {
             ))}
           </section>
 
-          {/* Tasks Kanban */}
           <section className="tasks-section">
-            <h2>Tasks Kanban</h2>
-            <div className="kanban">
+            <h2>Task Board</h2>
+            <div className="board">
               {['todo', 'inProgress', 'completed'].map(status => (
                 <div
                   key={status}
                   onDrop={(e) => onDrop(e, status)}
-                  onDragOver={onDragOver}
-                  className="kanban-column"
+                  onDragOver={(e) => e.preventDefault()}
+                  className="task-column"
                 >
                   <h3>
-                    {status === 'todo' ? 'To Do' : status === 'inProgress' ? 'In Progress' : 'Completed'}
+                    {status === 'todo'
+                      ? 'To Do'
+                      : status === 'inProgress'
+                      ? 'In Progress'
+                      : 'Completed'}
                   </h3>
                   {tasks[status].map(task => (
                     <div
@@ -105,7 +86,7 @@ function Home() {
                       draggable
                       onDragStart={(e) => onDragStart(e, task, status)}
                       className="task-card"
-                      onMouseDown={e => e.currentTarget.style.backgroundColor = '#dff9fb'}
+                      onMouseDown={e => e.currentTarget.style.backgroundColor = '#F5CB5C'}
                       onMouseUp={e => e.currentTarget.style.backgroundColor = 'white'}
                     >
                       {task}
@@ -117,6 +98,7 @@ function Home() {
           </section>
         </main>
       </div>
+      <Footer />
     </div>
   );
 }
