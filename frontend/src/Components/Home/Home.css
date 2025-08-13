@@ -1,162 +1,248 @@
 * {
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body, html, #root {
   height: 100%;
   margin: 0;
+  background-color: #D9D9D9; /* light gray background */
 }
 
 .dashboard {
   display: flex;
   height: 100vh;
-  background: #f9f9f9;
+  background: #D9D9D9;
+  color: #0B3954;
 }
 
-/* Sidebar */
-
-.sidebar {
-  width: 220px;
-  background-color: #2c3e50;
-  color: white;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
+/* ===== Logo Above Nav ===== */
+.logo-container {
+  text-align: center;
+  padding: 1rem 0;
+  background: white;
+  border-bottom: 2px solid #ddd;
 }
 
-.sidebar h2 {
-  margin-bottom: 2rem;
+.dashboard-logo {
+  height: 60px;
+  object-fit: contain;
 }
 
-.sidebar nav ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar nav ul li {
-  margin: 1rem 0;
-  cursor: pointer;
-  transition: background 0.3s;
-  padding: 0.5rem;
-  border-radius: 4px;
-}
-
-.sidebar nav ul li:hover {
-  background-color: #34495e;
-}
-
-/* Main content */
-
+/* ===== Main content ===== */
 .main-content {
   flex: 1;
-  padding: 1rem 2rem;
+  padding: 1.5rem 3rem;
   display: flex;
   flex-direction: column;
+  background: #FFFFFF; /* white */
+  border-radius: 12px;
+  margin: 1.5rem;
+  box-shadow: 0 8px 20px rgb(11 57 84 / 0.15);
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.header input {
-  padding: 0.5rem;
-  width: 250px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
-
-.profile {
-  background-color: #2980b9;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  color: white;
-  cursor: pointer;
-}
-
-/* Summary Cards */
-
-.summary-cards {
-  display: flex;
-  gap: 1rem;
   margin-bottom: 2rem;
 }
 
+.header input {
+  padding: 0.75rem 1rem;
+  width: 280px;
+  border-radius: 25px;
+  border: 2px solid #0B3954;
+  font-weight: 600;
+  color: #0B3954;
+  transition: all 0.3s ease;
+  outline: none;
+  background: #DBEAFE;
+}
+
+.header input::placeholder {
+  color: #0B3954;
+  opacity: 0.7;
+}
+
+.header input:focus {
+  background: #FFFFFF;
+  border-color: #F5CB5C;
+  box-shadow: 0 0 8px #F5CB5C;
+}
+
+/* ===== Profile dropdown styling ===== */
+.profile {
+  background-color: #F5CB5C;
+  padding: 0.5rem 1.5rem;
+  border-radius: 30px;
+  color: #0B3954;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 4px 8px rgb(245 203 92 / 0.5);
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: max-content;
+}
+
+.profile:hover {
+  background-color: #DBA832;
+}
+
+.profile select {
+  background-color: transparent;
+  border: none;
+  color: #0B3954; /* dark blue */
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  outline: none;
+  padding-right: 1.5rem;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.profile select::-ms-expand {
+  display: none; /* Hide default arrow in IE */
+}
+
+.dropdown-arrow {
+  position: relative;
+  left: -1.5rem;
+  pointer-events: none;
+  color: #0B3954; /* dark blue */
+  font-weight: 700;
+  user-select: none;
+}
+
+/* ===== Summary Cards ===== */
+.summary-cards {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
 .card {
-  background: white;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
-  flex: 1;
+  background: #DBEAFE; /* light blue */
+  padding: 1.5rem 2rem;
+  border-radius: 15px;
+  box-shadow: 0 6px 15px rgb(11 57 84 / 0.1);
+  flex: 1 1 200px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  color: #0B3954;
+  font-weight: 700;
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 25px rgb(11 57 84 / 0.2);
 }
 
 .card h3 {
-  margin: 0 0 0.5rem 0;
-  font-weight: 600;
+  margin: 0 0 0.7rem 0;
+  font-weight: 800;
+}
+
+.card p {
+  font-size: 1.25rem;
+  margin: 0;
+  color: #0B3954;
 }
 
 .card progress {
   width: 100%;
-  margin: 0.5rem 0;
+  margin: 0.7rem 0 0.2rem 0;
+  height: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
-/* Kanban Board */
+.card progress::-webkit-progress-bar {
+  background-color: #F5CB5C;
+  border-radius: 10px;
+}
 
+.card progress::-webkit-progress-value {
+  background-color: #0B3954;
+  border-radius: 10px;
+}
+
+/* ===== Task Board ===== */
 .tasks-section {
   flex: 1;
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+  background: #FFFFFF;
+  padding: 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgb(11 57 84 / 0.1);
   display: flex;
   flex-direction: column;
+  color: #0B3954;
 }
 
 .tasks-section h2 {
   margin-top: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
 }
 
-.kanban {
+.board {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   height: 100%;
 }
 
-.kanban-column {
+.task-column {
   flex: 1;
-  background: #ecf0f1;
-  border-radius: 8px;
+  background: #DBEAFE;
+  border-radius: 15px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  max-height: 400px;
+  max-height: 450px;
   overflow-y: auto;
+  box-shadow: inset 0 0 15px rgb(11 57 84 / 0.05);
+  transition: background-color 0.3s ease;
 }
 
-.kanban-column h3 {
+.task-column:hover {
+  background-color: #F5CB5C;
+  color: #0B3954;
+  box-shadow: inset 0 0 30px rgb(11 57 84 / 0.15);
+}
+
+.task-column h3 {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
-.kanban-task {
+.task-card {
   background: white;
   padding: 0.75rem 1rem;
-  margin-bottom: 0.75rem;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+  margin-bottom: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 3px 8px rgb(11 57 84 / 0.15);
   cursor: grab;
   user-select: none;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.kanban-task:active {
+.task-card:active {
   cursor: grabbing;
-  background: #dff9fb;
+  background: #F5CB5C;
+  box-shadow: 0 6px 15px rgb(11 57 84 / 0.25);
 }
