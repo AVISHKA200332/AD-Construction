@@ -7,6 +7,7 @@ const router = require("./Routes/ReportRoutes");
 const app = express();
 
 //Middleware
+app.use(express.json());
 app.use("/reports",router);
 
 mongoose.connect("mongodb+srv://admin:3KzKmzJ6QFuLjCBA@cluster0.i1f9ioi.mongodb.net/")
