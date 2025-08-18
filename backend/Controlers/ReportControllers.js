@@ -61,6 +61,29 @@ const getById = async (req, res, next) => {
     return res.status(200).json({report});
 }
 
+//update report details
+const updateReport = async (req, res, next) => {
+
+    const report_Id = req.params.id;
+    const {project_Id,record_Type,party_Name,amount,date,status,description,bank_Slip_Ref_No} = req.body;
+
+    let report;
+
+    try {
+        report = await Report.findByIdAndUpdate(report_Id, 
+         { project_Id: project_Id, record_Type: record_Type, party_Name: party_Name, amount: amount, date: date, status: status, description: description, bank_Slip_Ref_No: bank_Slip_Ref_No});
+         report = await report.save();
+    }catch(err) {
+        console.log(err);
+    }
+    // can not update reports
+    if(!report){
+        return res.status(404).json({message:"Unalbe to update Report Details"});
+    }
+    return res.status(200).json({report});
+}
+
 exports.getAllReports = getAllReports;
 exports.addReports = addReports;
 exports.getById = getById;
+exports.updateReport = updateReport;

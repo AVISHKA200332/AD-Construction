@@ -8,6 +8,7 @@ const ReportController = require("../Controlers/ReportControllers");
 router.get("/",ReportController.getAllReports);
 router.post("/",ReportController.addReports);
 router.get("/:id",ReportController.getById);
+router.put("/:id",ReportController.updateReport);
 
 //export
 module.exports = router;
