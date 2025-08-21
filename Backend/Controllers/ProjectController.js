@@ -18,18 +18,18 @@ const getAllProject = async (req, res, next) => {
 
 // Add new project
 const addProject = async (req, res, next) => {
-  const { name, description, startDate, endDate, status, client, budget } =
+  const { name, client, status, startDate, endDate, budget, completion } =
     req.body;
 
   try {
     const project = new Project({
       name,
-      description,
+      client,
+      status,
       startDate,
       endDate,
-      status,
-      client,
       budget,
+      completion,
     });
 
     await project.save();

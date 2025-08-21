@@ -6,27 +6,33 @@ const projectSchema = new Schema({
         type: String,
         required: true,
     },
-    description: {
+
+    client: {
         type: String,
         required: true,
-    },
-    startDate: {
-        type: Date,
-        required: true,
-    },
-    endDate: {
-        type: Date,
-        required: true,
-    },
+    }, 
+
     status: {
         type: String,
         required: true,
     },
-    client: {
-        type: String,
+
+    startDate: {
+        type: Date,
         required: true,
     },
+   
+    endDate: {
+        type: Date,
+        required: true,
+    },
+
     budget: {
+        type: Number,
+        required: true,
+    },
+
+    completion: {
         type: Number,
         required: true,
     }
