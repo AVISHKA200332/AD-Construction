@@ -78,7 +78,24 @@ const updateReport = async (req, res, next) => {
     }
     // can not update reports
     if(!report){
-        return res.status(404).json({message:"Unalbe to update Report Details"});
+        return res.status(404).json({message:"Unable to update Report Details"});
+    }
+    return res.status(200).json({report});
+}
+
+//delete report details
+const deleteReport = async (req, res, next) => {
+    const report_Id = req.params.id;
+
+    let report;
+
+    try{
+        report = await Report.findByIdAndDelete(report_Id);
+    }catch (err) {
+        console.log(err);
+    }
+    if(!report){
+        return res.status(404).json({message:"Unable to delete Report Details"});
     }
     return res.status(200).json({report});
 }
@@ -87,3 +104,4 @@ exports.getAllReports = getAllReports;
 exports.addReports = addReports;
 exports.getById = getById;
 exports.updateReport = updateReport;
+exports.deleteReport = deleteReport;
