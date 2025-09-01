@@ -1,19 +1,35 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import searchIcon from "../../assets/icons/search.png";
 import filterIcon from "../../assets/icons/filter.png";
 import fileTextIcon from "../../assets/icons/file-text.png";
-import plusIcon from "../../assets/icons/plus.jpg";
+import plusIcon from "../../assets/icons/plus.png";
 import AddProjectModal from "./AddProjectModel";
+import axios from "axios";
+
+const URL = "http://localhost:5000/projects";
+
+// fetch projects
+const fetchHandler = async () => {
+  return await axios.get(URL).then((res) => res.data);
+};
 
 function Project({ initialProjects = [] }) {
   const [showModal, setShowModal] = useState(false);
-  const [projects, setProjects] = useState(initialProjects); // existing projects
+  const [isEditing, setIsEditing] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
+
+  const [projects, setProjects] = useState(initialProjects);
+
+  useEffect(() => {
+    fetchHandler().then((data) => setProjects(data.projects));
+  }, []);
+
   const [newProject, setNewProject] = useState({
     name: "",
     client: "",
     status: "In Progress",
-    start: "",
-    end: "",
+    startDate: "",
+    endDate: "",
     budget: "",
     completion: 0,
   });
@@ -24,19 +40,48 @@ function Project({ initialProjects = [] }) {
     setNewProject({ ...newProject, [name]: value });
   };
 
-  // Add new project
-  const handleAddProject = () => {
-    setProjects([...projects, newProject]);
+  // Add or Edit project
+  const handleSaveProject = () => {
+    if (isEditing && editIndex !== null) {
+      const updatedProjects = [...projects];
+      updatedProjects[editIndex] = newProject;
+      setProjects(updatedProjects);
+      setIsEditing(false);
+      setEditIndex(null);
+    } else {
+      setProjects([...projects, newProject]);
+    }
+
     setNewProject({
       name: "",
       client: "",
       status: "In Progress",
-      start: "",
-      end: "",
+      startDate: "",
+      endDate: "",
       budget: "",
       completion: 0,
     });
     setShowModal(false);
+  };
+
+  // Delete project
+  const handleDelete = (index) => {
+    setProjects(projects.filter((_, i) => i !== index));
+  };
+
+  // Edit project
+  const handleEdit = (index) => {
+    setNewProject(projects[index]);
+    setIsEditing(true);
+    setEditIndex(index);
+    setShowModal(true);
+  };
+
+  // Format date nicely
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   };
 
   return (
@@ -49,7 +94,19 @@ function Project({ initialProjects = [] }) {
             <img src={fileTextIcon} alt="Report" className="w-4 h-4" /> Generate Report
           </button>
           <button
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setShowModal(true);
+              setIsEditing(false);
+              setNewProject({
+                name: "",
+                client: "",
+                status: "In Progress",
+                startDate: "",
+                endDate: "",
+                budget: "",
+                completion: 0,
+              });
+            }}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
           >
             <img src={plusIcon} alt="Add" className="w-4 h-4" /> Add Project
@@ -63,7 +120,8 @@ function Project({ initialProjects = [] }) {
         setShowModal={setShowModal}
         newProject={newProject}
         handleChange={handleChange}
-        handleAddProject={handleAddProject}
+        handleAddProject={handleSaveProject}
+        isEditing={isEditing}
       />
 
       {/* Search & Filter */}
@@ -97,6 +155,7 @@ function Project({ initialProjects = [] }) {
               <th className="px-4 py-3">End Date</th>
               <th className="px-4 py-3">Budget</th>
               <th className="px-4 py-3">Completion</th>
+              <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -106,8 +165,8 @@ function Project({ initialProjects = [] }) {
                   <td className="px-4 py-3">{p.name}</td>
                   <td className="px-4 py-3">{p.client}</td>
                   <td className="px-4 py-3">{p.status}</td>
-                  <td className="px-4 py-3">{p.start}</td>
-                  <td className="px-4 py-3">{p.end}</td>
+                  <td className="px-4 py-3">{formatDate(p.startDate)}</td>
+                  <td className="px-4 py-3">{formatDate(p.endDate)}</td>
                   <td className="px-4 py-3">{p.budget}</td>
                   <td className="px-4 py-3 w-48">
                     <div className="w-full bg-gray-200 rounded-full h-2 mb-1">
@@ -118,11 +177,25 @@ function Project({ initialProjects = [] }) {
                     </div>
                     <span className="text-xs text-gray-500">{p.completion}%</span>
                   </td>
+                  <td className="px-4 py-3 flex gap-2">
+                    <button
+                      onClick={() => handleEdit(idx)}
+                      className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(idx)}
+                      className="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100"
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center py-6 text-gray-500">
+                <td colSpan="8" className="text-center py-6 text-gray-500">
                   No projects available
                 </td>
               </tr>
