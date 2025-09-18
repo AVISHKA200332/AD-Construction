@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const reportSchema = new Schema({
+const financeSchema = new Schema({
     project_Id:{ type:String, required:true },//dataType, validate
     record_Type:{ type:String, required:true },
     party_Name:{ type:String, required:true },
@@ -12,4 +12,4 @@ const reportSchema = new Schema({
     bank_Slip_Ref_No:{ type:String, required:true }
 });
 
-module.exports = mongoose.model("ReportModel", reportSchema) //file_name, function_name
+module.exports = mongoose.model("FinanceModel", financeSchema) //file_name, function_name
