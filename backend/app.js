@@ -5,9 +5,11 @@ const mongoose = require("mongoose");
 const router = require("./Routes/FinanceRoutes");
 
 const app = express();
+const cors = require("cors");
 
 //Middleware
 app.use(express.json());
+app.use(cors());
 app.use("/finance",router);
 
 mongoose.connect("mongodb+srv://admin:3KzKmzJ6QFuLjCBA@cluster0.i1f9ioi.mongodb.net/")
