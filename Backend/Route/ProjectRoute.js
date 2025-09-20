@@ -5,13 +5,13 @@ const Project = require("../Model/ProjectModel");
 //Insert Project Controller
 const ProjectController = require("../Controllers/ProjectController");
 
-// Now responds to GET /users
+// Project routes
 
-router.get("/",ProjectController.getAllProject);
+router.get("/", ProjectController.getAllProject);
+router.get("/:id", ProjectController.getProjectById);
 router.post("/", ProjectController.addProject);
-//router.get('/:id', ProjectController.getById);
-//router.put('/:id', ProjectController.updateUser);
-//router.delete('/:id', ProjectController.deleteUser);
+router.put("/:id", ProjectController.updateProject);
+router.delete("/:id", ProjectController.deleteProject);
 
 //export
 module.exports = router;

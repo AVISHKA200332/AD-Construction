@@ -4,24 +4,36 @@ import filterIcon from "../../assets/icons/filter.png";
 import fileTextIcon from "../../assets/icons/file-text.png";
 import plusIcon from "../../assets/icons/plus.png";
 import AddProjectModal from "./AddProjectModel";
-import axios from "axios";
-
-const URL = "http://localhost:5000/projects";
-
-// fetch projects
-const fetchHandler = async () => {
-  return await axios.get(URL).then((res) => res.data);
-};
+import projectService from "../../services/projectService";
+import { downloadProjectReport } from "../../services/pdfService";
 
 function Project({ initialProjects = [] }) {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const [projects, setProjects] = useState(initialProjects);
 
+  // Fetch projects from API
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await projectService.getAllProjects();
+      setProjects(data.projects);
+    } catch (err) {
+      setError('Failed to fetch projects. Please try again.');
+      console.error('Error fetching projects:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchHandler().then((data) => setProjects(data.projects));
+    fetchProjects();
   }, []);
 
   const [newProject, setNewProject] = useState({
@@ -41,37 +53,66 @@ function Project({ initialProjects = [] }) {
   };
 
   // Add or Edit project
-  const handleSaveProject = () => {
-    if (isEditing && editIndex !== null) {
-      const updatedProjects = [...projects];
-      updatedProjects[editIndex] = newProject;
-      setProjects(updatedProjects);
-      setIsEditing(false);
-      setEditIndex(null);
-    } else {
-      setProjects([...projects, newProject]);
-    }
+  const handleSaveProject = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    setNewProject({
-      name: "",
-      client: "",
-      status: "In Progress",
-      startDate: "",
-      endDate: "",
-      budget: "",
-      completion: 0,
-    });
-    setShowModal(false);
+      if (isEditing && editIndex !== null) {
+        // Update existing project
+        const projectToUpdate = projects[editIndex];
+        await projectService.updateProject(projectToUpdate._id, newProject);
+        await fetchProjects(); // Refresh the list
+        setIsEditing(false);
+        setEditIndex(null);
+      } else {
+        // Create new project
+        await projectService.createProject(newProject);
+        await fetchProjects(); // Refresh the list
+      }
+
+      setNewProject({
+        name: "",
+        client: "",
+        status: "In Progress",
+        startDate: "",
+        endDate: "",
+        budget: "",
+        completion: 0,
+      });
+      setShowModal(false);
+    } catch (err) {
+      setError(isEditing ? 'Failed to update project. Please try again.' : 'Failed to create project. Please try again.');
+      console.error('Error saving project:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Delete project
-  const handleDelete = (index) => {
-    setProjects(projects.filter((_, i) => i !== index));
+  const handleDelete = async (index) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const projectToDelete = projects[index];
+      await projectService.deleteProject(projectToDelete._id);
+      await fetchProjects(); // Refresh the list
+    } catch (err) {
+      setError('Failed to delete project. Please try again.');
+      console.error('Error deleting project:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Edit project
   const handleEdit = (index) => {
-    setNewProject(projects[index]);
+    const projectToEdit = projects[index];
+    setNewProject({
+      ...projectToEdit,
+      startDate: projectToEdit.startDate ? projectToEdit.startDate.split('T')[0] : '',
+      endDate: projectToEdit.endDate ? projectToEdit.endDate.split('T')[0] : '',
+    });
     setIsEditing(true);
     setEditIndex(index);
     setShowModal(true);
@@ -84,14 +125,70 @@ function Project({ initialProjects = [] }) {
     return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
   };
 
+  // Generate PDF report
+  const handleGenerateReport = () => {
+    if (projects.length === 0) {
+      setError('No projects available to generate report.');
+      return;
+    }
+
+    console.log('Generating report for projects:', projects);
+    
+    try {
+      const reportGenerated = downloadProjectReport(projects);
+      console.log('Report generation result:', reportGenerated);
+      
+      if (reportGenerated) {
+        setSuccess('Report generated successfully!');
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        setError('Failed to generate report. Please try again.');
+      }
+    } catch (err) {
+      setError('Failed to generate report. Please try again.');
+      console.error('Error generating report:', err);
+    }
+  };
+
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+          {error}
+          <button 
+            onClick={() => setError(null)}
+            className="ml-2 text-red-500 hover:text-red-700 font-bold"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {/* Success Message */}
+      {success && (
+        <div className="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+          {success}
+          <button 
+            onClick={() => setSuccess(null)}
+            className="ml-2 text-green-500 hover:text-green-700 font-bold"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold">Project Management</h1>
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 border rounded-lg text-sm">
-            <img src={fileTextIcon} alt="Report" className="w-4 h-4" /> Generate Report
+          <button 
+            onClick={handleGenerateReport}
+            disabled={loading || projects.length === 0}
+            className="flex items-center gap-2 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50 disabled:bg-gray-100 disabled:text-gray-400 transition-colors"
+          >
+            <img src={fileTextIcon} alt="Report" className="w-4 h-4" /> 
+            Generate Report
           </button>
           <button
             onClick={() => {
@@ -107,7 +204,8 @@ function Project({ initialProjects = [] }) {
                 completion: 0,
               });
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg text-sm"
           >
             <img src={plusIcon} alt="Add" className="w-4 h-4" /> Add Project
           </button>
@@ -122,6 +220,7 @@ function Project({ initialProjects = [] }) {
         handleChange={handleChange}
         handleAddProject={handleSaveProject}
         isEditing={isEditing}
+        loading={loading}
       />
 
       {/* Search & Filter */}
@@ -159,9 +258,18 @@ function Project({ initialProjects = [] }) {
             </tr>
           </thead>
           <tbody>
-            {projects.length > 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan="8" className="text-center py-6 text-gray-500">
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                    <span className="ml-2">Loading projects...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : projects.length > 0 ? (
               projects.map((p, idx) => (
-                <tr key={idx} className="border-b last:border-0">
+                <tr key={p._id || idx} className="border-b last:border-0">
                   <td className="px-4 py-3">{p.name}</td>
                   <td className="px-4 py-3">{p.client}</td>
                   <td className="px-4 py-3">{p.status}</td>
@@ -180,13 +288,15 @@ function Project({ initialProjects = [] }) {
                   <td className="px-4 py-3 flex gap-2">
                     <button
                       onClick={() => handleEdit(idx)}
-                      className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+                      disabled={loading}
+                      className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-md"
                     >
                       Edit
                     </button>
                     <button
                       onClick={() => handleDelete(idx)}
-                      className="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100"
+                      disabled={loading}
+                      className="px-3 py-1 text-sm border border-gray-300 text-gray-700 rounded-md hover:bg-gray-100 disabled:bg-gray-100 disabled:text-gray-400"
                     >
                       Delete
                     </button>
