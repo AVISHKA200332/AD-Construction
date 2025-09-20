@@ -3,6 +3,7 @@ import Nav from "./Components/Nav/Nav";
 import Home from "./Components/Home/Home";
 import Foot from "./Components/Footer/Footer";
 import FinanceDetails from "./Components/FinanceDetails/FinanceDetails";
+import AddPayment from "./Components/AddPayment/AddPayment";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/finance" element={<FinanceDetails />} />
+        <Route path="/addPayment" element={<AddPayment />} />
       </Routes>
 
       <Foot /> {/* Footer stays on all pages */}

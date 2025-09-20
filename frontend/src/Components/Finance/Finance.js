@@ -1,8 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Finance(props) {
   const { project_Id, record_Type, party_Name, amount, date, status, description, bank_Slip_Ref_No } = props.finance;
   
+  const navigate = useNavigate();
+
+  const handleAddPayment = () => {
+    navigate("/addPayment");
+  };
+
   return (
     <div>
       <h1>Finance Table</h1>
@@ -15,6 +22,12 @@ function Finance(props) {
       <h3>Status: {status}</h3>
       <h3>Description: {description}</h3>
       <h3>Bank Slip No: {bank_Slip_Ref_No}</h3>
+      <button>Update</button>
+      <button>Delete</button>
+
+      <div style={{ marginTop: "10px" }}>
+        <button onClick={handleAddPayment}>Add Payment</button>
+      </div>
     </div>
   )
 }
