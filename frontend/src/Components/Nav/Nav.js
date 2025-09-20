@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import profilePic from "../../assets/profile.jpg";
+import NotificationIcon from "./NotificationIcon";
 
 function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -70,11 +71,6 @@ function Nav() {
             </Link>
           </li>
           <li>
-            <a href="#messages" className="font-semibold hover:text-[#F5CB5C] transition">
-              Messages
-            </a>
-          </li>
-          <li>
             <a href="#reports" className="font-semibold hover:text-[#F5CB5C] transition">
               Reports
             </a>
@@ -86,8 +82,9 @@ function Nav() {
           </li>
         </ul>
 
-        {/* Profile Section */}
-        <div className="relative flex items-center ml-4" ref={dropdownRef}>
+        {/* Notification & Profile Section */}
+        <div className="relative flex items-center ml-4 gap-4" ref={dropdownRef}>
+          <NotificationIcon count={3} />
           <img
             src={profilePic}
             alt="Profile"
