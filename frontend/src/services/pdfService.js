@@ -1,141 +1,176 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import logo from '../assets/logo.png'; // ✅ adjust the path to your logo
+
+// Helper to draw a colored box with text
+function drawBox(pdf, x, y, w, h, color, text, textColor = '#fff', fontSize = 16) {
+  pdf.setFillColor(...color);
+  pdf.rect(x, y, w, h, 'F');
+  pdf.setTextColor(textColor);
+  pdf.setFontSize(fontSize);
+  pdf.text(text, x + w / 2, y + h / 2, { align: 'center', baseline: 'middle' });
+}
+
+// Helper to add logo
+function addLogo(pdf, x, y, w, h) {
+  pdf.addImage(logo, 'PNG', x, y, w, h);
+}
 
 export const generateProjectReport = (projects) => {
-  // Create new PDF document
   const pdf = new jsPDF();
-  
-  // Add title
-  pdf.setFontSize(20);
+
+  // --- Cover Page ---
+  addLogo(pdf, 80, 30, 50, 50); // ✅ your company logo
+  pdf.setFontSize(28);
+  pdf.setTextColor(59, 130, 246);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Project Management Report', 20, 20);
-  
-  // Add generation date
+  pdf.text('AD Construction', 105, 95, { align: 'center' });
+  pdf.setFontSize(18);
+  pdf.setTextColor('#333');
+  pdf.text('Project Management Report', 105, 110, { align: 'center' });
+  pdf.setFontSize(12);
+  pdf.setTextColor('#666');
+  pdf.text(
+    `Generated on: ${new Date().toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    })}`,
+    105,
+    120,
+    { align: 'center' }
+  );
+  pdf.addPage();
+
+  // --- Table Page ---
+  pdf.setFontSize(20);
+  pdf.setTextColor(59, 130, 246);
+  pdf.setFont('helvetica', 'bold');
+  pdf.text('Project Overview', 20, 20);
   pdf.setFontSize(10);
+  pdf.setTextColor('#333');
   pdf.setFont('helvetica', 'normal');
-  const currentDate = new Date().toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  });
-  pdf.text(`Generated on: ${currentDate}`, 20, 30);
-  
-  // Add total projects count
-  pdf.text(`Total Projects: ${projects.length}`, 20, 40);
-  
-  // Prepare table data
-  const tableData = projects.map(project => {
-    console.log('Processing project:', project);
-    return [
-      project.name || 'N/A',
-      project.client || 'N/A',
-      project.status || 'N/A',
-      project.startDate ? new Date(project.startDate).toLocaleDateString('en-GB') : 'N/A',
-      project.endDate ? new Date(project.endDate).toLocaleDateString('en-GB') : 'N/A',
-      project.budget ? `Rs. ${Number(project.budget).toLocaleString()}` : 'N/A',
-      `${Number(project.completion) || 0}%`
-    ];
-  });
-  
-  // Define table columns
+  pdf.text(`Total Projects: ${projects.length}`, 20, 28);
+
+  const tableData = projects.map((project) => [
+    project.name || 'N/A',
+    project.client || 'N/A',
+    project.status || 'N/A',
+    project.priority || 'N/A',
+    project.startDate
+      ? new Date(project.startDate).toLocaleDateString('en-GB')
+      : 'N/A',
+    project.endDate
+      ? new Date(project.endDate).toLocaleDateString('en-GB')
+      : 'N/A',
+    project.budget ? `Rs. ${Number(project.budget).toLocaleString()}` : 'N/A',
+    `${Number(project.completion) || 0}%`,
+  ]);
+
   const columns = [
     'Project Name',
     'Client',
     'Status',
+    'Priority',
     'Start Date',
     'End Date',
     'Budget',
-    'Completion %'
+    'Completion %',
   ];
-  
-  // Add table to PDF
+
   autoTable(pdf, {
     head: [columns],
     body: tableData,
-    startY: 50,
+    startY: 35,
     styles: {
-      fontSize: 8,
+      fontSize: 9,
       cellPadding: 3,
     },
     headStyles: {
-      fillColor: [59, 130, 246], // Blue color
+      fillColor: [59, 130, 246],
       textColor: 255,
       fontStyle: 'bold',
     },
     alternateRowStyles: {
-      fillColor: [248, 250, 252], // Light gray
+      fillColor: [248, 250, 252],
     },
     columnStyles: {
-      0: { cellWidth: 30 }, // Project Name
-      1: { cellWidth: 25 }, // Client
-      2: { cellWidth: 20 }, // Status
-      3: { cellWidth: 20 }, // Start Date
-      4: { cellWidth: 20 }, // End Date
-      5: { cellWidth: 25 }, // Budget
-      6: { cellWidth: 20 }, // Completion
+      0: { cellWidth: 30 },
+      1: { cellWidth: 25 },
+      2: { cellWidth: 20 },
+      3: { cellWidth: 20 },
+      4: { cellWidth: 20 },
+      5: { cellWidth: 25 },
+      6: { cellWidth: 25 },
+      7: { cellWidth: 20 },
     },
     margin: { left: 20, right: 20 },
   });
-  
-  // Add summary statistics
-  const finalY = 200; // Approximate position after table
-  
-  // Calculate statistics
-  const completedProjects = projects.filter(p => p.status === 'Completed').length;
-  const inProgressProjects = projects.filter(p => p.status === 'In Progress').length;
-  const planningProjects = projects.filter(p => p.status === 'Planning').length;
-  const onHoldProjects = projects.filter(p => p.status === 'On Hold').length;
-  
-  const totalBudget = projects.reduce((sum, p) => sum + (Number(p.budget) || 0), 0);
-  const averageCompletion = projects.length > 0 
-    ? (projects.reduce((sum, p) => sum + (Number(p.completion) || 0), 0) / projects.length).toFixed(1)
-    : 0;
-  
-  // Add summary section
-  pdf.setFontSize(14);
+
+  // --- Summary Page ---
+  pdf.addPage();
+  pdf.setFontSize(18);
+  pdf.setTextColor(59, 130, 246);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('Project Summary', 20, finalY);
-  
-  pdf.setFontSize(10);
-  pdf.setFont('helvetica', 'normal');
-  pdf.text(`• Completed Projects: ${completedProjects}`, 20, finalY + 10);
-  pdf.text(`• In Progress: ${inProgressProjects}`, 20, finalY + 20);
-  pdf.text(`• Planning: ${planningProjects}`, 20, finalY + 30);
-  pdf.text(`• On Hold: ${onHoldProjects}`, 20, finalY + 40);
-  pdf.text(`• Total Budget: Rs. ${totalBudget.toLocaleString()}`, 20, finalY + 50);
-  pdf.text(`• Average Completion: ${averageCompletion}%`, 20, finalY + 60);
-  
-  // Add footer
+  pdf.text('Project Summary', 20, 30);
+
+  // Statistics
+  const completedProjects = projects.filter((p) => p.status === 'Completed').length;
+  const inProgressProjects = projects.filter((p) => p.status === 'In Progress').length;
+  const planningProjects = projects.filter((p) => p.status === 'Planning').length;
+  const onHoldProjects = projects.filter((p) => p.status === 'On Hold').length;
+  const totalBudget = projects.reduce((sum, p) => sum + (Number(p.budget) || 0), 0);
+  const averageCompletion =
+    projects.length > 0
+      ? (
+          projects.reduce((sum, p) => sum + (Number(p.completion) || 0), 0) /
+          projects.length
+        ).toFixed(1)
+      : 0;
+
+  // Draw colored boxes for status
+  drawBox(pdf, 20, 50, 60, 20, [34, 197, 94], `Completed: ${completedProjects}`);
+  drawBox(pdf, 90, 50, 60, 20, [59, 130, 246], `In Progress: ${inProgressProjects}`);
+  drawBox(pdf, 160, 50, 60, 20, [251, 191, 36], `Planning: ${planningProjects}`);
+  drawBox(pdf, 20, 80, 60, 20, [251, 146, 60], `On Hold: ${onHoldProjects}`);
+
+  pdf.setFontSize(12);
+  pdf.setTextColor('#333');
+  pdf.text(`Total Budget: Rs. ${totalBudget.toLocaleString()}`, 20, 110);
+  pdf.text(`Average Completion: ${averageCompletion}%`, 20, 120);
+
+  // --- Footer ---
   const pageHeight = pdf.internal.pageSize.height;
-  pdf.setFontSize(8);
-  pdf.text('Generated by AD Construction Project Management System', 20, pageHeight - 20);
-  
+  pdf.setFontSize(10);
+  pdf.setTextColor('#666');
+  pdf.text(
+    'Generated by AD Construction Project Management System',
+    20,
+    pageHeight - 20
+  );
+  pdf.text(
+    'Contact: info@adconstruction.com | +94 70 103 8400',
+    20,
+    pageHeight - 12
+  );
+
   return pdf;
 };
 
 export const downloadProjectReport = (projects) => {
   try {
-    console.log('Starting PDF generation with projects:', projects);
-    
     if (!projects || !Array.isArray(projects)) {
       console.error('Invalid projects data:', projects);
       return false;
     }
-    
     const pdf = generateProjectReport(projects);
-    console.log('PDF generated successfully');
-    
-    const fileName = `Project_Report_${new Date().toISOString().split('T')[0]}.pdf`;
-    console.log('Saving PDF with filename:', fileName);
-    
+    const fileName = `Project_Report_${new Date()
+      .toISOString()
+      .split('T')[0]}.pdf`;
     pdf.save(fileName);
-    console.log('PDF saved successfully');
-    
     return true;
   } catch (error) {
     console.error('Error generating PDF:', error);
-    console.error('Error details:', error.message);
-    console.error('Error stack:', error.stack);
     return false;
   }
 };
