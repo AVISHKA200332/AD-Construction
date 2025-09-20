@@ -1,6 +1,6 @@
 import React from "react";
 
-function AddProjectModal({ showModal, setShowModal, newProject, handleChange, handleAddProject, isEditing }) {
+function AddProjectModal({ showModal, setShowModal, newProject, handleChange, handleAddProject, isEditing, loading }) {
   if (!showModal) return null;
 
   return (
@@ -86,14 +86,19 @@ function AddProjectModal({ showModal, setShowModal, newProject, handleChange, ha
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-100 transition"
+              disabled={loading}
+              className="px-4 py-2 border rounded-lg hover:bg-gray-100 disabled:bg-gray-100 disabled:text-gray-400 transition"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 transition flex items-center gap-2"
             >
+              {loading && (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              )}
               {isEditing ? "Save Changes" : "Add Project"}
             </button>
           </div>
