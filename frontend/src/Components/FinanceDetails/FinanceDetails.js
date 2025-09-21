@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Finance from '../Finance/Finance';
 
-const URL = "http://localhost:5000/finance"; 
+const URL = `http://localhost:5000/finance`; 
 
 const fetchHandler = async () => {
   return await axios.get(URL).then((res) => res.data);

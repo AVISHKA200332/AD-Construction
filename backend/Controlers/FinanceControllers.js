@@ -23,12 +23,12 @@ const getAllFinance = async (req, res, next) => {
 // insert data
 const addFinance = async (req, res, next) => {
 
-    const {project_Id,record_Type,party_Name,amount,date,status,description,bank_Slip_Ref_No} = req.body;
+    const {description,Project_Name,category,amount,date,status} = req.body;
 
     let finance;
 
     try {
-        finance = new Finance({project_Id,record_Type,party_Name,amount,date,status,description,bank_Slip_Ref_No});
+        finance = new Finance({description,Project_Name,category,amount,date,status});
         await finance.save();
     }catch (err) {
         console.log(err);
@@ -65,13 +65,13 @@ const getById = async (req, res, next) => {
 const updateFinance = async (req, res, next) => {
 
     const finance_Id = req.params.id;
-    const {project_Id,record_Type,party_Name,amount,date,status,description,bank_Slip_Ref_No} = req.body;
+    const {description,Project_Name,category,amount,date,status} = req.body;
 
     let finance;
 
     try {
         finance = await Finance.findByIdAndUpdate(finance_Id, 
-         { project_Id: project_Id, record_Type: record_Type, party_Name: party_Name, amount: amount, date: date, status: status, description: description, bank_Slip_Ref_No: bank_Slip_Ref_No});
+         { description: description,Project_Name: Project_Name,category: category,amount: amount,date: date,status: status});
          finance = await finance.save();
     }catch(err) {
         console.log(err);
