@@ -60,9 +60,9 @@ function Nav() {
             </a>
           </li>
           <li>
-            <a href="#Communication" className="font-semibold hover:text-[#F5CB5C] transition">
+            <Link to="/Communication" className="font-semibold hover:text-[#F5CB5C] transition">
               Communication
-            </a>
+            </Link>
           </li>
           <li>
             <Link to="/financial" className="font-semibold hover:text-[#F5CB5C] transition">
