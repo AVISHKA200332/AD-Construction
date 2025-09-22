@@ -12,10 +12,11 @@ const api = axios.create({
 
 // API service functions
 export const projectService = {
-  // Get all projects
-  getAllProjects: async () => {
+  // Get all projects with filtering and pagination
+  getAllProjects: async (params = '') => {
     try {
-      const response = await api.get('/');
+      const url = params ? `/?${params}` : '/';
+      const response = await api.get(url);
       return response.data;
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -30,6 +31,28 @@ export const projectService = {
       return response.data;
     } catch (error) {
       console.error('Error fetching project:', error);
+      throw error;
+    }
+  },
+
+  // Get project statistics
+  getProjectStats: async () => {
+    try {
+      const response = await api.get('/stats');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching project stats:', error);
+      throw error;
+    }
+  },
+
+  // Get project audit logs
+  getProjectAuditLogs: async (id) => {
+    try {
+      const response = await api.get(`/${id}/audit-logs`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching audit logs:', error);
       throw error;
     }
   },
