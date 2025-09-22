@@ -76,13 +76,6 @@ function Finance(props) {
           onClick={deleteHandler}>
           Delete Record
         </button>
-
-        <button 
-          className="finance-button add-payment-button"
-          onClick={handleAddTransaction}
-        >
-          Add New Transaction
-        </button>
       </div>
     </div>
   )

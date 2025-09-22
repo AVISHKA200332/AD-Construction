@@ -50,6 +50,58 @@ function UpdateFinance() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        // Project Name
+        if (!/^[a-zA-Z0-9\s]{3,100}$/.test(inputs.Project_Name)) {
+            alert("Project name must be 3–100 characters and contain only letters, numbers, and spaces.");
+            return;
+        }
+
+        // Category
+        const allowedCategories = ["Income", "Expense"];
+        if (!allowedCategories.includes(inputs.category)) {
+            alert("Please select a valid category (Income or Expense).");
+            return;
+        }
+
+        // Amount
+        if (inputs.amount <= 0) {
+            alert("Amount must be greater than zero.");
+            return;
+        }
+        if (!/^\d+(\.\d{1,2})?$/.test(inputs.amount)) {
+            alert("Amount must be a valid number with up to 2 decimal places.");
+            return;
+        }
+        if (inputs.amount > 1000000) {
+            alert("Amount cannot exceed 1,000,000.");
+            return;
+        }
+
+        // Date
+        const today = new Date().toISOString().split("T")[0];
+        if (inputs.date > today) {
+            alert("Date cannot be in the future.");
+            return;
+        }
+
+        // Status
+        const allowedStatuses = ["Paid", "Unpaid"];
+        if (!allowedStatuses.includes(inputs.status)) {
+            alert("Please select a valid status (Paid or Unpaid).");
+            return;
+        }
+
+        // Description
+        if (inputs.description.length < 10) {
+            alert("Description must be at least 10 characters.");
+            return;
+        }
+        if (inputs.description.length > 500) {
+            alert("Description cannot exceed 500 characters.");
+            return;
+        }
+
         console.log(inputs);
         sendRequest().then(() => history("/finance"));
     };
@@ -88,10 +140,9 @@ function UpdateFinance() {
                             <option value="">-- Select Category --</option>
                             <option value="Income">Income</option>
                             <option value="Expense">Expense</option>
-                            <option value="Payment">Payment</option>
-                            <option value="Budget">Budget</option>
                         </select>
                     </div>
+
 
                     <div className="form-field-group amount-field">
                         <label className="form-label">Amount</label>
@@ -130,11 +181,11 @@ function UpdateFinance() {
                             className="form-select"
                         >
                             <option value="">-- Select Status --</option>
-                            <option value="Pending">Pending</option>
                             <option value="Paid">Paid</option>
-                             <option value="Unpaid">Unpaid</option>
+                            <option value="Unpaid">Unpaid</option>
                         </select>
                     </div>
+
 
                     <div className="form-field-group">
                         <label className="form-label">Description</label>

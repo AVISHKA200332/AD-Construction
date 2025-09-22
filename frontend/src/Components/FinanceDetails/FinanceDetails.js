@@ -21,7 +21,6 @@ function FinanceDetails() {
   return (
     <div>
       
-      <h1>Finance Details Display Page</h1>
       <div>
         {finances.length > 0 ? (
           finances.map((finance, i) => (
