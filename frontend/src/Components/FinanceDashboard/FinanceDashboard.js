@@ -54,9 +54,8 @@ function FinanceDashboard() {
 
   // Calculate summary statistics
   const calculateSummary = () => {
-    // Ensure financeData is always an array
     const data = Array.isArray(financeData) ? financeData : [];
-    
+
     const totalExpenses = data
       .filter(item => item.category === 'Expense')
       .reduce((sum, item) => sum + (item.amount || 0), 0);
@@ -65,37 +64,22 @@ function FinanceDashboard() {
       .filter(item => item.category === 'Income')
       .reduce((sum, item) => sum + (item.amount || 0), 0);
 
-    const totalPayments = data
-      .filter(item => item.category === 'Payment')
-      .reduce((sum, item) => sum + (item.amount || 0), 0);
-
-    const totalBudget = data
-      .filter(item => item.category === 'Budget')
-      .reduce((sum, item) => sum + (item.amount || 0), 0);
-
     const netBalance = totalIncome - totalExpenses;
 
     return {
       totalExpenses,
       totalIncome,
-      totalPayments,
-      totalBudget,
       netBalance
     };
   };
 
   // Get filtered data based on current filter
   const getFilteredData = () => {
-    // Ensure financeData is always an array
     const data = Array.isArray(financeData) ? financeData : [];
-    
+
     switch (filter) {
-      case 'budget':
-        return data.filter(item => item.category === 'Budget');
       case 'expenses':
         return data.filter(item => item.category === 'Expense');
-      case 'payments':
-        return data.filter(item => item.category === 'Payment');
       case 'income':
         return data.filter(item => item.category === 'Income');
       default:
@@ -255,22 +239,6 @@ function FinanceDashboard() {
           </div>
         </div>
 
-        <div className="summary-card payment-card">
-          <div className="card-icon">💳</div>
-          <div className="card-content">
-            <h3>Total Payments</h3>
-            <p className="card-amount">${summary.totalPayments.toLocaleString()}</p>
-          </div>
-        </div>
-
-        <div className="summary-card budget-card">
-          <div className="card-icon">📊</div>
-          <div className="card-content">
-            <h3>Total Budget</h3>
-            <p className="card-amount">${summary.totalBudget.toLocaleString()}</p>
-          </div>
-        </div>
-
         <div className={`summary-card balance-card ${summary.netBalance >= 0 ? 'positive' : 'negative'}`}>
           <div className="card-icon">{summary.netBalance >= 0 ? '📈' : '📉'}</div>
           <div className="card-content">
@@ -291,12 +259,6 @@ function FinanceDashboard() {
             All Data
           </button>
           <button 
-            className={`filter-btn ${filter === 'budget' ? 'active' : ''}`}
-            onClick={() => setFilter('budget')}
-          >
-            Budget
-          </button>
-          <button 
             className={`filter-btn ${filter === 'income' ? 'active' : ''}`}
             onClick={() => setFilter('income')}
           >
@@ -307,12 +269,6 @@ function FinanceDashboard() {
             onClick={() => setFilter('expenses')}
           >
             Expenses
-          </button>
-          <button 
-            className={`filter-btn ${filter === 'payments' ? 'active' : ''}`}
-            onClick={() => setFilter('payments')}
-          >
-            Payments
           </button>
         </div>
       </div>
