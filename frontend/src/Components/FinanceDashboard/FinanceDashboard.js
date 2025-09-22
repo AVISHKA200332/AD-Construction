@@ -11,8 +11,9 @@ import {
   BarElement,
   Title
 } from 'chart.js';
-import { Pie, Bar } from 'react-chartjs-2';
+import { Pie} from 'react-chartjs-2';
 import jsPDF from "jspdf";
+import "jspdf-autotable";
 import html2canvas from "html2canvas";
 import './FinanceDashboard.css';
 
@@ -175,33 +176,44 @@ function FinanceDashboard() {
   const summary = calculateSummary();
 
   // generate PDF
-  const generatePDF = () => {
-    const input = document.getElementById("finance-dashboard");
-    
-    html2canvas(input, { scale: 2 }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pageWidth;
-      const imgHeight = (canvas.height * pageWidth) / canvas.width;
+  const generatePDF = async () => {
+    const pdf = new jsPDF("p", "mm", "a4");
 
-      let heightLeft = imgHeight;
-      let position = 0;
+    // Title
+    pdf.setFontSize(18);
+    pdf.text("Finance Report", 14, 20);
+    pdf.setFontSize(11);
+    pdf.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
 
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+    // Step 1: Capture Pie Chart
+    const chartElement = document.querySelector("#finance-dashboard .chart-wrapper canvas");
+    if (chartElement) {
+      const canvas = await html2canvas(chartElement);
+      const chartImage = canvas.toDataURL("image/png");
+      pdf.addImage(chartImage, "PNG", 14, 40, 180, 90);
+    }
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
+    // Step 2: Income Statement
+    pdf.setFontSize(14);
+    pdf.text("Income Statement", 14, 145);
+    pdf.setFontSize(11);
+    pdf.text("For the year ended March 31", 14, 153);
+    pdf.text("(in Rs.)", 14, 160);
 
-      pdf.save("Finance_Report.pdf");
-    });
+    const startY = 170;
+    pdf.setFontSize(12);
+    pdf.text("Revenue", 14, startY);
+    pdf.text(`Rs. ${summary.totalIncome.toLocaleString()}`, 60, startY);
+
+    pdf.text("Cost of Services", 14, startY + 10);
+    pdf.text(`Rs. ${summary.totalExpenses.toLocaleString()}`, 60, startY + 10);
+
+    pdf.text("Gross Profit", 14, startY + 20);
+    pdf.text(`Rs. ${summary.netBalance.toLocaleString()}`, 60, startY + 20);
+
+    pdf.save("Finance_Report.pdf");
   };
+
 
   if (loading) {
     return (
@@ -227,7 +239,7 @@ function FinanceDashboard() {
           <div className="card-icon">💰</div>
           <div className="card-content">
             <h3>Total Income</h3>
-            <p className="card-amount">${summary.totalIncome.toLocaleString()}</p>
+            <p className="card-amount">Rs. {summary.totalIncome.toLocaleString()}</p>
           </div>
         </div>
 
@@ -235,7 +247,7 @@ function FinanceDashboard() {
           <div className="card-icon">💸</div>
           <div className="card-content">
             <h3>Total Expenses</h3>
-            <p className="card-amount">${summary.totalExpenses.toLocaleString()}</p>
+            <p className="card-amount">Rs. {summary.totalExpenses.toLocaleString()}</p>
           </div>
         </div>
 
@@ -243,7 +255,7 @@ function FinanceDashboard() {
           <div className="card-icon">{summary.netBalance >= 0 ? '📈' : '📉'}</div>
           <div className="card-content">
             <h3>Net Balance</h3>
-            <p className="card-amount">${summary.netBalance.toLocaleString()}</p>
+            <p className="card-amount">Rs. {summary.netBalance.toLocaleString()}</p>
           </div>
         </div>
       </div>
@@ -330,7 +342,7 @@ function FinanceDashboard() {
           <div className="stat-item">
             <span className="stat-label">Average Amount:</span>
             <span className="stat-value">
-              ${getFilteredData().length > 0 
+              Rs. {getFilteredData().length > 0 
                 ? (getFilteredData().reduce((sum, item) => sum + (item.amount || 0), 0) / getFilteredData().length).toFixed(2)
                 : '0.00'
               }

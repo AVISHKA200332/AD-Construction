@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Link } from "react-router-dom";
 import axios from 'axios';
 import './Finance.css';
 
@@ -8,10 +7,6 @@ function Finance(props) {
   const { Project_Name, category, amount, date, status, description, _id } = props.finance;
   
   const navigate = useNavigate();
-
-  const handleAddTransaction = () => {
-    navigate("/addFinance");
-  };
 
   const deleteHandler = async()=>{
     await axios.delete(`http://localhost:5000/finance/${_id}`)
