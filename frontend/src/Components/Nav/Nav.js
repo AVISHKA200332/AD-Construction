@@ -65,7 +65,7 @@ function Nav() {
             </a>
           </li>
           <li>
-            <Link to="/financial" className="font-semibold hover:text-[#F5CB5C] transition">
+            <Link to="/dashboard" className="font-semibold hover:text-[#F5CB5C] transition">
               Financial
             </Link>
           </li>
