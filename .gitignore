@@ -33,3 +33,6 @@ Backend/node_modules/
 dist/
 build/
 *.log
+
+# Avoid frontedn node modules
+frontend/node_modules/.cache/
