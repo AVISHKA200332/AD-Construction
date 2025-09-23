@@ -3,9 +3,25 @@ import "./PaymentUpload.css";   // Import CSS file
 
 function PaymentUpload() {
   const [bankSlip, setBankSlip] = useState(null);
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   const handleFileChange = (e) => {
-    setBankSlip(URL.createObjectURL(e.target.files[0]));
+    if (e.target.files.length > 0) {
+      setBankSlip(URL.createObjectURL(e.target.files[0]));
+      setMessage({ type: "", text: "" }); // clear error when file chosen
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!bankSlip) {
+      setMessage({ type: "error", text: "Please upload your bank slip before submitting." });
+      return;
+    }
+
+    // Simulate successful payment
+    setMessage({ type: "success", text: "✅ Payment Successful! Your bank slip has been uploaded." });
   };
 
   return (
@@ -13,8 +29,15 @@ function PaymentUpload() {
       <div className="payment-card">
         <h2 className="payment-title">Upload Bank Slip & Pay Budget</h2>
 
-        <form>
-          {/* Read-only fields (will be filled from DB in future) */}
+        {/* Show messages */}
+        {message.text && (
+          <div className={message.type === "success" ? "success-message" : "error-message"}>
+            {message.text}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          {/* Read-only fields */}
           <input
             type="text"
             value="Client123 / Project456"
@@ -29,15 +52,14 @@ function PaymentUpload() {
             className="payment-input"
           />
 
-          {/* Payment method fixed to Bank Transfer */}
           <select className="payment-select" disabled>
             <option selected>Bank Transfer</option>
           </select>
 
-          {/* Still editable field */}
+          {/* Notes field */}
           <textarea placeholder="Additional Notes" className="payment-textarea"></textarea>
 
-          {/* File upload for bank slip */}
+          {/* File upload */}
           <input
             type="file"
             accept="image/*,.pdf"
@@ -55,7 +77,7 @@ function PaymentUpload() {
 
           {/* Buttons */}
           <div className="payment-buttons">
-            <button type="reset" className="payment-btn payment-btn-reset">Reset</button>
+            <button type="reset" className="payment-btn payment-btn-reset" onClick={() => {setBankSlip(null); setMessage({type:"", text:""});}}>Reset</button>
             <button type="submit" className="payment-btn payment-btn-submit">Submit Payment</button>
           </div>
         </form>
