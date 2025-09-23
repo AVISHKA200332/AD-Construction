@@ -6,6 +6,7 @@ import FinanceDetails from "./Components/FinanceDetails/FinanceDetails";
 import AddFinance from "./Components/AddFinance/AddFinance";
 import UpdateFinance from "./Components/UpdateFinance/UpdateFinance";
 import FinanceDashboard from "./Components/FinanceDashboard/FinanceDashboard";
+import PaymentUpload from "./Components/PaymentUpload/PaymentUpload";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/dashboard" element={<FinanceDashboard />} />
         <Route path="/addFinance" element={<AddFinance />} />
         <Route path="/updateFinance/:id" element={<UpdateFinance />} />
+        <Route path="/payment-upload" element={<PaymentUpload />} />
       </Routes>
 
       <Foot /> {/* Footer stays on all pages */}
