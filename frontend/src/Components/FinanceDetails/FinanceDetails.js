@@ -11,6 +11,7 @@ const fetchHandler = async () => {
 
 function FinanceDetails() {
   const [finances, setFinance] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); 
 
   useEffect(() => {
     fetchHandler().then((data) => {
@@ -19,17 +20,36 @@ function FinanceDetails() {
     });
   }, []);
 
+  // Filter finances based on search term
+  const filteredFinances = finances.filter((finance) =>
+    finance.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    finance.Project_Name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (finance.category && finance.category.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (finance.status && finance.status.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+  
   return (
-    <div>
+    <div className="finance-details-container">
       
       <div className="finance-header">
-        <h1 className="finance-title">Finance Record</h1>
+        <h1 className="finance-title">Finance Records</h1>
       </div>
 
-      <div>
-        {finances.length > 0 ? (
-          finances.map((finance, i) => (
-            <div key={i}>
+      {/* Search Bar */}
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search finance records..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+      </div>
+
+      <div className="finance-list">
+        {filteredFinances.length > 0 ? (
+          filteredFinances.map((finance, i) => (
+            <div key={i} className="finance-item">
               <Finance finance={finance} />
             </div>
           ))
