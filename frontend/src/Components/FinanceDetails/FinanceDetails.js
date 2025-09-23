@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Finance from '../Finance/Finance';
+import './FinanceDetails.css';
 
 const URL = `http://localhost:5000/finance`; 
 
@@ -21,6 +22,10 @@ function FinanceDetails() {
   return (
     <div>
       
+      <div className="finance-header">
+        <h1 className="finance-title">Finance Record</h1>
+      </div>
+
       <div>
         {finances.length > 0 ? (
           finances.map((finance, i) => (

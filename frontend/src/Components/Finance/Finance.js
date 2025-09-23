@@ -19,9 +19,6 @@ function Finance(props) {
 
   return (
     <div className="finance-card">
-      <div className="finance-header">
-        <h1 className="finance-title">Finance Record</h1>
-      </div>
       
       <div className="finance-details">
         <div className="finance-detail-item">
