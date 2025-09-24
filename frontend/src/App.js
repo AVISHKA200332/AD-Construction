@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import Nav from "./Components/Nav/Nav";
 import AdminDashboard from "./Components/Admin/AdminDashboard";
 import Foot from "./Components/Footer/Footer";
-import Project from "./Components/Project/Project";
 import Home from "./Components/Home/Home";
 import SignIn from "./Components/Auth/SignIn";
 import SignUp from "./Components/Auth/SignUp";
@@ -55,8 +54,6 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard" element={<AdminDashboard />} />
-        <Route path="/projects" element={<Project />} />
         <Route path="/apply" element={<ApplyJob />} />
         {/* Client Routes */}
         <Route path="/client/dashboard" element={<ClientDashboard />} />

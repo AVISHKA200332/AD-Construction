@@ -146,8 +146,17 @@ const projectSchema = new Schema({
     type: Date,
     required: [true, 'Start date is required'],
     validate: {
-      validator: validateDateFromToday,
-      message: 'Start date must be from today onwards'
+      validator: function (value) {
+        // Only enforce future-or-today constraint when creating a new document
+        if (this.isNew) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          return value >= today;
+        }
+        // On edits, allow retaining or setting past dates
+        return true;
+      },
+      message: 'Start date must be from today onwards for new projects'
     }
   },
 
@@ -156,11 +165,14 @@ const projectSchema = new Schema({
     required: [true, 'End date is required'],
     validate: {
       validator: function(value) {
-        // If startDate is not present, skip validation (for updates)
-        if (!this.startDate) return true;
-        return value > this.startDate;
+        if (!value) return false;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const isFromTodayOnwards = value >= today;
+        if (!this.startDate) return isFromTodayOnwards;
+        return isFromTodayOnwards && value > this.startDate;
       },
-      message: 'End date must be after start date'
+      message: 'End date must be from today onwards and after start date'
     }
   },
 

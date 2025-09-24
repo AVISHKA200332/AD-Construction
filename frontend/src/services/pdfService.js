@@ -31,10 +31,14 @@ export const generateProjectReport = (projects) => {
   pdf.setFontSize(12);
   pdf.setTextColor('#666');
   pdf.text(
-    `Generated on: ${new Date().toLocaleDateString('en-GB', {
+    `Generated on: ${new Date().toLocaleString('en-GB', {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
     })}`,
     105,
     120,
@@ -149,6 +153,19 @@ export const generateProjectReport = (projects) => {
     pageHeight - 20
   );
   pdf.text(
+    `Generated on: ${new Date().toLocaleString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    })}`,
+    20,
+    pageHeight - 16
+  );
+  pdf.text(
     'Contact: info@adconstruction.com | +94 70 103 8400',
     20,
     pageHeight - 12
@@ -164,9 +181,9 @@ export const downloadProjectReport = (projects) => {
       return false;
     }
     const pdf = generateProjectReport(projects);
-    const fileName = `Project_Report_${new Date()
-      .toISOString()
-      .split('T')[0]}.pdf`;
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    const fileName = `Project_Report_${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.pdf`;
     pdf.save(fileName);
     return true;
   } catch (error) {
