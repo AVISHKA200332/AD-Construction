@@ -54,7 +54,6 @@ function Project({ initialProjects = [] }) {
       setTotalPages(data.pagination?.totalPages || 1);
     } catch (err) {
       setError('Failed to fetch projects. Please try again.');
-      console.error('Error fetching projects:', err);
     } finally {
       setLoading(false);
     }
@@ -66,7 +65,7 @@ function Project({ initialProjects = [] }) {
       const data = await projectService.getProjectStats();
       setProjectStats(data);
     } catch (err) {
-      console.error('Error fetching project stats:', err);
+      // Silently fail for stats - not critical
     }
   };
 
@@ -79,7 +78,6 @@ function Project({ initialProjects = [] }) {
       setShowAuditLogs(true);
     } catch (err) {
       setError('Failed to fetch audit logs. Please try again.');
-      console.error('Error fetching audit logs:', err);
     }
   };
 
@@ -178,8 +176,6 @@ function Project({ initialProjects = [] }) {
       });
       setShowModal(false);
     } catch (err) {
-      console.error('Error saving project:', err);
-      
       // Extract specific error message from response
       let errorMessage = isEditing ? 'Failed to update project. Please try again.' : 'Failed to create project. Please try again.';
       
@@ -207,7 +203,6 @@ function Project({ initialProjects = [] }) {
       await fetchProjects(); // Refresh the list
     } catch (err) {
       setError('Failed to delete project. Please try again.');
-      console.error('Error deleting project:', err);
     } finally {
       setLoading(false);
     }
@@ -268,11 +263,8 @@ function Project({ initialProjects = [] }) {
       return;
     }
 
-    console.log('Generating report for projects:', projects);
-    
     try {
       const reportGenerated = downloadProjectReport(projects);
-      console.log('Report generation result:', reportGenerated);
       
       if (reportGenerated) {
         setSuccess('Report generated successfully!');
@@ -282,7 +274,6 @@ function Project({ initialProjects = [] }) {
       }
     } catch (err) {
       setError('Failed to generate report. Please try again.');
-      console.error('Error generating report:', err);
     }
   };
 

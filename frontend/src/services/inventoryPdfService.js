@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import 'jspdf-autotable';
+import logger from '../utils/logger';
 import logo from '../assets/logo.png';
 
 // Helper to draw a colored box with text
@@ -97,7 +98,7 @@ export const generateInventoryReport = (items, buyerOrders = []) => {
     'Status',
   ];
 
-  autoTable(pdf, {
+  pdf.autoTable({
     head: [stockColumns],
     body: stockData,
     startY: 35,
@@ -242,7 +243,7 @@ export const generateInventoryReport = (items, buyerOrders = []) => {
       'Date'
     ];
 
-    autoTable(pdf, {
+    pdf.autoTable({
       head: [orderColumns],
       body: orderData,
       startY: 40,

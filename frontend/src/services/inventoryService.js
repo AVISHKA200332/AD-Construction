@@ -1,4 +1,5 @@
 import axios from 'axios';
+import logger from '../utils/logger';
 
 const API_BASE_URL = 'http://localhost:5000/inventory-items';
 const BUYER_API_URL = 'http://localhost:5000/buyer-items';
@@ -28,7 +29,7 @@ export const inventoryService = {
       const response = await api.get(url);
       return response.data;
     } catch (error) {
-      console.error('Error fetching inventory items:', error);
+      logger.error('Error fetching inventory items:', error);
       throw error;
     }
   },
@@ -39,7 +40,7 @@ export const inventoryService = {
       const response = await api.get(`/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching item:', error);
+      logger.error('Error fetching item:', error);
       throw error;
     }
   },
@@ -50,7 +51,7 @@ export const inventoryService = {
       const response = await api.post('/', itemData);
       return response.data;
     } catch (error) {
-      console.error('Error creating item:', error);
+      logger.error('Error creating item:', error);
       throw error;
     }
   },
@@ -61,7 +62,7 @@ export const inventoryService = {
       const response = await api.put(`/${id}`, itemData);
       return response.data;
     } catch (error) {
-      console.error('Error updating item:', error);
+      logger.error('Error updating item:', error);
       throw error;
     }
   },
@@ -72,7 +73,7 @@ export const inventoryService = {
       const response = await api.delete(`/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error deleting item:', error);
+      logger.error('Error deleting item:', error);
       throw error;
     }
   },
@@ -83,7 +84,7 @@ export const inventoryService = {
       const response = await api.patch(`/${id}/restock`, { amount });
       return response.data;
     } catch (error) {
-      console.error('Error restocking item:', error);
+      logger.error('Error restocking item:', error);
       throw error;
     }
   },
@@ -94,7 +95,7 @@ export const inventoryService = {
       const response = await api.patch(`/${id}/order`, { amount });
       return response.data;
     } catch (error) {
-      console.error('Error ordering item:', error);
+      logger.error('Error ordering item:', error);
       throw error;
     }
   },
@@ -129,7 +130,7 @@ export const inventoryService = {
         typeStats
       };
     } catch (error) {
-      console.error('Error fetching inventory stats:', error);
+      logger.error('Error fetching inventory stats:', error);
       throw error;
     }
   },
@@ -142,7 +143,7 @@ export const inventoryService = {
       const response = await buyerApi.get(url);
       return response.data;
     } catch (error) {
-      console.error('Error fetching buyer items:', error);
+      logger.error('Error fetching buyer items:', error);
       throw error;
     }
   },
@@ -152,7 +153,7 @@ export const inventoryService = {
       const response = await buyerApi.post('/', itemData);
       return response.data;
     } catch (error) {
-      console.error('Error creating buyer item:', error);
+      logger.error('Error creating buyer item:', error);
       throw error;
     }
   },
@@ -162,7 +163,7 @@ export const inventoryService = {
       const response = await buyerApi.put(`/${id}`, itemData);
       return response.data;
     } catch (error) {
-      console.error('Error updating buyer item:', error);
+      logger.error('Error updating buyer item:', error);
       throw error;
     }
   },
@@ -172,7 +173,7 @@ export const inventoryService = {
       const response = await buyerApi.delete(`/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error deleting buyer item:', error);
+      logger.error('Error deleting buyer item:', error);
       throw error;
     }
   },

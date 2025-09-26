@@ -1,6 +1,7 @@
 import axios from 'axios';
+import logger from '../utils/logger';
 
-const API_BASE_URL = 'http://localhost:5000/projects';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/projects';
 
 // Create axios instance with default config
 const api = axios.create({
@@ -19,7 +20,7 @@ export const projectService = {
       const response = await api.get(url);
       return response.data;
     } catch (error) {
-      console.error('Error fetching projects:', error);
+      logger.error('Error fetching projects:', error);
       throw error;
     }
   },
@@ -30,7 +31,7 @@ export const projectService = {
       const response = await api.get(`/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching project:', error);
+      logger.error('Error fetching project:', error);
       throw error;
     }
   },
@@ -41,7 +42,7 @@ export const projectService = {
       const response = await api.get('/stats');
       return response.data;
     } catch (error) {
-      console.error('Error fetching project stats:', error);
+      logger.error('Error fetching project stats:', error);
       throw error;
     }
   },
@@ -52,7 +53,7 @@ export const projectService = {
       const response = await api.get(`/${id}/audit-logs`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching audit logs:', error);
+      logger.error('Error fetching audit logs:', error);
       throw error;
     }
   },
@@ -63,7 +64,7 @@ export const projectService = {
       const response = await api.post('/', projectData);
       return response.data;
     } catch (error) {
-      console.error('Error creating project:', error);
+      logger.error('Error creating project:', error);
       throw error;
     }
   },
@@ -74,7 +75,7 @@ export const projectService = {
       const response = await api.put(`/${id}`, projectData);
       return response.data;
     } catch (error) {
-      console.error('Error updating project:', error);
+      logger.error('Error updating project:', error);
       throw error;
     }
   },
@@ -85,7 +86,7 @@ export const projectService = {
       const response = await api.delete(`/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error deleting project:', error);
+      logger.error('Error deleting project:', error);
       throw error;
     }
   },
