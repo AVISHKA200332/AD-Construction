@@ -69,16 +69,26 @@ function ClientProjects() {
 
         // Determine client identity keys
         const userName = currentUser?.name || currentUser?.fullName || currentUser?.username || "";
-        const userEmail = currentUser?.email || "";
+        const userEmail = currentUser?.email || currentUser?.gmail || "";
 
         // Filter to only projects assigned to this client (by name or email)
-        const assigned = mapped.filter((m) => {
-          const nameMatch = userName && m.clientName && m.clientName.toLowerCase() === userName.toLowerCase();
-          const emailMatch = userEmail && m.clientEmail && m.clientEmail.toLowerCase() === userEmail.toLowerCase();
-          return nameMatch || emailMatch;
-        });
+        const assigned =
+          userName || userEmail
+            ? mapped.filter((m) => {
+                const nameMatch =
+                  userName &&
+                  m.clientName &&
+                  m.clientName.toLowerCase() === userName.toLowerCase();
+                const emailMatch =
+                  userEmail &&
+                  m.clientEmail &&
+                  m.clientEmail.toLowerCase() === userEmail.toLowerCase();
+                return nameMatch || emailMatch;
+              })
+            : mapped;
 
-        setProjects(assigned);
+        // Fallback to show all if no matches found for the logged-in user
+        setProjects(assigned.length ? assigned : mapped);
       } catch (e) {
         console.error(e);
         setError("Failed to load projects. Please try again later.");
@@ -225,7 +235,11 @@ function ClientProjects() {
                 </div>
                 <div className="border border-gray-100 rounded-xl p-3">
                   <p className="text-xs text-gray-500">ETA</p>
-                  <p className="text-sm font-semibold text-gray-800">{new Date(p.eta).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" })}</p>
+                  <p className="text-sm font-semibold text-gray-800">{
+                    p.eta && !isNaN(new Date(p.eta).getTime())
+                      ? new Date(p.eta).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "2-digit" })
+                      : "-"
+                  }</p>
                 </div>
               </div>
               <div className="mt-4 flex items-center justify-between">
