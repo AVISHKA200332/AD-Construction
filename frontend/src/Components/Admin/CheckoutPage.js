@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCart } from './CartContext';
 import { useNavigate } from 'react-router-dom';
 import { generateInvoicePDF } from './invoicePdfUtil';
+import inventoryService from '../../services/inventoryService';
 
 export default function CheckoutPage() {
   const { cart, clearCart } = useCart();
@@ -17,8 +18,19 @@ export default function CheckoutPage() {
     setCustomer({ ...customer, [e.target.name]: e.target.value });
   };
 
-  const handleCheckout = e => {
+  const handleCheckout = async (e) => {
     e.preventDefault();
+    // Update inventory for each item in cart
+    try {
+      await Promise.all(
+        cart.map(item =>
+          inventoryService.orderItem(item._id, item.quantity)
+        )
+      );
+    } catch (err) {
+      // Optionally handle error (show error message)
+      console.error('Error updating inventory:', err);
+    }
     // Save order data before clearing cart
     setOrderData({
       orderId,
