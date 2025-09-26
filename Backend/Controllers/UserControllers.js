@@ -17,7 +17,7 @@ const getAllUsers = async (req, res, next) => {
 };
 
 // Create new user
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const addUsers = async (req, res, next) => {
     try {
         const { name, gmail, phone, role, age, address, password } = req.body;
@@ -68,6 +68,7 @@ const updateUser = async (req, res, next) => {
         if (!user) {
             return res.status(404).json({ message: "Unable to Update User Details" });
         }
+
         return res.status(200).json({ user });
     } catch (err) {
         console.log(err);
