@@ -1,25 +1,25 @@
-const User = require('../Model/UserAuthModel');
+const User = require('../Model/UserModel'); // Changed from UserAuthModel
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // Signup controller
 exports.signup = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ success: false, message: 'Full name, email, and password are required' });
+    const { name, gmail, password } = req.body; // Changed from email to gmail, removed role
+    if (!name || !gmail || !password) {
+      return res.status(400).json({ success: false, message: 'Full name, gmail, and password are required' });
     }
     // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await User.findOne({ gmail: gmail.toLowerCase() });
     if (existingUser) {
-      return res.status(400).json({ success: false, message: 'User already exists with this email' });
+      return res.status(400).json({ success: false, message: 'User already exists with this gmail' });
     }
-    // Create new user
+    // Create new user with default role "Client"
     const user = new User({
       name: name.trim(),
-      email: email.toLowerCase(),
+      gmail: gmail.toLowerCase(),
       password,
-      role: role || 'Client'
+      role: 'Client' // Default role for signup
     });
     await user.save();
     // Generate JWT token
@@ -31,10 +31,10 @@ exports.signup = async (req, res) => {
       user: {
         _id: user._id,
         name: user.name,
-        email: user.email,
+        gmail: user.gmail, // Changed from email to gmail
         role: user.role,
-        isActive: user.isActive,
-        createdAt: user.createdAt
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
       }
     });
   } catch (err) {

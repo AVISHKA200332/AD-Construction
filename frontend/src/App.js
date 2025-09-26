@@ -34,6 +34,7 @@ import SupSettings from "./Components/Supervisor/SupSettings";
 import SupCommunication from "./Components/Supervisor/SupCommunication";
 import SupInventory from "./Components/Supervisor/SupInventory";
 import LaborDashboard from "./Components/Labor/LaborDashboard";
+import LaborDashboard from "./Components/Labor/LaborDashBoard";
 import LaborProjects from "./Components/Labor/LaborProjects";
 import LaborReports from "./Components/Labor/LaborReports";
 import LaborSettings from "./Components/Labor/LaborSettings";
