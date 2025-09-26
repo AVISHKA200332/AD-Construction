@@ -20,6 +20,9 @@ import AdminReports from "./Components/Admin/AdminReports";
 import AdminSettings from "./Components/Admin/AdminSettings";
 import AdminCommunication from "./Components/Admin/AdminCommunication";
 import AdminInventory from "./Components/Admin/AdminInventory";
+import { CartProvider } from "./Components/Admin/CartContext";
+import CartPage from "./Components/Admin/CartPage";
+import CheckoutPage from "./Components/Admin/CheckoutPage";
 import SMDashboard from "./Components/SiteManager/SMDashboard";
 import SMProjects from "./Components/SiteManager/SMProjects";
 import SMFinancial from "./Components/SiteManager/SMFinancial";
@@ -73,6 +76,9 @@ function AppContent() {
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/communication" element={<AdminCommunication />} />
         <Route path="/admin/inventory" element={<AdminInventory />} />
+        {/* Cart Routes */}
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
         {/* Site Manager Routes */}
         <Route path="/site-manager/dashboard" element={<SMDashboard />} />
         <Route path="/site-manager/projects" element={<SMProjects />} />
@@ -105,7 +111,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
+      <CartProvider>
       <AppContent />
+      </CartProvider>
     </Router>
   );
 }

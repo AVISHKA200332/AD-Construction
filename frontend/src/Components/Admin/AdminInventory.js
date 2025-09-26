@@ -1,13 +1,17 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { useCart } from "./CartContext";
+import { useNavigate } from "react-router-dom";
 import searchIcon from "../../assets/icons/search.png";
 import filterIcon from "../../assets/icons/filter.png";
 import fileTextIcon from "../../assets/icons/file-text.png";
 import plusIcon from "../../assets/icons/plus.png";
 import AddInventoryModal from "./AddInventoryModal";
 import inventoryService from "../../services/inventoryService";
-import { downloadInventoryReport } from "../../services/inventoryPdfService";
+import { generateInventoryReportPDF } from "./inventoryReportPdfUtil";
 
 export default function AdminInventory() {
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("stock");
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -194,22 +198,14 @@ export default function AdminInventory() {
   };
 
   // Order item (reduce stock)
-  const handleOrder = async (id) => {
-    const amount = prompt("Enter order quantity:", "1");
+  const handleOrder = (item) => {
+    const amount = window.prompt("Enter order quantity:", "1");
     if (!amount || Number(amount) <= 0) return;
-    
-    try {
-      setLoading(true);
-      await inventoryService.orderItem(id, Number(amount));
-      await fetchItems();
-      await fetchInventoryStats();
-      setSuccess("Order placed successfully!");
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to place order.");
-    } finally {
-      setLoading(false);
-    }
+    addToCart(item, Number(amount));
+    setSuccess("Added to cart!");
+    setTimeout(() => setSuccess(null), 2000);
+    // Optionally, navigate to cart page directly:
+    // navigate('/cart');
   };
 
   // Generate report
@@ -218,15 +214,10 @@ export default function AdminInventory() {
       setError("No inventory items available to generate report.");
       return;
     }
-
     try {
-      const reportGenerated = downloadInventoryReport(items, buyerOrders);
-      if (reportGenerated) {
-        setSuccess("Report generated successfully!");
-        setTimeout(() => setSuccess(null), 3000);
-      } else {
-        setError("Failed to generate report. Please try again.");
-      }
+      generateInventoryReportPDF({ items, stats: inventoryStats });
+      setSuccess("Report generated successfully!");
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError("Failed to generate report. Please try again.");
       console.error("Error generating report:", err);
@@ -307,6 +298,12 @@ export default function AdminInventory() {
               }`}
             >
               🔔 Alerts ({stockAlerts.out.length + stockAlerts.low.length})
+            </button>
+            <button
+              onClick={() => navigate('/cart')}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+            >
+              🛒 Cart
             </button>
             <button
               onClick={handleGenerateReport}
@@ -557,8 +554,8 @@ export default function AdminInventory() {
                       {formatCurrency(item.amount * item.unitPrice)}
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
-                        {item.status}
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.amount === 0 ? 'out_of_stock' : item.status)}`}>
+                        {item.amount === 0 ? 'out_of_stock' : item.status}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -580,10 +577,10 @@ export default function AdminInventory() {
                           +Stock
                         </button>
                         <button
-                          onClick={() => handleOrder(item._id)}
+                          onClick={() => handleOrder(item)}
                           disabled={loading || item.amount === 0}
                           className="px-2 py-1 text-xs bg-orange-600 hover:bg-orange-700 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Order/Use Item"
+                          title="Add to Cart"
                         >
                           -Order
                         </button>
