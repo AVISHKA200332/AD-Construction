@@ -46,7 +46,7 @@ function FinanceDashboard() {
 
   const fetchFinanceData = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/finance');
+      const response = await axios.get('http://localhost:5000/finances');
       // Ensure response.data is an array
       const data = Array.isArray(response.data.finance) ? response.data.finance : [];
       setFinanceData(data);

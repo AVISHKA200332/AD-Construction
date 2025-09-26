@@ -8,14 +8,21 @@ function Finance(props) {
   
   const navigate = useNavigate();
 
-  const deleteHandler = async()=>{
-    await axios.delete(`http://localhost:5000/finance/${_id}`)
-    .then(res=>res.data)
-    .then(() => {
-      navigate("/finance");
-      window.location.reload();
-    });
-  }
+  const deleteHandler = async () => {
+    try {
+      await axios.delete(`http://localhost:5000/finances/${_id}`);
+      // Notify parent list to remove this item from UI without full reload
+      if (typeof props.onDeleted === 'function') {
+        props.onDeleted(_id);
+      } else {
+        // Fallback: navigate back to records page
+        navigate('/financeRecords');
+      }
+    } catch (err) {
+      console.error('Failed to delete finance record', err);
+      alert('Failed to delete the record. Please try again.');
+    }
+  };
 
   return (
     <div className="finance-card">

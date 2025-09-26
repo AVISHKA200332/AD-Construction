@@ -7,6 +7,7 @@ const projectRouter = require("./Route/ProjectRoute");
 const signupRouter = require("./Route/SignupRoutes");
 const loginRouter = require("./Route/LoginRoutes");
 const userRouter = require("./Route/UserRoutes");
+const financeRouter = require("./Route/FinanceRoutes");
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use("/projects", projectRouter);
 app.use("/signup", signupRouter);
 app.use("/login", loginRouter);
 app.use("/users", userRouter);
+app.use("/finances", financeRouter);
 
 // Database and server
 const PORT = process.env.PORT || 5000;

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Nav from "./Components/Nav/Nav";
 import AdminDashboard from "./Components/Admin/AdminDashboard";
+import FinanceDetails from "./Components/Finance/FinanceDetails/FinanceDetails";
 import Foot from "./Components/Footer/Footer";
 import Home from "./Components/Home/Home";
 import SignIn from "./Components/Auth/SignIn";
@@ -39,6 +40,7 @@ import LaborReports from "./Components/Labor/LaborReports";
 import LaborSettings from "./Components/Labor/LaborSettings";
 import LaborCommunication from "./Components/Labor/LaborCommunication";
 import LaborInventory from "./Components/Labor/LaborInventory";
+import UpdateFinance from "./Components/Finance/UpdateFinance/UpdateFinance";
 
 function AppContent() {
   const location = useLocation();
@@ -71,6 +73,10 @@ function AppContent() {
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/communication" element={<AdminCommunication />} />
+        {/* Finance Records Route */}
+        <Route path="/financeRecords" element={<FinanceDetails />} />
+        {/* Update Finance Route */}
+        <Route path="/updateFinance/:id" element={<UpdateFinance />} />
         {/* Site Manager Routes */}
         <Route path="/site-manager/dashboard" element={<SMDashboard />} />
         <Route path="/site-manager/projects" element={<SMProjects />} />
