@@ -1,25 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { 
   validateProject, 
-  validateSpecialCharacters, 
-  validateBankAccount, 
-  validatePhoneNumber, 
-  validateEmail,
-  validateAge,
-  formatCurrency,
   sanitizeInput
 } from "../../utils/validation";
 
 function AddProjectModal({ showModal, setShowModal, newProject, handleChange, handleAddProject, isEditing, loading }) {
   const [errors, setErrors] = useState({});
-  const [warnings, setWarnings] = useState({});
   const [budgetFormatted, setBudgetFormatted] = useState('');
 
   // Reset errors when modal opens/closes
   useEffect(() => {
     if (showModal) {
       setErrors({});
-      setWarnings({});
     }
   }, [showModal]);
 
@@ -31,6 +23,7 @@ function AddProjectModal({ showModal, setShowModal, newProject, handleChange, ha
         setBudgetFormatted(budgetValidation.budgetFormatted);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newProject.budget]);
 
   const handleInputChange = (e) => {
@@ -49,7 +42,7 @@ function AddProjectModal({ showModal, setShowModal, newProject, handleChange, ha
 
     // Phone number - only allow digits, spaces, hyphens, plus signs, and parentheses
     if (name === 'clientContact.phone') {
-      processedValue = value.replace(/[^\d\s\-\+\(\)]/g, '');
+      processedValue = value.replace(/[^\d\s\-+()]/g, '');
     }
 
     // Age - only allow numbers

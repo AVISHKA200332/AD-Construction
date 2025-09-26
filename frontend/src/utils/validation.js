@@ -45,7 +45,7 @@ export const validateBankAccount = (accountNumber) => {
 // Phone number validation
 export const validatePhoneNumber = (phone) => {
   if (!phone) return true; // Optional field
-  return /^[\d\s\-\+\(\)]+$/.test(phone);
+  return /^[\d\s\-+()]+$/.test(phone);
 };
 
 // Email validation

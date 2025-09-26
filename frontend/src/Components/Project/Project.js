@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import searchIcon from "../../assets/icons/search.png";
 import filterIcon from "../../assets/icons/filter.png";
 import fileTextIcon from "../../assets/icons/file-text.png";
@@ -35,7 +35,7 @@ function Project({ initialProjects = [] }) {
   const [projects, setProjects] = useState(initialProjects);
 
   // Fetch projects from API with enhanced filtering
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -58,7 +58,7 @@ function Project({ initialProjects = [] }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, searchTerm, statusFilter, priorityFilter, sortBy, sortOrder]);
 
   // Fetch project statistics
   const fetchProjectStats = async () => {
@@ -85,7 +85,7 @@ function Project({ initialProjects = [] }) {
   useEffect(() => {
     fetchProjects();
     fetchProjectStats();
-  }, [currentPage, searchTerm, statusFilter, priorityFilter, sortBy, sortOrder, fetchProjects]);
+  }, [fetchProjects]);
 
   const [newProject, setNewProject] = useState({
     name: "",

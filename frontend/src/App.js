@@ -41,7 +41,7 @@ import LaborSettings from "./Components/Labor/LaborSettings";
 import LaborCommunication from "./Components/Labor/LaborCommunication";
 import LaborInventory from "./Components/Labor/LaborInventory";
 
-//Finance CRUD
+// Finance CRUD
 import FinanceDetails from "./Components/FinanceDetails/FinanceDetails";
 import AddFinance from "./Components/AddFinance/AddFinance";
 import UpdateFinance from "./Components/UpdateFinance/UpdateFinance";
@@ -111,6 +111,15 @@ function AppContent() {
       </Routes>
       {showFoot && <Foot />}
     </>
+  );
+}
+
+// App wrapper with Router to provide routing context
+function App() {
+  return (
+    <Router>
+      <AppContent />
+    </Router>
   );
 }
 
