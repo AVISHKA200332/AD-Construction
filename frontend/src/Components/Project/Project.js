@@ -273,7 +273,7 @@ function Project({ initialProjects = [] }) {
         setError('Failed to generate report. Please try again.');
       }
     } catch (err) {
-      setError('Failed to generate report. Please try agai.');
+      setError('Failed to generate report. Please try again.');
     }
   };
 
