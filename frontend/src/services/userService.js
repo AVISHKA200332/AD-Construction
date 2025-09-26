@@ -43,9 +43,12 @@ const deleteUser = async (id) => {
   }
 };
 
-export default {
+const userService = {
   getAllUsers,
   createUser,
   updateUser,
   deleteUser,
 };
+
+export default userService;
+export { userService };
