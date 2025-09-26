@@ -3,9 +3,20 @@ import axios from "axios";
 // Use full URL for development
 const API_URL = "http://localhost:5000/users";
 
-const getAllUsers = async () => {
+const getAllUsers = async (params = {}) => {
   try {
-    const res = await axios.get(API_URL);
+    const queryParams = new URLSearchParams();
+    
+    // Add pagination parameters
+    if (params.page) queryParams.append('page', params.page);
+    if (params.limit) queryParams.append('limit', params.limit);
+    if (params.search) queryParams.append('search', params.search);
+    if (params.role) queryParams.append('role', params.role);
+    if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+    if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+    
+    const url = queryParams.toString() ? `${API_URL}?${queryParams.toString()}` : API_URL;
+    const res = await axios.get(url);
     return res.data;
   } catch (error) {
     console.error("API Error:", error);
