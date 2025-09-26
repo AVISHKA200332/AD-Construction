@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from 'react';
 
 function AdminCommunication() {
   return (
@@ -14,7 +14,7 @@ function AdminCommunication() {
 }
 
 export default AdminCommunication;
-import React, { useEffect, useState } from 'react';
+
 import axios from 'axios';
 import MessageInsert from '../MessaageInsert/MessageInsert';
 import { generateMessagesPDF } from '../../utils/pdfUtils';
@@ -202,4 +202,3 @@ const Message = () => {
 };
 
 
-export default Message;
