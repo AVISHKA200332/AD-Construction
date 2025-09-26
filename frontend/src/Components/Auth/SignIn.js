@@ -1,23 +1,27 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { validateEmail } from "../../utils/validation";
+import axios from "axios";
 
 function SignIn() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "", role: "" });
+  const [form, setForm] = useState({ email: "", password: "", role: "Client" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    // Clear errors when user types
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
+    if (apiError) setApiError("");
   };
 
   const validate = () => {
     const e = {};
     if (!form.email || !validateEmail(form.email)) e.email = "Enter a valid email";
     if (!form.password || form.password.length < 6) e.password = "Password must be 6+ chars";
-    if (!form.role) e.role = "Please select your role";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -25,25 +29,56 @@ function SignIn() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+    
     try {
       setLoading(true);
-      // TODO: Integrate with backend auth API
-      await new Promise((res) => setTimeout(res, 800));
-      // Persist role (placeholder for future auth context)
-      localStorage.setItem("ad_role", form.role);
-      if (form.role === "Admin") {
-        navigate("/admin/dashboard");
-      } else if (form.role === "Client") {
-        navigate("/client/dashboard");
-      } else if (form.role === "Site Manager") {
-        navigate("/site-manager/dashboard");
-      } else if (form.role === "Supervisor") {
-        navigate("/supervisor/dashboard");
-      } else if (form.role === "Labor") {
-        navigate("/labor/dashboard");
-      } else {
-        navigate("/");
+      setApiError("");
+
+      const response = await axios.post("/login", {
+        email: form.email,
+        password: form.password
+      });
+
+      if (response.data.success) {
+        // Store token and user data
+        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("userData", JSON.stringify(response.data.user));
+        localStorage.setItem("ad_role", response.data.user.role);
+
+        // Check for role mismatch for all roles
+        if (form.role !== response.data.user.role) {
+          setApiError(`You selected ${form.role}, but the entered email is not a ${form.role} account.`);
+          return;
+        }
+
+        // Role-based redirect
+        let redirectPath = "/";
+        switch (response.data.user.role) {
+          case "Admin":
+            redirectPath = "/admin/dashboard";
+            break;
+          case "Site Manager":
+            redirectPath = "/site-manager/dashboard";
+            break;
+          case "Supervisor":
+            redirectPath = "/supervisor/dashboard";
+            break;
+          case "Labor":
+            redirectPath = "/labor/dashboard";
+            break;
+          case "Client":
+            redirectPath = "/client/dashboard";
+            break;
+          default:
+            redirectPath = "/";
+        }
+        setApiError("Sign in successful! Redirecting...");
+        setTimeout(() => navigate(redirectPath), 1500);
       }
+    } catch (error) {
+      console.error("Login error:", error);
+      const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
+      setApiError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -55,6 +90,12 @@ function SignIn() {
         <h1 className="text-2xl font-bold text-[#0B3954] mb-1">Welcome back</h1>
         <p className="text-sm text-gray-500 mb-6">Sign in to continue to AD Construction</p>
 
+        {apiError && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {apiError}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
@@ -62,16 +103,14 @@ function SignIn() {
               name="role"
               value={form.role}
               onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#F5CB5C]"
+              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F5CB5C]"
             >
-              <option value="">Select your role</option>
               <option value="Client">Client</option>
               <option value="Admin">Admin</option>
               <option value="Site Manager">Site Manager</option>
               <option value="Supervisor">Supervisor</option>
               <option value="Labor">Labor</option>
             </select>
-            {errors.role && <p className="text-sm text-red-600 mt-1">{errors.role}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
@@ -85,7 +124,6 @@ function SignIn() {
             />
             {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <input
@@ -98,7 +136,6 @@ function SignIn() {
             />
             {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
           </div>
-
           <button
             type="submit"
             disabled={loading}

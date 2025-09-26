@@ -45,7 +45,7 @@ export const validateBankAccount = (accountNumber) => {
 // Phone number validation
 export const validatePhoneNumber = (phone) => {
   if (!phone) return true; // Optional field
-  return /^[\d\s\-\+\(\)]+$/.test(phone);
+  return /^[\d\s()+-]+$/.test(phone);
 };
 
 // Email validation
@@ -163,9 +163,10 @@ export const validateDescription = (description) => {
 };
 
 // Comprehensive project validation
-export const validateProject = (project) => {
+export const validateProject = (project, options = {}) => {
   const errors = [];
   const warnings = [];
+  const { mode = 'create', minStartDate } = options; // mode: 'create' | 'edit'
   
   // Required field validations
   const nameValidation = validateProjectName(project.name);
@@ -183,12 +184,20 @@ export const validateProject = (project) => {
   // Date validations
   if (!project.startDate) {
     errors.push('Start date is required');
-  } else if (!validateDateFromToday(project.startDate)) {
-    errors.push('Start date must be from today onwards');
+  } else {
+    if (mode === 'edit' && minStartDate) {
+      if (new Date(project.startDate) < new Date(minStartDate)) {
+        errors.push('Start date cannot be earlier than the original start date');
+      }
+    } else if (!validateDateFromToday(project.startDate)) {
+      errors.push('Start date must be from today onwards');
+    }
   }
   
   if (!project.endDate) {
     errors.push('End date is required');
+  } else if (!validateDateFromToday(project.endDate)) {
+    errors.push('End date must be from today onwards');
   } else if (project.startDate && !validateEndDate(project.startDate, project.endDate)) {
     errors.push('End date must be after start date');
   }

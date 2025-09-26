@@ -1,17 +1,29 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { validateEmail, sanitizeInput } from "../../utils/validation";
-
+import axios from "axios";
 function SignUp() {
   const navigate = useNavigate();
-  // Sign up is restricted to Clients only
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", role: "Client" });
+  const [form, setForm] = useState({ 
+    name: "", 
+    email: "", 
+    password: "", 
+    confirmPassword: "", 
+    role: "Client" 
+  });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: name === 'name' ? sanitizeInput(value) : value }));
+    setForm((prev) => ({ 
+      ...prev, 
+      [name]: name === 'name' ? sanitizeInput(value) : value 
+    }));
+    // Clear errors when user types
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: "" }));
+    if (apiError) setApiError("");
   };
 
   const validate = () => {
@@ -27,13 +39,27 @@ function SignUp() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
+    
     try {
       setLoading(true);
-      // TODO: Integrate with backend registration API
-      await new Promise((res) => setTimeout(res, 800));
-      // Persist desired role (placeholder for backend-driven role assignment). Always 'Client'
-      localStorage.setItem("ad_role_pending", "Client");
-      navigate("/signin");
+      setApiError("");
+
+      // Call backend signup API. Expecting { name, email, password, role }
+      const response = await axios.post("/signup", {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: form.role
+      });
+
+      if (response.data.success) {
+        // Redirect to login page after signup
+        navigate("/signin");
+      }
+    } catch (error) {
+      console.error("Signup error:", error);
+      const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
+      setApiError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -45,8 +71,12 @@ function SignUp() {
         <h1 className="text-2xl font-bold text-[#0B3954] mb-1">Create your client account</h1>
         <p className="text-sm text-gray-500 mb-6">Only Clients can sign up here. Site Managers, Supervisors, and Labor users are added by Admin.</p>
 
+        {apiError && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {apiError}
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Role is fixed to Client; no selection shown */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
             <input

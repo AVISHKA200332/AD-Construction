@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import Nav from "./Components/Nav/Nav";
 import AdminDashboard from "./Components/Admin/AdminDashboard";
 import Foot from "./Components/Footer/Footer";
-import Project from "./Components/Project/Project";
 import Home from "./Components/Home/Home";
 import SignIn from "./Components/Auth/SignIn";
 import SignUp from "./Components/Auth/SignUp";
@@ -34,17 +33,12 @@ import SupReports from "./Components/Supervisor/SupReports";
 import SupSettings from "./Components/Supervisor/SupSettings";
 import SupCommunication from "./Components/Supervisor/SupCommunication";
 import SupInventory from "./Components/Supervisor/SupInventory";
-import LaborDashboard from "./Components/Labor/LaborDashboard";
+import LaborDashboard from "./Components/Labor/LaborDashBoard";
 import LaborProjects from "./Components/Labor/LaborProjects";
 import LaborReports from "./Components/Labor/LaborReports";
 import LaborSettings from "./Components/Labor/LaborSettings";
 import LaborCommunication from "./Components/Labor/LaborCommunication";
 import LaborInventory from "./Components/Labor/LaborInventory";
-
-//Finance CRUD
-import FinanceDetails from "./Components/Finance/FinanceDetails/FinanceDetails";
-import AddFinance from "./Components/Finance/AddFinance/AddFinance";
-import UpdateFinance from "./Components/Finance/UpdateFinance/UpdateFinance";
 
 function AppContent() {
   const location = useLocation();
@@ -60,8 +54,6 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard" element={<AdminDashboard />} />
-        <Route path="/projects" element={<Project />} />
         <Route path="/apply" element={<ApplyJob />} />
         {/* Client Routes */}
         <Route path="/client/dashboard" element={<ClientDashboard />} />
@@ -102,12 +94,6 @@ function AppContent() {
         <Route path="/labor/settings" element={<LaborSettings />} />
         <Route path="/labor/communication" element={<LaborCommunication />} />
         <Route path="/labor/inventory" element={<LaborInventory />} />
-
-        {/* Finance CRUD */}
-        <Route path="/financeRecords" element={<FinanceDetails />} />
-        <Route path="/addFinance" element={<AddFinance />} />
-        <Route path="/updateFinance/:id" element={<UpdateFinance />} />
-
       </Routes>
       {showFoot && <Foot />}
     </>

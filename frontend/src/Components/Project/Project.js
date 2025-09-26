@@ -29,7 +29,7 @@ function Project({ initialProjects = [] }) {
   const [totalPages, setTotalPages] = useState(1);
   const [projectStats, setProjectStats] = useState(null);
   const [showAuditLogs, setShowAuditLogs] = useState(false);
-  // Removed unused selectedProjectId
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [auditLogs, setAuditLogs] = useState([]);
 
   const [projects, setProjects] = useState(initialProjects);
@@ -74,8 +74,9 @@ function Project({ initialProjects = [] }) {
   const fetchAuditLogs = async (projectId) => {
     try {
       const data = await projectService.getProjectAuditLogs(projectId);
-  setAuditLogs(data.auditLogs);
-  setShowAuditLogs(true);
+      setAuditLogs(data.auditLogs);
+      setSelectedProjectId(projectId);
+      setShowAuditLogs(true);
     } catch (err) {
       setError('Failed to fetch audit logs. Please try again.');
       console.error('Error fetching audit logs:', err);
@@ -85,7 +86,7 @@ function Project({ initialProjects = [] }) {
   useEffect(() => {
     fetchProjects();
     fetchProjectStats();
-  }, [currentPage, searchTerm, statusFilter, priorityFilter, sortBy, sortOrder, fetchProjects]);
+  }, [currentPage, searchTerm, statusFilter, priorityFilter, sortBy, sortOrder]);
 
   const [newProject, setNewProject] = useState({
     name: "",

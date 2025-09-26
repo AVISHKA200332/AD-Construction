@@ -7,9 +7,7 @@ import NotificationIcon from "./NotificationIcon";
 function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
   const [role, setRole] = useState("");
-
   const dropdownRef = useRef(null);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -25,7 +23,6 @@ function Nav() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
   useEffect(() => {
     // Try to read role from storage set during sign-in
     const storedRole = localStorage.getItem("ad_role");
@@ -37,7 +34,6 @@ function Nav() {
       {/* Accent gradient bar */}
       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-[#F5CB5C] via-transparent to-[#F5CB5C]/60 pointer-events-none"></div>
       <div className="relative flex items-center justify-between">
-
         {/* Logo */}
         <div className="flex items-center">
           <img
@@ -46,7 +42,6 @@ function Nav() {
             className="h-12 w-auto object-contain rounded"
           />
           <span className="ml-3 text-lg font-extrabold tracking-wide hidden sm:inline">AD Construction</span>
-
         </div>
 
         {/* Nav Links */}
@@ -168,7 +163,6 @@ function Nav() {
             onClick={toggleDropdown}
             aria-haspopup="true"
             aria-expanded={dropdownOpen}
-
             className="font-semibold flex items-center gap-2 hover:text-[#F5CB5C] focus:outline-none focus:ring-2 focus:ring-[#F5CB5C]/60 rounded"
           >
             <span className="hidden sm:inline">{role || "Guest"}</span>
@@ -188,7 +182,6 @@ function Nav() {
               <li>
                 <a
                   href="#change-password"
-
                   className="block px-4 py-2 hover:bg-white/10"
                 >
                   Change Password
