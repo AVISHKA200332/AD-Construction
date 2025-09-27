@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 const MessageSchema = new mongoose.Schema({
   subject: { type: String, required: true },
-  sender: { type: mongoose.Schema.Types.ObjectId,ref:"user", required: true },
-  recipient: { type: mongoose.Schema.Types.ObjectId,ref:"user", required: true },
+  sender: { type: String, required: true },
+  recipient: { type: String, required: true },
   date: { type: Date, default: Date.now },
-  status: { type: Boolean, default: false }
+  status: { type: String, default: 'Unread' }
 });
 
 module.exports = mongoose.model('Message', MessageSchema);

@@ -1,40 +1,119 @@
 import React from 'react';
 
-const ServiceInsert = ({ open, onClose, onSubmit, form, setForm, submitting, editingId }) => {
+const Backdrop = ({ onClick }) => (
+  <div className="fixed inset-0 bg-black/30 z-40" onClick={onClick} aria-hidden="true" />
+);
+
+const Modal = ({ children }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="w-full max-w-xl bg-white rounded-lg shadow-xl overflow-hidden">
+      {children}
+    </div>
+  </div>
+);
+
+function ServiceInsert({ open, onClose, onSubmit, form, setForm, submitting, editingId }) {
   if (!open) return null;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <div className="text-xl font-bold mb-4 text-[#0B3954]">{editingId ? 'Edit Service' : 'New Service'}</div>
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold mb-1">Service Type</label>
-            <input type="text" className="w-full border rounded px-3 py-2" value={form.serviceType} onChange={e => setForm(f => ({ ...f, serviceType: e.target.value }))} required />
+    <>
+      <Backdrop onClick={onClose} />
+      <Modal>
+        <div className="px-6 py-4 border-b">
+          <h2 className="text-xl font-semibold text-[#0B3954]">
+            {editingId ? 'Edit Service' : 'New Service'}
+          </h2>
+        </div>
+        <form onSubmit={onSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Service Type</label>
+              <input
+                type="text"
+                name="serviceType"
+                value={form.serviceType}
+                onChange={handleChange}
+                required
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+                placeholder="Enter service type"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Provider</label>
+              <input
+                type="text"
+                name="provider"
+                value={form.provider}
+                onChange={handleChange}
+                required
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+                placeholder="Enter provider"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Status</label>
+              <select
+                name="status"
+                value={form.status}
+                onChange={handleChange}
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+              >
+                <option value="">Select status</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Date</label>
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleChange}
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Cost</label>
+              <input
+                type="number"
+                step="0.01"
+                name="cost"
+                value={form.cost}
+                onChange={handleChange}
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+                placeholder="0.00"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1">Provider</label>
-            <input type="text" className="w-full border rounded px-3 py-2" value={form.provider} onChange={e => setForm(f => ({ ...f, provider: e.target.value }))} required />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1">Status</label>
-            <input type="text" className="w-full border rounded px-3 py-2" value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} required />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1">Date</label>
-            <input type="date" className="w-full border rounded px-3 py-2" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} required />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1">Cost</label>
-            <input type="number" className="w-full border rounded px-3 py-2" value={form.cost} onChange={e => setForm(f => ({ ...f, cost: e.target.value }))} required />
-          </div>
-          <div className="flex justify-end gap-2 mt-6">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300">Cancel</button>
-            <button type="submit" disabled={submitting} className="px-4 py-2 rounded bg-[#0B3954] text-white font-semibold hover:bg-[#0a2f46]">{submitting ? 'Saving...' : (editingId ? 'Update' : 'Create')}</button>
+
+          <div className="flex items-center justify-end gap-3 pt-4 border-t">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="px-4 py-2 rounded-md bg-[#0B3954] text-white font-semibold hover:bg-[#0a2f46] disabled:opacity-60"
+            >
+              {submitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
+            </button>
           </div>
         </form>
-      </div>
-    </div>
+      </Modal>
+    </>
   );
-};
+}
 
 export default ServiceInsert;

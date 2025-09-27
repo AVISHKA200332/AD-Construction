@@ -1,45 +1,9 @@
 const Message = require('../Model/MessageModel');
 
-// Get all messages with optional search and filters
+// Get all messages
 exports.getMessages = async (req, res) => {
   try {
-    const { q, status, dateFrom, dateTo, sender, recipient } = req.query;
-
-    const filter = {};
-
-    // Text search on subject
-    if (q) {
-      filter.subject = { $regex: q, $options: 'i' };
-    }
-
-    // Status filter (schema uses Boolean; accept several forms from client)
-    if (typeof status !== 'undefined' && status !== '' && status !== 'All') {
-      let statusBool = undefined;
-      const s = String(status).toLowerCase();
-      if (s === 'read' || s === 'true' || s === '1') statusBool = true;
-      if (s === 'unread' || s === 'false' || s === '0') statusBool = false;
-      if (typeof statusBool === 'boolean') {
-        filter.status = statusBool;
-      }
-    }
-
-    // Sender and recipient filters (ObjectId strings)
-    if (sender) filter.sender = sender;
-    if (recipient) filter.recipient = recipient;
-
-    // Date range filter
-    if (dateFrom || dateTo) {
-      filter.date = {};
-      if (dateFrom) filter.date.$gte = new Date(dateFrom);
-      if (dateTo) {
-        const d = new Date(dateTo);
-        // Include the entire end date by setting time to end of the day
-        d.setHours(23, 59, 59, 999);
-        filter.date.$lte = d;
-      }
-    }
-
-    const messages = await Message.find(filter);
+    const messages = await Message.find();
     res.json({ messages });
   } catch (err) {
     res.status(500).json({ error: err.message });

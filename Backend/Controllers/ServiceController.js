@@ -1,50 +1,9 @@
 const Service = require('../Model/ServiceModel');
 
-// Get all services with optional search and filters
+// Get all services
 exports.getServices = async (req, res) => {
   try {
-    const { q, status, dateFrom, dateTo, minCost, maxCost, provider, serviceType } = req.query;
-
-    const filter = {};
-
-    // Text search on serviceType or provider
-    if (q) {
-      filter.$or = [
-        { serviceType: { $regex: q, $options: 'i' } },
-        { provider: { $regex: q, $options: 'i' } }
-      ];
-    }
-
-    if (serviceType) {
-      filter.serviceType = { $regex: serviceType, $options: 'i' };
-    }
-    if (provider) {
-      filter.provider = { $regex: provider, $options: 'i' };
-    }
-
-    if (status && status !== 'All') {
-      filter.status = status;
-    }
-
-    // Date range
-    if (dateFrom || dateTo) {
-      filter.date = {};
-      if (dateFrom) filter.date.$gte = new Date(dateFrom);
-      if (dateTo) {
-        const d = new Date(dateTo);
-        d.setHours(23, 59, 59, 999);
-        filter.date.$lte = d;
-      }
-    }
-
-    // Cost range
-    if (minCost || maxCost) {
-      filter.cost = {};
-      if (minCost) filter.cost.$gte = Number(minCost);
-      if (maxCost) filter.cost.$lte = Number(maxCost);
-    }
-
-    const services = await Service.find(filter);
+    const services = await Service.find();
     res.json({ services });
   } catch (err) {
     res.status(500).json({ error: err.message });
