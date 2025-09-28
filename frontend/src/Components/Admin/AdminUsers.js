@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 import userService from "../../services/userService";
-import userPdfService from "../../services/UserPdfServices";
 
 function AdminUsers() {
   const [loading, setLoading] = useState(false);
@@ -18,7 +17,6 @@ function AdminUsers() {
   const [roleFilter, setRoleFilter] = useState("");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
-  const [exporting, setExporting] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -65,40 +63,6 @@ function AdminUsers() {
       setLoading(false);
     }
   }, [currentPage, searchTerm, roleFilter, sortBy, sortOrder]);
-
-  // Download PDF with current filters (role + search) across all pages
-  const handleDownloadPdf = async () => {
-    try {
-      setExporting(true);
-      let allUsers = [];
-      let page = 1;
-      let totalPagesLocal = 1;
-      do {
-        const response = await userService.getAllUsers({
-          page,
-          limit: 100,
-          ...(roleFilter && { role: roleFilter }),
-          ...(searchTerm && { search: searchTerm }),
-          sortBy,
-          sortOrder,
-        });
-        if (response?.users?.length) {
-          allUsers = allUsers.concat(response.users);
-        }
-        totalPagesLocal = response?.totalPages || 1;
-        page += 1;
-      } while (page <= totalPagesLocal);
-
-      // Extra safety: enforce role filter client-side too
-      const finalUsers = roleFilter ? allUsers.filter(u => u.role === roleFilter) : allUsers;
-      userPdfService.downloadUserReport(finalUsers, { role: roleFilter || "All", search: searchTerm || "" });
-    } catch (e) {
-      console.error("PDF export failed:", e);
-      setError("Failed to export PDF: " + (e.response?.data?.message || e.message));
-    } finally {
-      setExporting(false);
-    }
-  };
 
   useEffect(() => {
     fetchUsers();
@@ -210,25 +174,6 @@ function AdminUsers() {
     }
   };
 
-  // Analytics (this page)
-  const roleList = ['Admin', 'Site Manager', 'Supervisor', 'Labor', 'Client'];
-  const roleColorMap = {
-    Admin: 'bg-red-500',
-    'Site Manager': 'bg-green-500',
-    Supervisor: 'bg-purple-500',
-    Labor: 'bg-orange-500',
-    Client: 'bg-blue-500'
-  };
-  const roleGradientMap = {
-    Admin: 'from-red-400 to-red-600',
-    'Site Manager': 'from-green-400 to-green-600',
-    Supervisor: 'from-purple-400 to-purple-600',
-    Labor: 'from-orange-400 to-orange-600',
-    Client: 'from-blue-400 to-blue-600'
-  };
-  const roleCounts = roleList.map((r) => users.filter((u) => u.role === r).length);
-  const totalOnPage = Math.max(1, users.length);
-
   return (
     <div className="p-4 bg-gray-50 min-h-screen">
       <div className="max-w-full mx-auto">
@@ -241,35 +186,18 @@ function AdminUsers() {
               <h2 className="text-lg font-semibold text-gray-800">User Management</h2>
               <p className="text-sm text-gray-600">Search users by name, email, or role.</p>
             </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={handleDownloadPdf}
-                disabled={exporting}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-lg font-medium text-sm inline-flex items-center disabled:opacity-60"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-1">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                {exporting ? 'Generating…' : 'Download PDF'}
-              </button>
-              <button 
-                onClick={handleAddUser}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium text-sm inline-flex items-center"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 mr-1">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-                Add User
-              </button>
-            </div>
+            <button 
+              onClick={handleAddUser}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium text-sm"
+            >
+              Add User
+            </button>
           </div>
           
           {/* Search Bar and Filters */}
           <div className="flex flex-col space-y-4">
             <div className="flex items-center space-x-4">
-              <div className="w-full sm:w-64">
+              <div className="flex-1">
                 <input
                   type="text"
                   placeholder="Search users..."
@@ -385,36 +313,6 @@ function AdminUsers() {
               </div>
             ) : (
               <>
-                {/* User Analytics */}
-                <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
-                  <h3 className="text-md font-semibold text-gray-800 mb-3">User Analytics</h3>
-                  <div className="space-y-3">
-                    {roleList.map((role, idx) => {
-                      const count = roleCounts[idx];
-                      const percent = Math.round((count / totalOnPage) * 100);
-                      const colorClass = roleColorMap[role] || 'bg-gray-400';
-                      const gradient = roleGradientMap[role] || 'from-gray-300 to-gray-500';
-                      return (
-                        <div key={role} className="flex items-center space-x-3">
-                          <div className="w-32 text-xs text-gray-600">{role}</div>
-                          <div className="relative flex-1 bg-gray-100 border border-gray-200 rounded h-3">
-                            <div
-                              className={`absolute left-0 top-0 h-3 rounded bg-gradient-to-r ${gradient} transition-all duration-700 ease-out`}
-                              style={{ width: `${percent}%` }}
-                            ></div>
-                          </div>
-                          <div className="w-24 text-xs text-gray-700 text-right">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 border border-gray-200">
-                              <span className={`w-2 h-2 rounded-full mr-1 ${colorClass}`}></span>
-                              {count} ({percent}%)
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full table-fixed">
@@ -454,24 +352,11 @@ function AdminUsers() {
                           <tr key={user._id || index} className="hover:bg-gray-50">
                             <td className="px-3 py-2">
                               <div className="flex items-center">
-                                {/* Role line bar */}
-                                <span className={`w-1 h-8 rounded mr-2 ${
-                                  user.role === 'Admin'
-                                    ? 'bg-red-500'
-                                    : user.role === 'Site Manager'
-                                    ? 'bg-green-500'
-                                    : user.role === 'Supervisor'
-                                    ? 'bg-purple-500'
-                                    : user.role === 'Labor'
-                                    ? 'bg-orange-500'
-                                    : 'bg-blue-500'
-                                }`}></span>
                                 <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs mr-2">
                                   {user.name ? user.name.charAt(0).toUpperCase() : user.gmail.charAt(0).toUpperCase()}
                                 </div>
-                                <div className="text-xs text-gray-900 truncate">
-                                  <div className="font-medium">{user.name || 'No name provided'}</div>
-                                  <div className="text-[10px] text-gray-500 break-all" title={user._id}>ID: {user._id}</div>
+                                <div className="text-xs font-medium text-gray-900 truncate">
+                                  {user.name || 'No name provided'}
                                 </div>
                               </div>
                             </td>
@@ -630,7 +515,7 @@ function AdminUsers() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
+                    Gmail
                   </label>
                   <input
                     type="email"
@@ -716,46 +601,6 @@ function AdminUsers() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-
-                {modalType === "edit" && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        User ID
-                      </label>
-                      <input
-                        type="text"
-                        value={selectedUser?._id || ""}
-                        disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Created
-                        </label>
-                        <input
-                          type="text"
-                          value={selectedUser?.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : ""}
-                          disabled
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Updated
-                        </label>
-                        <input
-                          type="text"
-                          value={selectedUser?.updatedAt ? new Date(selectedUser.updatedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' }) : ""}
-                          disabled
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600 cursor-not-allowed"
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
 
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
