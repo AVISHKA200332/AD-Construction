@@ -66,7 +66,7 @@ function AdminUsers() {
     }
   }, [currentPage, searchTerm, roleFilter, sortBy, sortOrder]);
 
-  // Download PDF with current filters (role + search) across all pages
+ 
   const handleDownloadPdf = async () => {
     try {
       setExporting(true);
@@ -89,7 +89,7 @@ function AdminUsers() {
         page += 1;
       } while (page <= totalPagesLocal);
 
-      // Extra safety: enforce role filter client-side too
+      
       const finalUsers = roleFilter ? allUsers.filter(u => u.role === roleFilter) : allUsers;
       userPdfService.downloadUserReport(finalUsers, { role: roleFilter || "All", search: searchTerm || "" });
     } catch (e) {
@@ -104,17 +104,17 @@ function AdminUsers() {
     fetchUsers();
   }, [fetchUsers]);
 
-  // Handle search with debounce effect
+  
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      setCurrentPage(1); // Reset to first page when searching
+      setCurrentPage(1); 
       fetchUsers();
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, roleFilter]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchTerm, roleFilter]);
 
-  // Pagination handlers
+  
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
@@ -356,7 +356,7 @@ function AdminUsers() {
           </div>
         )}
 
-        {/* Error State */}
+        
         {error && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
             <div className="text-red-600 bg-red-50 p-4 rounded-lg">
@@ -365,7 +365,7 @@ function AdminUsers() {
           </div>
         )}
 
-        {/* Users Display */}
+        
         {!loading && !error && (
           <>
             {users.length === 0 ? (
@@ -385,7 +385,7 @@ function AdminUsers() {
               </div>
             ) : (
               <>
-                {/* User Analytics */}
+
                 <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
                   <h3 className="text-md font-semibold text-gray-800 mb-3">User Analytics</h3>
                   <div className="space-y-3">
@@ -482,13 +482,7 @@ function AdminUsers() {
                               <div className="text-xs text-gray-900">{user.phone || 'N/A'}</div>
                             </td>
                             <td className="px-2 py-2">
-                              {/* Role Color Scheme:
-                                  Admin - Red
-                                  Site Manager - Green  
-                                  Supervisor - Purple
-                                  Labor - Orange
-                                  Client - Blue (default)
-                              */}
+                            
                               <span className={`inline-flex px-1 py-0.5 text-xs font-semibold rounded ${
                                 user.role === 'Admin' 
                                   ? 'bg-red-100 text-red-800' 
@@ -498,7 +492,7 @@ function AdminUsers() {
                                   ? 'bg-purple-100 text-purple-800'
                                   : user.role === 'Labor'
                                   ? 'bg-orange-100 text-orange-800'
-                                  : 'bg-blue-100 text-blue-800' // Client - default
+                                  : 'bg-blue-100 text-blue-800' 
                               }`}>
                                 {user.role || 'Client'}
                               </span>
@@ -552,7 +546,7 @@ function AdminUsers() {
                   </div>
                 </div>
                 
-                {/* Pagination Controls */}
+                 //Pagination Controls 
                 {totalPages > 1 && (
                   <div className="bg-white border-t px-4 py-3 flex items-center justify-between mt-4">
                     <div className="text-xs text-gray-500">
@@ -567,7 +561,7 @@ function AdminUsers() {
                         Previous
                       </button>
                       
-                      {/* Page Numbers */}
+                       //Page Numbers 
                       {[...Array(Math.min(5, totalPages))].map((_, index) => {
                         const page = index + Math.max(1, currentPage - 2);
                         if (page <= totalPages) {
@@ -604,7 +598,7 @@ function AdminUsers() {
         )}
       </div>
 
-      {/* Modal Form */}
+      //Modal Form 
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
