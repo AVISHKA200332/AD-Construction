@@ -16,7 +16,7 @@ const Modal = ({ children }) => (
   </div>
 );
 
-function MessageInsert({ open, onClose, onSubmit, form, setForm, submitting, editingId }) {
+function MessageInsert({ open, onClose, onSubmit, form, setForm, submitting, editingId, errors = {} }) {
   if (!open) return null;
 
   const handleChange = (e) => {
@@ -46,6 +46,9 @@ function MessageInsert({ open, onClose, onSubmit, form, setForm, submitting, edi
                 className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
                 placeholder="Enter subject"
               />
+              {errors.subject && (
+                <p className="mt-1 text-xs text-red-600">{errors.subject}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Sender</label>
@@ -58,6 +61,9 @@ function MessageInsert({ open, onClose, onSubmit, form, setForm, submitting, edi
                 className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
                 placeholder="Enter sender"
               />
+              {errors.sender && (
+                <p className="mt-1 text-xs text-red-600">{errors.sender}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Recipient</label>
@@ -70,6 +76,9 @@ function MessageInsert({ open, onClose, onSubmit, form, setForm, submitting, edi
                 className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
                 placeholder="Enter recipient"
               />
+              {errors.recipient && (
+                <p className="mt-1 text-xs text-red-600">{errors.recipient}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Date</label>
@@ -80,6 +89,9 @@ function MessageInsert({ open, onClose, onSubmit, form, setForm, submitting, edi
                 onChange={handleChange}
                 className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
               />
+              {errors.date && (
+                <p className="mt-1 text-xs text-red-600">{errors.date}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Status</label>
@@ -93,6 +105,24 @@ function MessageInsert({ open, onClose, onSubmit, form, setForm, submitting, edi
                 <option value="Read">Read</option>
                 <option value="Archived">Archived</option>
               </select>
+              {errors.status && (
+                <p className="mt-1 text-xs text-red-600">{errors.status}</p>
+              )}
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700">Message</label>
+              <textarea
+                name="message"
+                value={form.message || ''}
+                onChange={handleChange}
+                required
+                rows={4}
+                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+                placeholder="Type your message..."
+              />
+              {errors.message && (
+                <p className="mt-1 text-xs text-red-600">{errors.message}</p>
+              )}
             </div>
           </div>
 

@@ -4,7 +4,6 @@ import axios from 'axios';
 import MessageInsert from '../MessaageInsert/MessageInsert';
 import { generateMessagesPDF } from '../../utils/pdfUtils';
 import Service from '../Service/Service';
-
 const Message = () => {
   const [activeTab, setActiveTab] = useState('messages');
   const [messages, setMessages] = useState([]);
@@ -14,6 +13,7 @@ const Message = () => {
     subject: '',
     sender: '',
     recipient: '',
+    message: '',
     date: '',
     status: 'Unread',
   });
@@ -23,6 +23,7 @@ const Message = () => {
   const [statusFilter, setStatusFilter] = useState('All');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [errors, setErrors] = useState({});
 
   const BASE_URL = 'http://localhost:5000';
   const fetchMessages = useCallback(async () => {
@@ -47,9 +48,41 @@ const Message = () => {
     fetchMessages();
   }, [fetchMessages]);
 
+  const validate = (values) => {
+    const errs = {};
+    const subject = (values.subject || '').trim();
+    const sender = (values.sender || '').trim();
+    const recipient = (values.recipient || '').trim();
+    const message = (values.message || '').trim();
+    const status = values.status;
+    if (subject.length < 3 || subject.length > 100) {
+      errs.subject = 'Subject must be 3-100 characters.';
+    }
+    if (sender.length < 2 || sender.length > 50) {
+      errs.sender = 'Sender must be 2-50 characters.';
+    }
+    if (recipient.length < 2 || recipient.length > 50) {
+      errs.recipient = 'Recipient must be 2-50 characters.';
+    }
+    if (message.length < 1 || message.length > 1000) {
+      errs.message = 'Message must be 1-1000 characters.';
+    }
+    if (values.date) {
+      const iso = /^\d{4}-\d{2}-\d{2}$/;
+      if (!iso.test(values.date)) {
+        errs.date = 'Date must be a valid date.';
+      }
+    }
+    if (!['Unread', 'Read', 'Archived'].includes(status)) {
+      errs.status = 'Invalid status.';
+    }
+    return errs;
+  };
+
   const openNew = () => {
     setEditingId(null);
-    setForm({ subject: '', sender: '', recipient: '', date: '', status: 'Unread' });
+    setForm({ subject: '', sender: '', recipient: '', message: '', date: '', status: 'Unread' });
+    setErrors({});
     setModalOpen(true);
   };
 
@@ -59,14 +92,21 @@ const Message = () => {
       subject: msg.subject || '',
       sender: msg.sender || '',
       recipient: msg.recipient || '',
+      message: msg.message || '',
       date: msg.date ? new Date(msg.date).toISOString().slice(0,10) : '',
       status: msg.status || 'Unread',
     });
+    setErrors({});
     setModalOpen(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const v = validate(form);
+    setErrors(v);
+    if (Object.keys(v).length > 0) {
+      return;
+    }
     setSubmitting(true);
     try {
       if (editingId) {
@@ -75,10 +115,17 @@ const Message = () => {
         await axios.post(`${BASE_URL}/messages`, form);
       }
       setModalOpen(false);
-      setForm({ subject: '', sender: '', recipient: '', date: '', status: 'Unread' });
+      setForm({ subject: '', sender: '', recipient: '', message: '', date: '', status: 'Unread' });
+      setErrors({});
       await fetchMessages();
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.error) {
+      if (err.response && err.response.status === 422 && Array.isArray(err.response.data?.errors)) {
+        const fieldErrs = {};
+        err.response.data.errors.forEach((e) => {
+          if (e.path) fieldErrs[e.path] = e.msg;
+        });
+        setErrors(fieldErrs);
+      } else if (err.response && err.response.data && err.response.data.error) {
         alert('Error saving message: ' + err.response.data.error);
       } else {
         alert('Error saving message: ' + err.message);
@@ -197,7 +244,7 @@ const Message = () => {
                   <div className="col-span-2">{m.sender}</div>
                   <div className="col-span-2">{m.recipient}</div>
                   <div className="col-span-2">{m.date ? new Date(m.date).toISOString().slice(0,10) : ''}</div>
-                  <div className="col-span-1">{String(m.status) === 'true' || m.status === true ? 'Read' : 'Unread'}</div>
+                  <div className="col-span-1">{m.status}</div>
                   <div className="col-span-1 flex items-center justify-end gap-2">
                     <button onClick={() => openEdit(m)} className="px-2 py-1 text-xs rounded-md border border-gray-300 text-[#0B3954] hover:bg-gray-100">Edit</button>
                     <button onClick={() => deleteMessage(m._id)} className="px-2 py-1 text-xs rounded-md border border-red-300 text-red-700 hover:bg-red-50">Delete</button>
@@ -209,7 +256,6 @@ const Message = () => {
               )}
             </div>
           </div>
-          {/* Modal */}
           <MessageInsert
             open={modalOpen}
             onClose={() => setModalOpen(false)}
@@ -218,6 +264,7 @@ const Message = () => {
             setForm={setForm}
             submitting={submitting}
             editingId={editingId}
+            errors={errors}
           />
         </>
       )}
@@ -229,4 +276,5 @@ const Message = () => {
 };
 
 export default Message;
+
 

@@ -5,16 +5,7 @@ import { generateMessagesPDF } from '../../utils/pdfUtils';
 import Service from '../Service/Service';
 
 function AdminCommunication() {
-  return (
-    <div className="px-6 py-8">
-      <h1 className="text-2xl font-bold text-[#0B3954]">Communication</h1>
-      <p className="text-gray-600 mt-2">Organization-wide announcements and messages.</p>
-
-      <div className="mt-6 bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-        <p className="text-gray-500">Communications center coming soon.</p>
-      </div>
-    </div>
-  );
+  return <Message />;
 }
 
 const Message = () => {
@@ -27,11 +18,13 @@ const Message = () => {
     subject: '',
     sender: '',
     recipient: '',
+    message: '',
     date: '',
     status: 'Unread',
   });
   const [submitting, setSubmitting] = useState(false);
   const [fetchError, setFetchError] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const BASE_URL = 'http://localhost:5000';
 
@@ -50,18 +43,51 @@ const Message = () => {
     fetchMessages();
   }, []);
 
+  const validate = (values) => {
+    const errs = {};
+    const subject = (values.subject || '').trim();
+    const sender = (values.sender || '').trim();
+    const recipient = (values.recipient || '').trim();
+    const message = (values.message || '').trim();
+    const status = values.status;
+    if (subject.length < 3 || subject.length > 100) {
+      errs.subject = 'Subject must be 3-100 characters.';
+    }
+    if (sender.length < 2 || sender.length > 50) {
+      errs.sender = 'Sender must be 2-50 characters.';
+    }
+    if (recipient.length < 2 || recipient.length > 50) {
+      errs.recipient = 'Recipient must be 2-50 characters.';
+    }
+    if (message.length < 1 || message.length > 1000) {
+      errs.message = 'Message must be 1-1000 characters.';
+    }
+    if (values.date) {
+      // Basic ISO date (yyyy-mm-dd) check
+      const iso = /^\d{4}-\d{2}-\d{2}$/;
+      if (!iso.test(values.date)) {
+        errs.date = 'Date must be a valid date.';
+      }
+    }
+    if (!['Unread', 'Read', 'Archived'].includes(status)) {
+      errs.status = 'Invalid status.';
+    }
+    return errs;
+  };
+
   const filteredMessages = messages.filter((m) => {
     const q = searchTerm.trim().toLowerCase();
     if (!q) return true;
     const dateStr = m.date ? new Date(m.date).toISOString().slice(0, 10) : '';
-    return [m.subject, m.sender, m.recipient, m.status, dateStr]
+    return [m.subject, m.sender, m.recipient, m.message, m.status, dateStr]
       .filter(Boolean)
       .some((field) => String(field).toLowerCase().includes(q));
   });
 
   const openNew = () => {
     setEditingId(null);
-    setForm({ subject: '', sender: '', recipient: '', date: '', status: 'Unread' });
+    setForm({ subject: '', sender: '', recipient: '', message: '', date: '', status: 'Unread' });
+    setErrors({});
     setModalOpen(true);
   };
 
@@ -71,14 +97,22 @@ const Message = () => {
       subject: msg.subject || '',
       sender: msg.sender || '',
       recipient: msg.recipient || '',
+      message: msg.message || '',
       date: msg.date ? new Date(msg.date).toISOString().slice(0, 10) : '',
       status: msg.status || 'Unread',
     });
+    setErrors({});
     setModalOpen(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // client-side validation
+    const v = validate(form);
+    setErrors(v);
+    if (Object.keys(v).length > 0) {
+      return; // stop submit
+    }
     setSubmitting(true);
     try {
       if (editingId) {
@@ -87,10 +121,18 @@ const Message = () => {
         await axios.post(`${BASE_URL}/messages`, form);
       }
       setModalOpen(false);
-      setForm({ subject: '', sender: '', recipient: '', date: '', status: 'Unread' });
+      setForm({ subject: '', sender: '', recipient: '', message: '', date: '', status: 'Unread' });
+      setErrors({});
       await fetchMessages();
     } catch (err) {
-      if (err.response && err.response.data && err.response.data.error) {
+      if (err.response && err.response.status === 422 && Array.isArray(err.response.data?.errors)) {
+        // map express-validator errors to field map
+        const fieldErrs = {};
+        err.response.data.errors.forEach((e) => {
+          if (e.path) fieldErrs[e.path] = e.msg;
+        });
+        setErrors(fieldErrs);
+      } else if (err.response && err.response.data && err.response.data.error) {
         alert('Error saving message: ' + err.response.data.error);
       } else {
         alert('Error saving message: ' + err.message);
@@ -219,6 +261,7 @@ const Message = () => {
             setForm={setForm}
             submitting={submitting}
             editingId={editingId}
+            errors={errors}
           />
         </>
       )}

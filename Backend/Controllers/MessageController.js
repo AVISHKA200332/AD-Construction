@@ -1,4 +1,5 @@
 const Message = require('../Model/MessageModel');
+const { validationResult } = require('express-validator');
 
 // Get all messages
 exports.getMessages = async (req, res) => {
@@ -12,6 +13,10 @@ exports.getMessages = async (req, res) => {
 
 // Get a single message by ID
 exports.getMessageById = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
   try {
     const message = await Message.findById(req.params.id);
     if (!message) return res.status(404).json({ error: 'Message not found' });
@@ -23,6 +28,10 @@ exports.getMessageById = async (req, res) => {
 
 // Create a new message
 exports.createMessage = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
   try {
     const newMessage = new Message(req.body);
     await newMessage.save();
@@ -34,6 +43,10 @@ exports.createMessage = async (req, res) => {
 
 // Update a message
 exports.updateMessage = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
   try {
     const updated = await Message.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!updated) return res.status(404).json({ error: 'Message not found' });
@@ -45,6 +58,10 @@ exports.updateMessage = async (req, res) => {
 
 // Delete a message
 exports.deleteMessage = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(422).json({ errors: errors.array() });
+  }
   try {
     const deleted = await Message.findByIdAndDelete(req.params.id);
     if (!deleted) return res.status(404).json({ error: 'Message not found' });
