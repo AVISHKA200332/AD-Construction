@@ -33,7 +33,10 @@ import SupReports from "./Components/Supervisor/SupReports";
 import SupSettings from "./Components/Supervisor/SupSettings";
 import SupCommunication from "./Components/Supervisor/SupCommunication";
 import SupInventory from "./Components/Supervisor/SupInventory";
+<<<<<<< HEAD
 import LaborDashboard from "./Components/Labor/LaborDashboard";
+=======
+>>>>>>> parent of 8f13d2f6 (edit App.js)
 import LaborDashboard from "./Components/Labor/LaborDashBoard";
 import LaborProjects from "./Components/Labor/LaborProjects";
 import LaborReports from "./Components/Labor/LaborReports";
