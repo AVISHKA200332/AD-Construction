@@ -7,10 +7,15 @@ function StatCard({ title, value, subtitle, icon, accent = "#0B3954" }) {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-gray-500">{title}</p>
-          <p className="text-3xl font-extrabold mt-1" style={{ color: accent }}>{value}</p>
+          <p className="text-3xl font-extrabold mt-1" style={{ color: accent }}>
+            {value}
+          </p>
           {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
         </div>
-        <div className="h-10 w-10 rounded-lg flex items-center justify-center" style={{ background: `${accent}10`, color: accent }}>
+        <div
+          className="h-10 w-10 rounded-lg flex items-center justify-center"
+          style={{ background: `${accent}10`, color: accent }}
+        >
           {icon}
         </div>
       </div>
@@ -25,7 +30,10 @@ function ProgressBar({ value, color = "#0B3954" }) {
   const pct = Math.max(0, Math.min(100, Number(value) || 0));
   return (
     <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }}></div>
+      <div
+        className="h-full rounded-full transition-all"
+        style={{ width: `${pct}%`, background: color }}
+      ></div>
     </div>
   );
 }
@@ -43,8 +51,12 @@ function ClientDashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3">
         <div>
-          <h1 className="text-2xl md:text-3xl font-extrabold text-[#0B3954]">Client Dashboard</h1>
-          <p className="text-gray-600 mt-1">A quick overview of your projects, finances, and communications.</p>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#0B3954]">
+            Client Dashboard
+          </h1>
+          <p className="text-gray-600 mt-1">
+            A quick overview of your projects, finances, and communications.
+          </p>
         </div>
         <div className="text-sm text-gray-500">{niceDate}</div>
       </div>
@@ -144,32 +156,40 @@ function ClientDashboard() {
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-[#0B3954]">Project Progress</h2>
-              <Link to="/client/projects" className="text-sm text-[#0B3954] hover:underline">View all</Link>
+              <Link to="/client/projects" className="text-sm text-[#0B3954] hover:underline">
+                View all
+              </Link>
             </div>
             <div className="mt-4 space-y-4">
-              {[{
-                name: "Residential Villa - Kandy",
-                pct: 78,
-                color: "#16A34A",
-                eta: "Nov 12, 2025"
-              }, {
-                name: "Commercial Complex - Galle",
-                pct: 46,
-                color: "#E67E22",
-                eta: "Feb 03, 2026"
-              }, {
-                name: "Renovation - Colombo 05",
-                pct: 22,
-                color: "#0B3954",
-                eta: "May 18, 2026"
-              }].map((p, idx) => (
+              {[
+                {
+                  name: "Residential Villa - Kandy",
+                  pct: 78,
+                  color: "#16A34A",
+                  eta: "Nov 12, 2025",
+                },
+                {
+                  name: "Commercial Complex - Galle",
+                  pct: 46,
+                  color: "#E67E22",
+                  eta: "Feb 03, 2026",
+                },
+                {
+                  name: "Renovation - Colombo 05",
+                  pct: 22,
+                  color: "#0B3954",
+                  eta: "May 18, 2026",
+                },
+              ].map((p, idx) => (
                 <div key={idx} className="border border-gray-100 rounded-xl p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="font-medium text-gray-800">{p.name}</p>
                       <p className="text-xs text-gray-500">ETA: {p.eta}</p>
                     </div>
-                    <span className="text-sm font-semibold" style={{ color: p.color }}>{p.pct}%</span>
+                    <span className="text-sm font-semibold" style={{ color: p.color }}>
+                      {p.pct}%
+                    </span>
                   </div>
                   <div className="mt-2">
                     <ProgressBar value={p.pct} color={p.color} />
@@ -186,26 +206,34 @@ function ClientDashboard() {
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-[#0B3954]">Financial Overview</h2>
-              <Link to="/client/financial" className="text-sm text-[#0B3954] hover:underline">Details</Link>
+              <Link to="/client/financial" className="text-sm text-[#0B3954] hover:underline">
+                Details
+              </Link>
             </div>
             <div className="mt-4 space-y-4">
-              {[{
-                label: "Budget Used",
-                value: 58,
-                color: "#0B3954"
-              }, {
-                label: "Invoices Paid",
-                value: 72,
-                color: "#16A34A"
-              }, {
-                label: "Pending Payments",
-                value: 28,
-                color: "#DC2626"
-              }].map((f, i) => (
+              {[
+                {
+                  label: "Budget Used",
+                  value: 58,
+                  color: "#0B3954",
+                },
+                {
+                  label: "Invoices Paid",
+                  value: 72,
+                  color: "#16A34A",
+                },
+                {
+                  label: "Pending Payments",
+                  value: 28,
+                  color: "#DC2626",
+                },
+              ].map((f, i) => (
                 <div key={i}>
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-sm text-gray-700">{f.label}</p>
-                    <p className="text-sm font-semibold" style={{ color: f.color }}>{f.value}%</p>
+                    <p className="text-sm font-semibold" style={{ color: f.color }}>
+                      {f.value}%
+                    </p>
                   </div>
                   <ProgressBar value={f.value} color={f.color} />
                 </div>
@@ -217,22 +245,28 @@ function ClientDashboard() {
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-[#0B3954]">Recent Communications</h2>
-              <Link to="/client/communication" className="text-sm text-[#0B3954] hover:underline">Open inbox</Link>
+              <Link to="/client/communication" className="text-sm text-[#0B3954] hover:underline">
+                Open inbox
+              </Link>
             </div>
             <ul className="mt-4 divide-y divide-gray-100">
-              {[{
-                from: "Site Manager",
-                subject: "Concrete delivery rescheduled",
-                time: "2h ago"
-              }, {
-                from: "Accounts",
-                subject: "Invoice #INV-203 approved",
-                time: "Yesterday"
-              }, {
-                from: "Architect",
-                subject: "Updated floor plans uploaded",
-                time: "Mon"
-              }].map((m, i) => (
+              {[
+                {
+                  from: "Site Manager",
+                  subject: "Concrete delivery rescheduled",
+                  time: "2h ago",
+                },
+                {
+                  from: "Accounts",
+                  subject: "Invoice #INV-203 approved",
+                  time: "Yesterday",
+                },
+                {
+                  from: "Architect",
+                  subject: "Updated floor plans uploaded",
+                  time: "Mon",
+                },
+              ].map((m, i) => (
                 <li key={i} className="py-3 flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-800">{m.subject}</p>
@@ -248,22 +282,32 @@ function ClientDashboard() {
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
             <h2 className="text-lg font-semibold text-[#0B3954]">Upcoming Milestones</h2>
             <div className="mt-4 space-y-3">
-              {[{
-                label: "Roof slab casting",
-                date: "Oct 08, 2025",
-                color: "#0B3954"
-              }, {
-                label: "MEP rough-ins",
-                date: "Oct 22, 2025",
-                color: "#16A34A"
-              }, {
-                label: "Client site walk",
-                date: "Nov 02, 2025",
-                color: "#E67E22"
-              }].map((mil, i) => (
-                <div key={i} className="flex items-center justify-between border border-gray-100 rounded-xl p-3">
+              {[
+                {
+                  label: "Roof slab casting",
+                  date: "Oct 08, 2025",
+                  color: "#0B3954",
+                },
+                {
+                  label: "MEP rough-ins",
+                  date: "Oct 22, 2025",
+                  color: "#16A34A",
+                },
+                {
+                  label: "Client site walk",
+                  date: "Nov 02, 2025",
+                  color: "#E67E22",
+                },
+              ].map((mil, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between border border-gray-100 rounded-xl p-3"
+                >
                   <div className="flex items-center gap-3">
-                    <span className="h-2.5 w-2.5 rounded-full" style={{ background: mil.color }}></span>
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ background: mil.color }}
+                    ></span>
                     <p className="text-sm text-gray-800">{mil.label}</p>
                   </div>
                   <span className="text-xs text-gray-500">{mil.date}</span>
@@ -271,29 +315,6 @@ function ClientDashboard() {
               ))}
             </div>
           </div>
-
-function ClientDashboard() {
-  return (
-    <div className="px-6 py-8">
-      <h1 className="text-2xl font-bold text-[#0B3954]">Client Dashboard</h1>
-      <p className="text-gray-600 mt-2">Welcome to your project overview. Track progress, budgets, and timelines.</p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-          <p className="text-sm text-gray-500">Active Projects</p>
-          <p className="text-3xl font-extrabold text-[#0B3954] mt-1">3</p>
-        </div>
-        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-          <p className="text-sm text-gray-500">Total Budget</p>
-          <p className="text-3xl font-extrabold text-[#0B3954] mt-1">Rs. 25M</p>
-        </div>
-        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-          <p className="text-sm text-gray-500">Avg. Completion</p>
-          <p className="text-3xl font-extrabold text-[#0B3954] mt-1">62%</p>
-        </div>
-        <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
-          <p className="text-sm text-gray-500">Alerts</p>
-          <p className="text-3xl font-extrabold text-[#0B3954] mt-1">2</p>
         </div>
       </div>
     </div>
