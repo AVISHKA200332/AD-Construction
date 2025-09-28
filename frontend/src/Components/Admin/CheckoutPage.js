@@ -15,7 +15,14 @@ export default function CheckoutPage() {
   const total = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
 
   const handleChange = e => {
-    setCustomer({ ...customer, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'phone') {
+      // Only allow up to 10 digits, numbers only
+      const digits = value.replace(/\D/g, '').slice(0, 10);
+      setCustomer({ ...customer, phone: digits });
+    } else {
+      setCustomer({ ...customer, [name]: value });
+    }
   };
 
   const handleCheckout = async (e) => {
@@ -116,7 +123,17 @@ export default function CheckoutPage() {
           </div>
           <div className="mb-4">
             <label className="block text-gray-700 font-medium mb-1">Phone</label>
-            <input type="text" name="phone" value={customer.phone} onChange={handleChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+            <input
+              type="text"
+              name="phone"
+              value={customer.phone}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              maxLength={10}
+              pattern="\d{10}"
+              title="Please enter a 10-digit phone number"
+            />
           </div>
           <div className="mb-6">
             <label className="block text-gray-700 font-medium mb-1">Address</label>
