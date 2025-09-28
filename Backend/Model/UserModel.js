@@ -36,10 +36,6 @@ const userSchema = new Schema({
     required: false,
     trim: true
   },
-  profileImage: {
-    type: String,
-    required: false // base64 data URL or URL
-  },
   password: {
     type: String,
     required: true,

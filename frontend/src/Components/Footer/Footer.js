@@ -81,6 +81,8 @@ function Footer() {
           <div className="flex items-center gap-4">
             <Link to="/privacy" className="hover:text-[#F5CB5C]">Privacy</Link>
             <Link to="/terms" className="hover:text-[#F5CB5C]">Terms</Link>
+            <Link to="/signin" className="hover:text-[#F5CB5C]">Sign In</Link>
+            <Link to="/signup" className="hover:text-[#F5CB5C]">Sign Up</Link>
           </div>
         </div>
       </div>
