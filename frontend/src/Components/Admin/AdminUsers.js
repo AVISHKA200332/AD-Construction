@@ -11,7 +11,7 @@ function AdminUsers() {
   const [modalType, setModalType] = useState(""); // "add" or "edit"
   const [selectedUser, setSelectedUser] = useState(null);
   
-  // Pagination and filtering states
+  
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
@@ -30,7 +30,7 @@ function AdminUsers() {
     password: ""
   });
 
-  // Fetch users with pagination and filtering
+  
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -66,7 +66,7 @@ function AdminUsers() {
     }
   }, [currentPage, searchTerm, roleFilter, sortBy, sortOrder]);
 
-  // Download PDF with current filters (role + search) across all pages
+  
   const handleDownloadPdf = async () => {
     try {
       setExporting(true);
@@ -89,7 +89,7 @@ function AdminUsers() {
         page += 1;
       } while (page <= totalPagesLocal);
 
-      // Extra safety: enforce role filter client-side too
+      
       const finalUsers = roleFilter ? allUsers.filter(u => u.role === roleFilter) : allUsers;
       userPdfService.downloadUserReport(finalUsers, { role: roleFilter || "All", search: searchTerm || "" });
     } catch (e) {
@@ -104,7 +104,7 @@ function AdminUsers() {
     fetchUsers();
   }, [fetchUsers]);
 
-  // Handle search with debounce effect
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setCurrentPage(1); // Reset to first page when searching
