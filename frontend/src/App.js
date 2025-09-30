@@ -27,19 +27,16 @@ import SMSettings from "./Components/SiteManager/SMSettings";
 import SMCommunication from "./Components/SiteManager/SMCommunication";
 import SMInventory from "./Components/SiteManager/SMInventory";
 import SupDashboard from "./Components/Supervisor/SupDashboard";
-import SupProjects from "./Components/Supervisor/SupProjects";
 import SupFinancial from "./Components/Supervisor/SupFinancial";
 import SupReports from "./Components/Supervisor/SupReports";
 import SupSettings from "./Components/Supervisor/SupSettings";
 import SupCommunication from "./Components/Supervisor/SupCommunication";
 import SupInventory from "./Components/Supervisor/SupInventory";
-import LaborDashboard from "./Components/Labor/LaborDashBoard";
 import LaborProjects from "./Components/Labor/LaborProjects";
 import LaborReports from "./Components/Labor/LaborReports";
 import LaborSettings from "./Components/Labor/LaborSettings";
 import LaborCommunication from "./Components/Labor/LaborCommunication";
 import LaborInventory from "./Components/Labor/LaborInventory";
-
 function AppContent() {
   const location = useLocation();
   const hideNavOn = ["/", "/signin", "/signup"]; // Hide Nav on public pages
@@ -81,15 +78,13 @@ function AppContent() {
         <Route path="/site-manager/inventory" element={<SMInventory />} />
         {/* Supervisor Routes */}
         <Route path="/supervisor/dashboard" element={<SupDashboard />} />
-        <Route path="/supervisor/projects" element={<SupProjects />} />
         <Route path="/supervisor/financial" element={<SupFinancial />} />
         <Route path="/supervisor/reports" element={<SupReports />} />
         <Route path="/supervisor/settings" element={<SupSettings />} />
         <Route path="/supervisor/communication" element={<SupCommunication />} />
         <Route path="/supervisor/inventory" element={<SupInventory />} />
         {/* Labor Routes */}
-        <Route path="/labor/dashboard" element={<LaborDashboard />} />
-        <Route path="/labor/projects" element={<LaborProjects />} />
+                <Route path="/labor/projects" element={<LaborProjects />} />
         <Route path="/labor/reports" element={<LaborReports />} />
         <Route path="/labor/settings" element={<LaborSettings />} />
         <Route path="/labor/communication" element={<LaborCommunication />} />

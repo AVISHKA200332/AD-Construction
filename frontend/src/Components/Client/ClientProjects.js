@@ -50,10 +50,14 @@ function ClientProjects() {
       try {
         setLoading(true);
         setError("");
-        const data = await projectService.getAllProjects();
+        // Determine client identity keys
+        const userName = currentUser?.name || currentUser?.fullName || currentUser?.username || "";
+        const userEmail = currentUser?.email || "";
+        const params = ["limit=1000"];
+        if (userName) params.push(`clientName=${encodeURIComponent(userName)}`);
+        if (userEmail) params.push(`clientEmail=${encodeURIComponent(userEmail)}`);
+        const data = await projectService.getAllProjects(params.join('&'));
         const list = Array.isArray(data?.projects) ? data.projects : Array.isArray(data) ? data : [];
-
-        // Normalize and map to the structure this page expects
         const mapped = list.map((p) => ({
           _raw: p,
           id: p.projectId || p._id || p.id,
@@ -66,19 +70,7 @@ function ClientProjects() {
           clientName: p.client || p.clientName || "",
           clientEmail: p.clientContact?.email || p.clientEmail || "",
         }));
-
-        // Determine client identity keys
-        const userName = currentUser?.name || currentUser?.fullName || currentUser?.username || "";
-        const userEmail = currentUser?.email || "";
-
-        // Filter to only projects assigned to this client (by name or email)
-        const assigned = mapped.filter((m) => {
-          const nameMatch = userName && m.clientName && m.clientName.toLowerCase() === userName.toLowerCase();
-          const emailMatch = userEmail && m.clientEmail && m.clientEmail.toLowerCase() === userEmail.toLowerCase();
-          return nameMatch || emailMatch;
-        });
-
-        setProjects(assigned);
+        setProjects(mapped);
       } catch (e) {
         console.error(e);
         setError("Failed to load projects. Please try again later.");

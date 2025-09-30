@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import userService from '../../services/userService';
 import {
   validateProject,
   sanitizeInput,
@@ -14,8 +15,31 @@ function AddProjectModal({
   loading,
   originalStartDate,
 }) {
+  const [siteManagers, setSiteManagers] = useState([]);
+  const [clients, setClients] = useState([]);
   const [errors, setErrors] = useState({});
   const todayStr = new Date().toISOString().split("T")[0];
+
+  useEffect(() => {
+    async function fetchManagers() {
+      try {
+        const data = await userService.getAllUsers({ role: 'Site Manager', limit: 100 });
+        setSiteManagers(data.users || []);
+      } catch (err) {
+        setSiteManagers([]);
+      }
+    }
+    async function fetchClients() {
+      try {
+        const data = await userService.getAllUsers({ role: 'Client', limit: 100 });
+        setClients(data.users || []);
+      } catch (err) {
+        setClients([]);
+      }
+    }
+    fetchManagers();
+    fetchClients();
+  }, []);
 
   // Reset errors when modal opens/closes
   useEffect(() => {
@@ -199,16 +223,17 @@ function AddProjectModal({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Client Name *
                 </label>
-                <input
-                  type="text"
-                  name="client"
-                  value={newProject.client || ""}
-                  onChange={handleInputChange}
-                  placeholder="Enter client name"
-                  className={`w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                    errors.client ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
+                <select
+  name="client"
+  value={newProject.client || ""}
+  onChange={handleInputChange}
+  className={`w-full border rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 transition ${errors.client ? "border-red-500" : "border-gray-300"}`}
+>
+  <option value="">Select Client</option>
+  {clients.map((client) => (
+    <option key={client._id} value={client.name}>{client.name}</option>
+  ))}
+</select>
                 {errors.client && (
                   <p className="text-red-500 text-xs mt-1">{errors.client}</p>
                 )}
@@ -420,73 +445,26 @@ function AddProjectModal({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Manager Name
-                  </label>
-                  <input
-                    type="text"
-                    name="projectManager.name"
-                    value={newProject.projectManager.name || ""}
-                    onChange={handleInputChange}
-                    placeholder="Enter manager name"
-                    className={`w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                      errors["projectManager.name"]
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
-                  />
-                  {errors["projectManager.name"] && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors["projectManager.name"]}
-                    </p>
-                  )}
+  Project Manager *
+</label>
+<select
+  name="projectManager.name"
+  value={newProject.projectManager.name || ""}
+  onChange={handleInputChange}
+  className={`w-full border rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 transition ${errors["projectManager.name"] ? "border-red-500" : "border-gray-300"}`}
+>
+  <option value="">Select Site Manager</option>
+  {siteManagers.map((manager) => (
+    <option key={manager._id} value={manager.name}>{manager.name}</option>
+  ))}
+</select>
+{errors["projectManager.name"] && (
+  <p className="text-red-500 text-xs mt-1">
+    {errors["projectManager.name"]}
+  </p>
+)}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Age
-                  </label>
-                  <input
-                    type="number"
-                    name="projectManager.age"
-                    min="18"
-                    value={newProject.projectManager.age || ""}
-                    onChange={handleInputChange}
-                    placeholder="Enter age"
-                    className={`w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                      errors["projectManager.age"]
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
-                  />
-                  {errors["projectManager.age"] && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors["projectManager.age"]}
-                    </p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Experience (Years)
-                  </label>
-                  <input
-                    type="number"
-                    name="projectManager.experience"
-                    min="0"
-                    value={newProject.projectManager.experience || ""}
-                    onChange={handleInputChange}
-                    placeholder="Enter years of experience"
-                    className={`w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                      errors["projectManager.experience"]
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
-                  />
-                  {errors["projectManager.experience"] && (
-                    <p className="text-red-500 text-xs mt-1">
-                      {errors["projectManager.experience"]}
-                    </p>
-                  )}
-                </div>
-              </div>
+                                              </div>
             </div>
 
             {/* Project Location */}
