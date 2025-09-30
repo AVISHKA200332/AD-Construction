@@ -27,7 +27,7 @@ export function generateMessagesPDF(messages = []) {
   autoTable(doc, {
     headStyles: { fillColor: [11, 57, 84] },
     styles: { fontSize: 10 },
-    startY: 22,
+    startY: doc.lastAutoTable ? doc.lastAutoTable.finalY + 5 : 1,
     columns,
     body: rows,
   });
@@ -62,7 +62,7 @@ export function generateServicesPDF(services = []) {
   autoTable(doc, {
     headStyles: { fillColor: [11, 57, 84] },
     styles: { fontSize: 10 },
-    startY: 22,
+    startY: 1, 
     columns,
     body: rows,
   });
@@ -70,4 +70,3 @@ export function generateServicesPDF(services = []) {
   const dateStr = new Date().toISOString().slice(0, 10);
   doc.save(`services_${dateStr}.pdf`);
 }
-
