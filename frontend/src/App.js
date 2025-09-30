@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Nav from "./Components/Nav/Nav";
 import AdminDashboard from "./Components/Admin/AdminDashboard";
+import FinanceDetails from "./Components/Finance/FinanceDetails/FinanceDetails";
 import Foot from "./Components/Footer/Footer";
 import Home from "./Components/Home/Home";
 import SignIn from "./Components/Auth/SignIn";
@@ -40,6 +41,7 @@ import LaborCommunication from "./Components/Labor/LaborCommunication";
 import LaborInventory from "./Components/Labor/LaborInventory";
 import ClientProfile from "./Components/Profile/ClientProfile";
 import AdminProfile from "./Components/Profile/AdminProfile";
+import UpdateFinance from "./Components/Finance/UpdateFinance/UpdateFinance";
 
 function AppContent() {
   const location = useLocation();
@@ -74,6 +76,16 @@ function AppContent() {
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/communication" element={<AdminCommunication />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
+        {/* Finance Records Route */}
+        <Route path="/financeRecords" element={<FinanceDetails />} />
+        {/* Update Finance Route */}
+        <Route path="/updateFinance/:id" element={<UpdateFinance />} />
+        {/* Site Manager Routes */}
+        <Route path="/site-manager/dashboard" element={<SMDashboard />} />
+        <Route path="/site-manager/projects" element={<SMProjects />} />
+        <Route path="/site-manager/financial" element={<SMFinancial />} />
+        <Route path="/site-manager/reports" element={<SMReports />} />
+        <Route path="/site-manager/settings" element={<SMSettings />} />
         <Route path="/site-manager/communication" element={<SMCommunication />} />
         <Route path="/site-manager/inventory" element={<SMInventory />} />
         {/* Supervisor Routes */}

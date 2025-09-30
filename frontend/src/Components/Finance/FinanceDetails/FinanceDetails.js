@@ -3,7 +3,7 @@ import axios from 'axios';
 import Finance from '../Finance';
 import './FinanceDetails.css';
 
-const URL = `http://localhost:5000/finance`; 
+const URL = `http://localhost:5000/finances`; 
 
 const fetchHandler = async () => {
   return await axios.get(URL).then((res) => res.data);
@@ -19,6 +19,11 @@ function FinanceDetails() {
       setFinance(data.finance || []); 
     });
   }, []);
+
+  // Remove a finance item from local state after deletion
+  const handleDeleted = (id) => {
+    setFinance((prev) => Array.isArray(prev) ? prev.filter((f) => f._id !== id) : []);
+  };
 
   // Filter finances based on search term
   const filteredFinances = finances.filter((finance) =>
@@ -48,9 +53,9 @@ function FinanceDetails() {
 
       <div className="finance-list">
         {filteredFinances.length > 0 ? (
-          filteredFinances.map((finance, i) => (
-            <div key={i} className="finance-item">
-              <Finance finance={finance} />
+          filteredFinances.map((finance) => (
+            <div key={finance._id} className="finance-item">
+              <Finance finance={finance} onDeleted={handleDeleted} />
             </div>
           ))
         ) : (
