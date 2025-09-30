@@ -8,6 +8,16 @@ function AdminCommunication() {
   return <Message />;
 }
 
+const StatusBadge = ({ status }) => {
+  const map = {
+    Read: 'bg-green-100 text-green-700',
+    Unread: 'bg-yellow-100 text-yellow-700',
+    Archived: 'bg-gray-100 text-gray-700',
+  };
+  const cls = map[status] || map.Archived;
+  return <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${cls}`}>{status}</span>;
+};
+
 const Message = () => {
   const [activeTab, setActiveTab] = useState('messages');
   const [messages, setMessages] = useState([]);
@@ -16,17 +26,15 @@ const Message = () => {
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     subject: '',
-    sender: '',
-    recipient: '',
     message: '',
-    date: '',
-    status: 'Unread',
+    recipientId: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [fetchError, setFetchError] = useState(null);
-  const [errors, setErrors] = useState({});
+  const [users, setUsers] = useState([]);
 
   const BASE_URL = 'http://localhost:5000';
+  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 
   const fetchMessages = async () => {
     setFetchError(null);
@@ -39,55 +47,33 @@ const Message = () => {
     }
   };
 
+  const fetchUsers = async () => {
+    try {
+      const res = await axios.get(`${BASE_URL}/users`);
+      setUsers(res.data.users || []);
+    } catch (e) {
+      // Non-blocking
+      console.warn('Failed to load users list', e);
+    }
+  };
+
   useEffect(() => {
     fetchMessages();
+    fetchUsers();
   }, []);
-
-  const validate = (values) => {
-    const errs = {};
-    const subject = (values.subject || '').trim();
-    const sender = (values.sender || '').trim();
-    const recipient = (values.recipient || '').trim();
-    const message = (values.message || '').trim();
-    const status = values.status;
-    if (subject.length < 3 || subject.length > 100) {
-      errs.subject = 'Subject must be 3-100 characters.';
-    }
-    if (sender.length < 2 || sender.length > 50) {
-      errs.sender = 'Sender must be 2-50 characters.';
-    }
-    if (recipient.length < 2 || recipient.length > 50) {
-      errs.recipient = 'Recipient must be 2-50 characters.';
-    }
-    if (message.length < 1 || message.length > 1000) {
-      errs.message = 'Message must be 1-1000 characters.';
-    }
-    if (values.date) {
-      // Basic ISO date (yyyy-mm-dd) check
-      const iso = /^\d{4}-\d{2}-\d{2}$/;
-      if (!iso.test(values.date)) {
-        errs.date = 'Date must be a valid date.';
-      }
-    }
-    if (!['Unread', 'Read', 'Archived'].includes(status)) {
-      errs.status = 'Invalid status.';
-    }
-    return errs;
-  };
 
   const filteredMessages = messages.filter((m) => {
     const q = searchTerm.trim().toLowerCase();
     if (!q) return true;
     const dateStr = m.date ? new Date(m.date).toISOString().slice(0, 10) : '';
-    return [m.subject, m.sender, m.recipient, m.message, m.status, dateStr]
+    return [m.subject, m.sender, m.recipient, m.status, dateStr]
       .filter(Boolean)
       .some((field) => String(field).toLowerCase().includes(q));
   });
 
   const openNew = () => {
     setEditingId(null);
-    setForm({ subject: '', sender: '', recipient: '', message: '', date: '', status: 'Unread' });
-    setErrors({});
+    setForm({ subject: '', message: '', recipientId: '' });
     setModalOpen(true);
   };
 
@@ -97,42 +83,36 @@ const Message = () => {
       subject: msg.subject || '',
       sender: msg.sender || '',
       recipient: msg.recipient || '',
-      message: msg.message || '',
       date: msg.date ? new Date(msg.date).toISOString().slice(0, 10) : '',
       status: msg.status || 'Unread',
+      message: msg.message || '',
     });
-    setErrors({});
     setModalOpen(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // client-side validation
-    const v = validate(form);
-    setErrors(v);
-    if (Object.keys(v).length > 0) {
-      return; // stop submit
-    }
     setSubmitting(true);
     try {
       if (editingId) {
-        await axios.put(`${BASE_URL}/messages/${editingId}`, form);
+        await axios.put(`${BASE_URL}/messages/${editingId}`, form, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
       } else {
-        await axios.post(`${BASE_URL}/messages`, form);
+        const payload = {
+          subject: form.subject,
+          message: form.message,
+          recipientId: form.recipientId,
+        };
+        await axios.post(`${BASE_URL}/messages`, payload, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
       }
       setModalOpen(false);
-      setForm({ subject: '', sender: '', recipient: '', message: '', date: '', status: 'Unread' });
-      setErrors({});
+      setForm({ subject: '', message: '', recipientId: '' });
       await fetchMessages();
     } catch (err) {
-      if (err.response && err.response.status === 422 && Array.isArray(err.response.data?.errors)) {
-        // map express-validator errors to field map
-        const fieldErrs = {};
-        err.response.data.errors.forEach((e) => {
-          if (e.path) fieldErrs[e.path] = e.msg;
-        });
-        setErrors(fieldErrs);
-      } else if (err.response && err.response.data && err.response.data.error) {
+      if (err.response && err.response.data && err.response.data.error) {
         alert('Error saving message: ' + err.response.data.error);
       } else {
         alert('Error saving message: ' + err.message);
@@ -144,8 +124,22 @@ const Message = () => {
 
   const deleteMessage = async (id) => {
     if (!window.confirm('Delete this message?')) return;
-    await axios.delete(`${BASE_URL}/messages/${id}`);
+    await axios.delete(`${BASE_URL}/messages/${id}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
     await fetchMessages();
+  };
+
+  const markRead = async (msg) => {
+    try {
+      await axios.patch(`${BASE_URL}/messages/${msg._id}/read`, {}, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      });
+      // Optimistic update
+      setMessages((prev) => prev.map(m => m._id === msg._id ? { ...m, isRead: true, status: 'Read' } : m));
+    } catch (e) {
+      // ignore if not allowed (not recipient)
+    }
   };
 
   return (
@@ -221,7 +215,8 @@ const Message = () => {
                 filteredMessages.map((m) => (
                   <div
                     key={m._id}
-                    className="grid grid-cols-10 px-6 py-4 items-center border-b hover:bg-gray-50"
+                    className={`grid grid-cols-10 px-6 py-4 items-center border-b hover:bg-gray-50 cursor-pointer ${m.status === 'Unread' ? 'bg-yellow-50' : ''}`}
+                    onClick={() => markRead(m)}
                   >
                     <div className="col-span-2 text-[#0B3954] font-medium">{m.subject}</div>
                     <div className="col-span-2">{m.sender}</div>
@@ -229,16 +224,16 @@ const Message = () => {
                     <div className="col-span-2">
                       {m.date ? new Date(m.date).toISOString().slice(0, 10) : ''}
                     </div>
-                    <div className="col-span-1">{m.status}</div>
+                    <div className="col-span-1"><StatusBadge status={m.status} /></div>
                     <div className="col-span-1 flex items-center justify-end gap-2">
                       <button
-                        onClick={() => openEdit(m)}
+                        onClick={(e) => { e.stopPropagation(); openEdit(m); }}
                         className="px-2 py-1 text-xs rounded-md border border-gray-300 text-[#0B3954] hover:bg-gray-100"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => deleteMessage(m._id)}
+                        onClick={(e) => { e.stopPropagation(); deleteMessage(m._id); }}
                         className="px-2 py-1 text-xs rounded-md border border-red-300 text-red-700 hover:bg-red-50"
                       >
                         Delete
@@ -261,7 +256,7 @@ const Message = () => {
             setForm={setForm}
             submitting={submitting}
             editingId={editingId}
-            errors={errors}
+            users={users}
           />
         </>
       )}

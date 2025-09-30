@@ -55,6 +55,7 @@ const Message = () => {
     const recipient = (values.recipient || '').trim();
     const message = (values.message || '').trim();
     const status = values.status;
+
     if (subject.length < 3 || subject.length > 100) {
       errs.subject = 'Subject must be 3-100 characters.';
     }
@@ -166,7 +167,7 @@ const Message = () => {
               <button onClick={() => generateMessagesPDF(messages)} className="px-4 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700">Generate PDF</button>
             </div>
           </div>
-          {/* Search & Filters */}
+          
           <div className="bg-white rounded-lg shadow mb-4">
             <div className="grid grid-cols-12 gap-3 px-6 py-4 items-end">
               <div className="col-span-4">

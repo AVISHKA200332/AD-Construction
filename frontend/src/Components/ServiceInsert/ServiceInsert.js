@@ -12,7 +12,7 @@ const Modal = ({ children }) => (
   </div>
 );
 
-function ServiceInsert({ open, onClose, onSubmit, form, setForm, submitting, editingId }) {
+function ServiceInsert({ open, onClose, onSubmit, form, setForm, submitting, editingId, errors = {}, users = [] }) {
   if (!open) return null;
 
   const handleChange = (e) => {
@@ -42,19 +42,43 @@ function ServiceInsert({ open, onClose, onSubmit, form, setForm, submitting, edi
                 className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
                 placeholder="Enter service type"
               />
+              {errors.serviceType && (
+                <p className="mt-1 text-xs text-red-600">{errors.serviceType}</p>
+              )}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Provider</label>
-              <input
-                type="text"
-                name="provider"
-                value={form.provider}
-                onChange={handleChange}
-                required
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
-                placeholder="Enter provider"
-              />
-            </div>
+            {!editingId && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Assignee</label>
+                <select
+                  name="assigneeId"
+                  value={form.assigneeId || ''}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+                >
+                  <option value="">Select a user</option>
+                  {users.map(u => (
+                    <option key={u._id} value={u._id}>{u.name} ({u.role})</option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {editingId && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Provider</label>
+                <input
+                  type="text"
+                  name="provider"
+                  value={form.provider}
+                  onChange={handleChange}
+                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+                  placeholder="Enter provider"
+                />
+                {errors.provider && (
+                  <p className="mt-1 text-xs text-red-600">{errors.provider}</p>
+                )}
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-gray-700">Status</label>
               <select
@@ -69,6 +93,9 @@ function ServiceInsert({ open, onClose, onSubmit, form, setForm, submitting, edi
                 <option value="Completed">Completed</option>
                 <option value="Cancelled">Cancelled</option>
               </select>
+              {errors.status && (
+                <p className="mt-1 text-xs text-red-600">{errors.status}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Date</label>
@@ -79,6 +106,9 @@ function ServiceInsert({ open, onClose, onSubmit, form, setForm, submitting, edi
                 onChange={handleChange}
                 className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
               />
+              {errors.date && (
+                <p className="mt-1 text-xs text-red-600">{errors.date}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Cost</label>
@@ -91,6 +121,9 @@ function ServiceInsert({ open, onClose, onSubmit, form, setForm, submitting, edi
                 className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
                 placeholder="0.00"
               />
+              {errors.cost && (
+                <p className="mt-1 text-xs text-red-600">{errors.cost}</p>
+              )}
             </div>
           </div>
 

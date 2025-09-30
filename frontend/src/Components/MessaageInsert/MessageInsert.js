@@ -16,7 +16,7 @@ const Modal = ({ children }) => (
   </div>
 );
 
-function MessageInsert({ open, onClose, onSubmit, form, setForm, submitting, editingId, errors = {} }) {
+function MessageInsert({ open, onClose, onSubmit, form, setForm, submitting, editingId, errors = {}, users = [] }) {
   if (!open) return null;
 
   const handleChange = (e) => {
@@ -50,65 +50,80 @@ function MessageInsert({ open, onClose, onSubmit, form, setForm, submitting, edi
                 <p className="mt-1 text-xs text-red-600">{errors.subject}</p>
               )}
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Sender</label>
-              <input
-                type="text"
-                name="sender"
-                value={form.sender}
-                onChange={handleChange}
-                required
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
-                placeholder="Enter sender"
-              />
-              {errors.sender && (
-                <p className="mt-1 text-xs text-red-600">{errors.sender}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Recipient</label>
-              <input
-                type="text"
-                name="recipient"
-                value={form.recipient}
-                onChange={handleChange}
-                required
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
-                placeholder="Enter recipient"
-              />
-              {errors.recipient && (
-                <p className="mt-1 text-xs text-red-600">{errors.recipient}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Date</label>
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
-              />
-              {errors.date && (
-                <p className="mt-1 text-xs text-red-600">{errors.date}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Status</label>
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
-              >
-                <option value="Unread">Unread</option>
-                <option value="Read">Read</option>
-                <option value="Archived">Archived</option>
-              </select>
-              {errors.status && (
-                <p className="mt-1 text-xs text-red-600">{errors.status}</p>
-              )}
-            </div>
+
+            {!editingId && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Recipient</label>
+                <select
+                  name="recipientId"
+                  value={form.recipientId || ''}
+                  onChange={handleChange}
+                  required
+                  className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+                >
+                  <option value="">Select a user</option>
+                  {users.map(u => (
+                    <option key={u._id} value={u._id}>
+                      {u.name} ({u.role})
+                    </option>
+                  ))}
+                </select>
+                {errors.recipientId && (
+                  <p className="mt-1 text-xs text-red-600">{errors.recipientId}</p>
+                )}
+              </div>
+            )}
+
+            {editingId && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Sender</label>
+                  <input
+                    type="text"
+                    name="sender"
+                    value={form.sender}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+                    placeholder="Enter sender"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Recipient</label>
+                  <input
+                    type="text"
+                    name="recipient"
+                    value={form.recipient}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+                    placeholder="Enter recipient"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Date</label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={form.date}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Status</label>
+                  <select
+                    name="status"
+                    value={form.status}
+                    onChange={handleChange}
+                    className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B3954]"
+                  >
+                    <option value="Unread">Unread</option>
+                    <option value="Read">Read</option>
+                    <option value="Archived">Archived</option>
+                  </select>
+                </div>
+              </>
+            )}
+
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700">Message</label>
               <textarea
