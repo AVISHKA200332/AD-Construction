@@ -72,9 +72,7 @@ function ClientProjects() {
         }));
         setProjects(mapped);
 
-        // Determine client identity keys
-        const userName = currentUser?.name || currentUser?.fullName || currentUser?.username || "";
-        const userEmail = currentUser?.email || currentUser?.gmail || "";
+  // ...existing code...
 
         // Filter to only projects assigned to this client (by name or email)
         const assigned =
