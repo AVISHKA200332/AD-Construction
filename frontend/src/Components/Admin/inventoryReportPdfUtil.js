@@ -17,7 +17,7 @@ export function generateInventoryReportPDF({ items, stats }) {
   doc.text('Inventory Insights', 14, 38);
   doc.setFontSize(12);
   let y = 44;
-  doc.setTextColor(34, 197, 94); // green
+  doc.setTextColor(239, 68, 68 ); // green
   doc.text(`Total Items: ${stats.totalItems}`, 14, y);
   y += 7;
   doc.setTextColor(59, 130, 246); // blue
