@@ -22,21 +22,25 @@ import AdminCommunication from "./Components/Admin/AdminCommunication";
 import SMDashboard from "./Components/SiteManager/SMDashboard";
 import SMProjects from "./Components/SiteManager/SMProjects";
 import SMFinancial from "./Components/SiteManager/SMFinancial";
-import SMReports from "./Components/SiteManager/SMReports";
 import SMSettings from "./Components/SiteManager/SMSettings";
 import SMCommunication from "./Components/SiteManager/SMCommunication";
 import SMInventory from "./Components/SiteManager/SMInventory";
 import SupDashboard from "./Components/Supervisor/SupDashboard";
 import SupFinancial from "./Components/Supervisor/SupFinancial";
+import SupProjects from "./Components/Supervisor/SupProjects";
 import SupReports from "./Components/Supervisor/SupReports";
 import SupSettings from "./Components/Supervisor/SupSettings";
 import SupCommunication from "./Components/Supervisor/SupCommunication";
 import SupInventory from "./Components/Supervisor/SupInventory";
+import LaborDashboard from "./Components/Labor/LaborDashboard.js";
 import LaborProjects from "./Components/Labor/LaborProjects";
 import LaborReports from "./Components/Labor/LaborReports";
 import LaborSettings from "./Components/Labor/LaborSettings";
 import LaborCommunication from "./Components/Labor/LaborCommunication";
 import LaborInventory from "./Components/Labor/LaborInventory";
+import ClientProfile from "./Components/Profile/ClientProfile";
+import AdminProfile from "./Components/Profile/AdminProfile";
+
 function AppContent() {
   const location = useLocation();
   const hideNavOn = ["/", "/signin", "/signup"]; // Hide Nav on public pages
@@ -60,6 +64,7 @@ function AppContent() {
         <Route path="/client/settings" element={<ClientSettings />} />
         <Route path="/client/communication" element={<ClientCommunication />} />
         <Route path="/client/inventory" element={<ClientInventory />} />
+        <Route path="/client/profile" element={<ClientProfile />} />
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<AdminUsers />} />
@@ -68,17 +73,13 @@ function AppContent() {
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/communication" element={<AdminCommunication />} />
-        {/* Site Manager Routes */}
-        <Route path="/site-manager/dashboard" element={<SMDashboard />} />
-        <Route path="/site-manager/projects" element={<SMProjects />} />
-        <Route path="/site-manager/financial" element={<SMFinancial />} />
-        <Route path="/site-manager/reports" element={<SMReports />} />
-        <Route path="/site-manager/settings" element={<SMSettings />} />
+        <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/site-manager/communication" element={<SMCommunication />} />
         <Route path="/site-manager/inventory" element={<SMInventory />} />
         {/* Supervisor Routes */}
         <Route path="/supervisor/dashboard" element={<SupDashboard />} />
         <Route path="/supervisor/financial" element={<SupFinancial />} />
+        <Route path="/supervisor/projects" element={<SupProjects />} />
         <Route path="/supervisor/reports" element={<SupReports />} />
         <Route path="/supervisor/settings" element={<SupSettings />} />
         <Route path="/supervisor/communication" element={<SupCommunication />} />

@@ -3,7 +3,7 @@ import searchIcon from "../../assets/icons/search.png";
 import filterIcon from "../../assets/icons/filter.png";
 import fileTextIcon from "../../assets/icons/file-text.png";
 import plusIcon from "../../assets/icons/plus.png";
-import AddProjectModal from "./AddProjectModel";
+import AddProjectModal from "./AddProjectModelDynamic";
 import projectService from "../../services/projectService";
 import { downloadProjectReport } from "../../services/pdfService";
 import {

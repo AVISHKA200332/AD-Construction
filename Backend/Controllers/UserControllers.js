@@ -65,7 +65,7 @@ const getAllUsers = async (req, res, next) => {
 // Create new user
 const addUsers = async (req, res, next) => {
     try {
-        const { name, gmail, phone, role, age, address, password } = req.body;
+        const { name, gmail, phone, role, age, address, password, profileImage } = req.body;
         if (!password || password.length < 6) {
             return res.status(400).json({ message: "Password must be at least 6 characters" });
         }
@@ -118,6 +118,7 @@ const updateUser = async (req, res, next) => {
         if (password && password.length >= 6) {
             user.password = password; // Let pre-save hook handle hashing
         }
+        if (profileImage) user.profileImage = profileImage;
 
         // Save the user (this will trigger updatedAt update and password hashing if needed)
         await user.save();

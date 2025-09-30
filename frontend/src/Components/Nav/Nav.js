@@ -1,14 +1,23 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import axios from "axios";
 import logo from "../../assets/logo.png";
 import profilePic from "../../assets/profile.jpg";
 import NotificationIcon from "./NotificationIcon";
+import MessageInsert from "../MessaageInsert/MessageInsert";
 
 function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [role, setRole] = useState("");
   const [userData, setUserData] = useState(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [recent, setRecent] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [form, setForm] = useState({ subject: "", message: "", recipientId: "" });
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -31,6 +40,7 @@ function Nav() {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
+        setNotifOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -51,6 +61,80 @@ function Nav() {
       }
     }
   }, []);
+
+  // Notification: fetch unread inbox count
+  useEffect(() => {
+    const BASE_URL = "http://localhost:5000";
+    let timer;
+    const fetchUnread = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        if (!token) { setUnreadCount(0); return; }
+        const res = await axios.get(`${BASE_URL}/messages/inbox`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const msgs = res.data?.messages || [];
+        const count = msgs.filter(m => (m.isRead === false) || (m.status === 'Unread')).length;
+        setUnreadCount(count);
+        // store top 5 recent by date
+        const sorted = [...msgs].sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
+        setRecent(sorted.slice(0,5));
+      } catch (e) {
+        // silent fail
+      }
+    };
+    fetchUnread();
+    timer = setInterval(fetchUnread, 30000); // poll every 30s
+    return () => { if (timer) clearInterval(timer); };
+  }, []);
+
+  // Load users for quick compose
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/users");
+        setUsers(res.data.users || []);
+      } catch (_) {}
+    };
+    loadUsers();
+  }, []);
+
+  const communicationPath = (() => {
+    switch (role) {
+      case "Admin": return "/admin/communication";
+      case "Site Manager": return "/site-manager/communication";
+      case "Supervisor": return "/supervisor/communication";
+      case "Labor": return "/labor/communication";
+      case "Client":
+      default: return "/client/communication";
+    }
+  })();
+
+  const openCompose = () => {
+    setForm({ subject: "", message: "", recipientId: "" });
+    setModalOpen(true);
+    setNotifOpen(false);
+  };
+
+  const submitCompose = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      await axios.post("http://localhost:5000/messages", {
+        subject: form.subject,
+        message: form.message,
+        recipientId: form.recipientId,
+      }, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+      setModalOpen(false);
+      // After sending, navigate to Sent for visibility
+      navigate(communicationPath);
+    } catch (err) {
+      alert(err.response?.data?.error || err.message || "Failed to send message");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur bg-[#0B3954]/80 text-white px-6 py-3 border-b border-white/10 shadow-lg">
@@ -176,7 +260,40 @@ function Nav() {
 
         {/* Notification & Profile Section */}
         <div className="relative flex items-center ml-4 gap-4" ref={dropdownRef}>
-          <NotificationIcon count={3} />
+          <button onClick={() => setNotifOpen(!notifOpen)} title="Messages" className="relative">
+            <NotificationIcon count={unreadCount} />
+          </button>
+          {notifOpen && (
+            <div className="absolute top-full right-0 mt-2 w-96 bg-white text-black rounded-lg shadow-xl z-50 border border-gray-200 overflow-hidden">
+              <div className="px-4 py-3 border-b flex items-center justify-between">
+                <div className="font-semibold text-[#0B3954]">Messages</div>
+                <div className="text-xs text-gray-500">Unread: {unreadCount}</div>
+              </div>
+              <div className="max-h-80 overflow-auto">
+                {recent.length === 0 && (
+                  <div className="px-4 py-6 text-gray-500 text-sm">No recent messages</div>
+                )}
+                {recent.map(m => (
+                  <button
+                    key={m._id}
+                    onClick={() => { setNotifOpen(false); navigate(communicationPath); }}
+                    className={`w-full text-left px-4 py-3 border-b hover:bg-gray-50 ${!m.isRead ? 'bg-yellow-50' : ''}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium text-[#0B3954] line-clamp-1">{m.subject}</div>
+                      <span className={`ml-2 text-[10px] px-2 py-0.5 rounded-full ${m.status==='Unread'?'bg-yellow-100 text-yellow-700':'bg-green-100 text-green-700'}`}>{m.status || (m.isRead?'Read':'Unread')}</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-0.5">From {m.sender} • {m.date ? new Date(m.date).toLocaleDateString() : ''}</div>
+                    {m.message && <div className="text-xs text-gray-500 mt-1 line-clamp-1">{m.message}</div>}
+                  </button>
+                ))}
+              </div>
+              <div className="px-4 py-3 flex items-center justify-between">
+                <Link to={communicationPath} onClick={() => setNotifOpen(false)} className="text-sm text-[#0B3954] hover:underline">Open Communication</Link>
+                <button onClick={openCompose} className="px-3 py-1.5 rounded-md bg-[#0B3954] text-white text-sm hover:bg-[#0a2f46]">+ New</button>
+              </div>
+            </div>
+          )}
           
           {/* Profile Button */}
           <button
@@ -291,6 +408,18 @@ function Nav() {
           ></span>
         </div>
       </div>
+
+      {/* Quick Compose Modal */}
+      <MessageInsert
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSubmit={submitCompose}
+        form={form}
+        setForm={setForm}
+        submitting={submitting}
+        editingId={null}
+        users={users}
+      />
     </nav>
   );
 }
