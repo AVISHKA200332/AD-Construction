@@ -60,7 +60,7 @@ router.put(
 // Delete a message
 router.delete(
   '/:id',
-  [authMiddleware, param('id').isMongoId().withMessage('Invalid message id')],
+  [param('id').isMongoId().withMessage('Invalid message id')],
   MessageController.deleteMessage
 );
 

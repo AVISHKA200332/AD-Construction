@@ -92,24 +92,9 @@ exports.deleteMessage = async (req, res) => {
   }
   try {
     const id = req.params.id;
-    const user = req.user;
-    // Try to delete in one query with ownership constraints (supports legacy string fields)
-    const deleted = await Message.findOneAndDelete({
-      _id: id,
-      $or: [
-        { senderId: user._id },
-        { recipientId: user._id },
-        { sender: user.name },
-        { sender: user.gmail },
-        { recipient: user.name },
-        { recipient: user.gmail },
-      ],
-    });
-    if (deleted) return res.json({ message: deleted });
-    // Determine whether it's not found or forbidden
-    const exists = await Message.findById(id).lean();
-    if (!exists) return res.status(404).json({ error: 'Message not found' });
-    return res.status(403).json({ error: 'Not allowed to delete this message (not owner)' });
+    const deleted = await Message.findByIdAndDelete(id);
+    if (!deleted) return res.status(404).json({ error: 'Message not found' });
+    return res.json({ message: deleted });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete message', details: err.message });
   }
