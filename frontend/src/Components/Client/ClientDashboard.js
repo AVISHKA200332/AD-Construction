@@ -10,6 +10,8 @@ function StatCard({ title, value, subtitle, icon, accent = "#0B3954" }) {
           <p className="text-3xl font-extrabold mt-1" style={{ color: accent }}>
             {value}
           </p>
+          {title && <p className="text-xs uppercase tracking-wide text-gray-500">{title}</p>}
+          <p className="text-3xl font-extrabold mt-1" style={{ color: accent }}>{value}</p>
           {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
         </div>
         <div
@@ -97,61 +99,22 @@ function ClientDashboard() {
           }
         />
         <StatCard
-          title="Open Alerts"
+          title="Alerts"
           value="2"
           subtitle="Requires your attention"
           accent="#DC2626"
           icon={
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-              <path d="M1 21h22L12 2 1 21zm12-3h-2v2h2v-2zm0-6h-2v4h2v-4z" />
+              <path d="M12 2L2 22h20L12 2zm0 15h-1v-1h2v1h-1zm0-3h-1V8h2v6h-1z" />
             </svg>
           }
         />
       </div>
 
-      {/* Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         {/* Left Column */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* Quick Actions */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-[#0B3954]">Quick Actions</h2>
-            </div>
-            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <Link to="/client/projects" className="group">
-                <div className="w-full h-24 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md transition-all flex items-center justify-center gap-2">
-                  <span className="text-[#0B3954] font-medium">Projects</span>
-                </div>
-              </Link>
-              <Link to="/client/financial" className="group">
-                <div className="w-full h-24 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md transition-all flex items-center justify-center gap-2">
-                  <span className="text-[#0B3954] font-medium">Financial</span>
-                </div>
-              </Link>
-              <Link to="/client/reports" className="group">
-                <div className="w-full h-24 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md transition-all flex items-center justify-center gap-2">
-                  <span className="text-[#0B3954] font-medium">Reports</span>
-                </div>
-              </Link>
-              <Link to="/client/communication" className="group">
-                <div className="w-full h-24 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md transition-all flex items-center justify-center gap-2">
-                  <span className="text-[#0B3954] font-medium">Messages</span>
-                </div>
-              </Link>
-              <Link to="/client/inventory" className="group">
-                <div className="w-full h-24 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md transition-all flex items-center justify-center gap-2">
-                  <span className="text-[#0B3954] font-medium">Inventory</span>
-                </div>
-              </Link>
-              <Link to="/client/settings" className="group">
-                <div className="w-full h-24 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md transition-all flex items-center justify-center gap-2">
-                  <span className="text-[#0B3954] font-medium">Settings</span>
-                </div>
-              </Link>
-            </div>
-          </div>
-
+        <div className="space-y-6">
           {/* Project Progress */}
           <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between">
@@ -227,6 +190,9 @@ function ClientDashboard() {
                   value: 28,
                   color: "#DC2626",
                 },
+                { label: "Budget Used", value: 58, color: "#0B3954" },
+                { label: "Invoices Paid", value: 72, color: "#16A34A" },
+                { label: "Pending Payments", value: 28, color: "#DC2626" },
               ].map((f, i) => (
                 <div key={i}>
                   <div className="flex items-center justify-between mb-1">
@@ -298,6 +264,9 @@ function ClientDashboard() {
                   date: "Nov 02, 2025",
                   color: "#E67E22",
                 },
+                { label: "Roof slab casting", date: "Oct 08, 2025", color: "#0B3954" },
+                { label: "MEP rough-ins", date: "Oct 22, 2025", color: "#16A34A" },
+                { label: "Client site walk", date: "Nov 02, 2025", color: "#E67E22" },
               ].map((mil, i) => (
                 <div
                   key={i}

@@ -24,6 +24,16 @@ const getAllUsers = async (params = {}) => {
   }
 };
 
+const getUserById = async (id) => {
+  try {
+    const res = await axios.get(`${API_URL}/${id}`);
+    return res.data;
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
+};
+
 const createUser = async (user) => {
   try {
     const res = await axios.post(API_URL, user);
@@ -56,6 +66,7 @@ const deleteUser = async (id) => {
 
 const userService = {
   getAllUsers,
+  getUserById,
   createUser,
   updateUser,
   deleteUser,

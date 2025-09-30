@@ -30,7 +30,7 @@ function UpdateFinance() {
 
     const sendRequest = async () => {
         await axios
-            .put(`http://localhost:5000/finance/${id}`, {
+            .put(`http://localhost:5000/finances/${id}`, {
                 Project_Name: String(inputs.Project_Name),
                 category: String(inputs.category),
                 amount: Number(inputs.amount),
@@ -209,7 +209,7 @@ function UpdateFinance() {
                         </button>
                         <button
                             type="button"
-                            onClick={() => history("/finance")}
+                            onClick={() => history("/financeRecords")}
                             className="cancel-button"
                         >
                             Cancel

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Nav from "./Components/Nav/Nav";
 import AdminDashboard from "./Components/Admin/AdminDashboard";
+import FinanceDetails from "./Components/Finance/FinanceDetails/FinanceDetails";
 import Foot from "./Components/Footer/Footer";
 import Home from "./Components/Home/Home";
 import SignIn from "./Components/Auth/SignIn";
@@ -22,12 +23,13 @@ import AdminCommunication from "./Components/Admin/AdminCommunication";
 import SMDashboard from "./Components/SiteManager/SMDashboard";
 import SMProjects from "./Components/SiteManager/SMProjects";
 import SMFinancial from "./Components/SiteManager/SMFinancial";
-import SMReports from "./Components/SiteManager/SMReports";
 import SMSettings from "./Components/SiteManager/SMSettings";
 import SMCommunication from "./Components/SiteManager/SMCommunication";
 import SMInventory from "./Components/SiteManager/SMInventory";
+import SMReports from "./Components/SiteManager/SMReports";
 import SupDashboard from "./Components/Supervisor/SupDashboard";
 import SupFinancial from "./Components/Supervisor/SupFinancial";
+import SupProjects from "./Components/Supervisor/SupProjects";
 import SupReports from "./Components/Supervisor/SupReports";
 import SupSettings from "./Components/Supervisor/SupSettings";
 import SupCommunication from "./Components/Supervisor/SupCommunication";
@@ -37,6 +39,10 @@ import LaborReports from "./Components/Labor/LaborReports";
 import LaborSettings from "./Components/Labor/LaborSettings";
 import LaborCommunication from "./Components/Labor/LaborCommunication";
 import LaborInventory from "./Components/Labor/LaborInventory";
+import ClientProfile from "./Components/Profile/ClientProfile";
+import AdminProfile from "./Components/Profile/AdminProfile";
+import UpdateFinance from "./Components/Finance/UpdateFinance/UpdateFinance";
+
 function AppContent() {
   const location = useLocation();
   const hideNavOn = ["/", "/signin", "/signup"]; // Hide Nav on public pages
@@ -60,6 +66,7 @@ function AppContent() {
         <Route path="/client/settings" element={<ClientSettings />} />
         <Route path="/client/communication" element={<ClientCommunication />} />
         <Route path="/client/inventory" element={<ClientInventory />} />
+        <Route path="/client/profile" element={<ClientProfile />} />
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<AdminUsers />} />
@@ -68,6 +75,11 @@ function AppContent() {
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/communication" element={<AdminCommunication />} />
+        <Route path="/admin/profile" element={<AdminProfile />} />
+        {/* Finance Records Route */}
+        <Route path="/financeRecords" element={<FinanceDetails />} />
+        {/* Update Finance Route */}
+        <Route path="/updateFinance/:id" element={<UpdateFinance />} />
         {/* Site Manager Routes */}
         <Route path="/site-manager/dashboard" element={<SMDashboard />} />
         <Route path="/site-manager/projects" element={<SMProjects />} />
@@ -79,6 +91,7 @@ function AppContent() {
         {/* Supervisor Routes */}
         <Route path="/supervisor/dashboard" element={<SupDashboard />} />
         <Route path="/supervisor/financial" element={<SupFinancial />} />
+        <Route path="/supervisor/projects" element={<SupProjects />} />
         <Route path="/supervisor/reports" element={<SupReports />} />
         <Route path="/supervisor/settings" element={<SupSettings />} />
         <Route path="/supervisor/communication" element={<SupCommunication />} />

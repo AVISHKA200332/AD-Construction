@@ -3,12 +3,14 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 require('dotenv').config();
 
+// Routers (declare each only once)
 const projectRouter = require('./Route/ProjectRoute');
 const signupRouter = require('./Route/SignupRoutes');
 const loginRouter = require('./Route/LoginRoutes');
 const userRouter = require('./Route/UserRoutes');
 const messageRouter = require('./Route/MessageRoute');
 const serviceRouter = require('./Route/ServiceRoute');
+const financeRouter = require('./Route/FinanceRoutes');
 
 const app = express();
 
@@ -28,10 +30,13 @@ app.use('/login', loginRouter);
 app.use('/users', userRouter);
 app.use('/messages', messageRouter);
 app.use('/services', serviceRouter);
+app.use('/finances', financeRouter);
 
 // Database and server
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://Admin:1jRinOK59GDesfiB@cluster0.pmkuy4i.mongodb.net/';
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  'mongodb+srv://Admin:1jRinOK59GDesfiB@cluster0.pmkuy4i.mongodb.net/';
 
 mongoose
   .connect(MONGODB_URI)

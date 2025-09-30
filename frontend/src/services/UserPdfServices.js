@@ -84,10 +84,12 @@ const downloadUserReport = (users) => {
   doc.save("users_report.pdf");
 };
 
-export default {
+const userPdfService = {
   getAllUsers,
   createUser,
   updateUser,
   deleteUser,
   downloadUserReport,
 };
+
+export default userPdfService;
