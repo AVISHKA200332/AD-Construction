@@ -1,18 +1,6 @@
 import React from "react";
 
-function AddUserModal({
-  showModal,
-  setShowModal,
-  newUser,
-  handleChange,
-  handleAddUser,
-  isEditing,
-  loading,
-}) {
-  // Placeholder for future validation state if needed
-  // const [formErrors, setFormErrors] = useState({});
-
-  // ...existing code...
+function AddUserModal({ showModal }) {
 
   return (
     showModal && (

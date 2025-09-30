@@ -20,7 +20,7 @@ export const generateProjectReport = (projects) => {
   const pdf = new jsPDF();
 
   // --- Cover Page ---
-  addLogo(pdf, 80, 30, 50, 50); // ✅ your company logo
+  addLogo(pdf, 80, 30, 50, 50);
   pdf.setFontSize(28);
   pdf.setTextColor(59, 130, 246);
   pdf.setFont('helvetica', 'bold');
@@ -51,10 +51,14 @@ export const generateProjectReport = (projects) => {
   pdf.setTextColor(59, 130, 246);
   pdf.setFont('helvetica', 'bold');
   pdf.text('Project Overview', 20, 20);
+
   pdf.setFontSize(10);
   pdf.setTextColor('#333');
   pdf.setFont('helvetica', 'normal');
   pdf.text(`Total Projects: ${projects.length}`, 20, 28);
+
+  // Dynamic startY for table
+  const startY = 35; // slightly below the last text
 
   const tableData = projects.map((project) => [
     project.name || 'N/A',
@@ -85,7 +89,7 @@ export const generateProjectReport = (projects) => {
   autoTable(pdf, {
     head: [columns],
     body: tableData,
-    startY: 35,
+    startY, // ✅ dynamic position
     styles: {
       fontSize: 9,
       cellPadding: 3,
