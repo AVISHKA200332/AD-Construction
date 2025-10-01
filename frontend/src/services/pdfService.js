@@ -19,47 +19,29 @@ function addLogo(pdf, x, y, w, h) {
 export const generateProjectReport = (projects) => {
   const pdf = new jsPDF();
 
-  // --- Cover Page ---
-  addLogo(pdf, 80, 30, 50, 50);
-  pdf.setFontSize(28);
+  // --- Creative Header ---
+  addLogo(pdf, 10, 8, 20, 20);
+  pdf.setFontSize(22);
   pdf.setTextColor(59, 130, 246);
   pdf.setFont('helvetica', 'bold');
-  pdf.text('AD Construction', 105, 95, { align: 'center' });
-  pdf.setFontSize(18);
-  pdf.setTextColor('#333');
-  pdf.text('Project Management Report', 105, 110, { align: 'center' });
-  pdf.setFontSize(12);
-  pdf.setTextColor('#666');
-  pdf.text(
-    `Generated on: ${new Date().toLocaleString('en-GB', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    })}`,
-    105,
-    120,
-    { align: 'center' }
-  );
-  pdf.addPage();
-
-  // --- Table Page ---
-  pdf.setFontSize(20);
-  pdf.setTextColor(59, 130, 246);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Project Overview', 20, 20);
-
-  pdf.setFontSize(10);
+  pdf.text('AD Construction', 35, 18);
+  pdf.setFontSize(13);
   pdf.setTextColor('#333');
   pdf.setFont('helvetica', 'normal');
-  pdf.text(`Total Projects: ${projects.length}`, 20, 28);
+  pdf.text('Project Report', 35, 26);
 
-  // Dynamic startY for table
-  const startY = 35; // slightly below the last text
-
+  // --- Project Table (One Page) ---
+  const startY = 35;
+  const columns = [
+    'Project Name',
+    'Client',
+    'Status',
+    'Priority',
+    'Start Date',
+    'End Date',
+    'Budget',
+    'Completion %',
+  ];
   const tableData = projects.map((project) => [
     project.name || 'N/A',
     project.client || 'N/A',
@@ -75,24 +57,16 @@ export const generateProjectReport = (projects) => {
     `${Number(project.completion) || 0}%`,
   ]);
 
-  const columns = [
-    'Project Name',
-    'Client',
-    'Status',
-    'Priority',
-    'Start Date',
-    'End Date',
-    'Budget',
-    'Completion %',
-  ];
-
   autoTable(pdf, {
     head: [columns],
     body: tableData,
-    startY, // ✅ dynamic position
+    startY,
     styles: {
-      fontSize: 9,
+      fontSize: 10,
       cellPadding: 3,
+      halign: 'center',
+      valign: 'middle',
+      textColor: [51, 51, 51],
     },
     headStyles: {
       fillColor: [59, 130, 246],
@@ -100,80 +74,45 @@ export const generateProjectReport = (projects) => {
       fontStyle: 'bold',
     },
     alternateRowStyles: {
-      fillColor: [248, 250, 252],
+      fillColor: [243, 244, 246],
     },
     columnStyles: {
-      0: { cellWidth: 30 },
+      0: { cellWidth: 32 },
       1: { cellWidth: 25 },
       2: { cellWidth: 20 },
       3: { cellWidth: 20 },
       4: { cellWidth: 20 },
       5: { cellWidth: 25 },
       6: { cellWidth: 25 },
-      7: { cellWidth: 20 },
+      7: { cellWidth: 22 },
     },
-    margin: { left: 20, right: 20 },
+    margin: { left: 10, right: 10 },
+    theme: 'striped',
+    didDrawPage: function (data) {
+      // Stylish Footer
+      const pageHeight = pdf.internal.pageSize.height;
+      pdf.setFontSize(10);
+      pdf.setTextColor('#666');
+      pdf.text(
+        `Generated: ${new Date().toLocaleString('en-GB', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        })}`,
+        10,
+        pageHeight - 10
+      );
+      pdf.text(
+        'Contact: info@adconstruction.com | +94 70 103 8400',
+        120,
+        pageHeight - 10
+      );
+    },
   });
-
-  // --- Summary Page ---
-  pdf.addPage();
-  pdf.setFontSize(18);
-  pdf.setTextColor(59, 130, 246);
-  pdf.setFont('helvetica', 'bold');
-  pdf.text('Project Summary', 20, 30);
-
-  // Statistics
-  const completedProjects = projects.filter((p) => p.status === 'Completed').length;
-  const inProgressProjects = projects.filter((p) => p.status === 'In Progress').length;
-  const planningProjects = projects.filter((p) => p.status === 'Planning').length;
-  const onHoldProjects = projects.filter((p) => p.status === 'On Hold').length;
-  const totalBudget = projects.reduce((sum, p) => sum + (Number(p.budget) || 0), 0);
-  const averageCompletion =
-    projects.length > 0
-      ? (
-          projects.reduce((sum, p) => sum + (Number(p.completion) || 0), 0) /
-          projects.length
-        ).toFixed(1)
-      : 0;
-
-  // Draw colored boxes for status
-  drawBox(pdf, 20, 50, 60, 20, [34, 197, 94], `Completed: ${completedProjects}`);
-  drawBox(pdf, 90, 50, 60, 20, [59, 130, 246], `In Progress: ${inProgressProjects}`);
-  drawBox(pdf, 160, 50, 60, 20, [251, 191, 36], `Planning: ${planningProjects}`);
-  drawBox(pdf, 20, 80, 60, 20, [251, 146, 60], `On Hold: ${onHoldProjects}`);
-
-  pdf.setFontSize(12);
-  pdf.setTextColor('#333');
-  pdf.text(`Total Budget: Rs. ${totalBudget.toLocaleString()}`, 20, 110);
-  pdf.text(`Average Completion: ${averageCompletion}%`, 20, 120);
-
-  // --- Footer ---
-  const pageHeight = pdf.internal.pageSize.height;
-  pdf.setFontSize(10);
-  pdf.setTextColor('#666');
-  pdf.text(
-    'Generated by AD Construction Project Management System',
-    20,
-    pageHeight - 20
-  );
-  pdf.text(
-    `Generated on: ${new Date().toLocaleString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    })}`,
-    20,
-    pageHeight - 16
-  );
-  pdf.text(
-    'Contact: info@adconstruction.com | +94 70 103 8400',
-    20,
-    pageHeight - 12
-  );
 
   return pdf;
 };
