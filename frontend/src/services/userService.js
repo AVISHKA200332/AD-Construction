@@ -1,7 +1,14 @@
 import axios from "axios";
 
-// Use full URL for development
+// Base URLs
 const API_URL = "http://localhost:5000/users";
+const PROFILE_URL = "http://localhost:5000/profile";
+
+// Helper to attach Authorization header
+function authHeaders() {
+  const token = localStorage.getItem('authToken');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 const getAllUsers = async (params = {}) => {
   try {
@@ -16,7 +23,7 @@ const getAllUsers = async (params = {}) => {
     if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
     
     const url = queryParams.toString() ? `${API_URL}?${queryParams.toString()}` : API_URL;
-    const res = await axios.get(url);
+  const res = await axios.get(url, { headers: authHeaders() });
     return res.data;
   } catch (error) {
     console.error("API Error:", error);
@@ -26,7 +33,7 @@ const getAllUsers = async (params = {}) => {
 
 const getUserById = async (id) => {
   try {
-    const res = await axios.get(`${API_URL}/${id}`);
+  const res = await axios.get(`${API_URL}/${id}`, { headers: authHeaders() });
     return res.data;
   } catch (error) {
     console.error("API Error:", error);
@@ -36,7 +43,7 @@ const getUserById = async (id) => {
 
 const createUser = async (user) => {
   try {
-    const res = await axios.post(API_URL, user);
+  const res = await axios.post(API_URL, user, { headers: authHeaders() });
     return res.data;
   } catch (error) {
     console.error("API Error:", error);
@@ -46,7 +53,7 @@ const createUser = async (user) => {
 
 const updateUser = async (id, user) => {
   try {
-    const res = await axios.put(`${API_URL}/${id}`, user);
+  const res = await axios.put(`${API_URL}/${id}`, user, { headers: authHeaders() });
     return res.data;
   } catch (error) {
     console.error("API Error:", error);
@@ -56,7 +63,7 @@ const updateUser = async (id, user) => {
 
 const deleteUser = async (id) => {
   try {
-    const res = await axios.delete(`${API_URL}/${id}`);
+    const res = await axios.delete(`${API_URL}/${id}`, { headers: authHeaders() });
     return res.data;
   } catch (error) {
     console.error("API Error:", error);
@@ -64,13 +71,37 @@ const deleteUser = async (id) => {
   }
 };
 
-const userService = {
-  getAllUsers,
-  getUserById,
-  createUser,
-  updateUser,
-  deleteUser,
+// Profile specific endpoints (authenticated)
+const getMyProfile = async () => {
+  const res = await axios.get(`${PROFILE_URL}/me`, { headers: authHeaders() });
+  return res.data;
 };
+
+const updateMyProfile = async (data) => {
+  const res = await axios.put(`${PROFILE_URL}/me`, data, { headers: authHeaders() });
+  return res.data;
+};
+
+const uploadMyProfileImage = async (file) => {
+  const form = new FormData();
+  form.append('profileImage', file);
+  const res = await axios.post(`${PROFILE_URL}/me/image`, form, { headers: { ...authHeaders(), 'Content-Type': 'multipart/form-data' } });
+  return res.data;
+};
+
+const getMyActivity = async () => {
+  const res = await axios.get(`${PROFILE_URL}/activity`, { headers: authHeaders() });
+  return res.data;
+};
+
+const changeMyPassword = async (currentPassword, newPassword) => {
+  const res = await axios.post(`${PROFILE_URL}/me/password`, { currentPassword, newPassword }, { headers: authHeaders() });
+  return res.data;
+};
+
+const profileService = { getMyProfile, updateMyProfile, uploadMyProfileImage, getMyActivity, changeMyPassword };
+
+const userService = { getAllUsers, getUserById, createUser, updateUser, deleteUser, profile: profileService };
 
 export default userService;
 export { userService };

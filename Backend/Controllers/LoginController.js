@@ -1,6 +1,7 @@
-const User = require('../Model/UserModel'); // Changed from UserAuthModel
+const User = require('../Model/UserModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { inferRoleFromEmail } = require('../utils/roleUtils');
 
 // Login controller
 exports.login = async (req, res) => {
@@ -14,11 +15,18 @@ exports.login = async (req, res) => {
     if (!user) {
       return res.status(400).json({ success: false, message: 'Invalid gmail or password' });
     }
-    // Compare password directly (assuming passwords are already hashed in UserModel)
+  // Compare password directly
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ success: false, message: 'Invalid gmail or password' });
     }
+    // Auto-heal role if empty or legacy mismatch
+    if (!user.role) {
+      user.role = inferRoleFromEmail(user.gmail);
+    }
+    user.lastLogin = new Date();
+    await user.save();
+    user.addActivity('USER_LOGIN', { from: 'credentials' });
     // Generate JWT token
     const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET || 'your-fallback-secret-key', { expiresIn: '7d' });
     res.status(200).json({

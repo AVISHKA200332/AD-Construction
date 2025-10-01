@@ -5,7 +5,7 @@ import axios from "axios";
 
 function SignIn() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ gmail: "", password: "", role: "Client" }); // Changed email to gmail
+  const [form, setForm] = useState({ gmail: "", password: "" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
@@ -35,7 +35,7 @@ function SignIn() {
       setLoading(true);
       setApiError("");
 
-      console.log("Attempting login with:", { gmail: form.gmail, role: form.role }); // Debug
+  console.log("Attempting login with:", { gmail: form.gmail }); // Debug
 
       const response = await axios.post("http://localhost:5000/login", {
         gmail: form.gmail, // Changed from email to gmail
@@ -51,38 +51,22 @@ function SignIn() {
         localStorage.setItem("ad_role", response.data.user.role);
 
         console.log("User role from server:", response.data.user.role); // Debug
-        console.log("Selected role from form:", form.role); // Debug
-
-        // Check for role mismatch for all roles
-        if (form.role !== response.data.user.role) {
-          setApiError(`You selected ${form.role}, but the entered email is not a ${form.role} account. Your actual role is ${response.data.user.role}.`);
-          return;
-        }
 
         // Role-based redirect
-        let redirectPath = "/";
-        switch (response.data.user.role) {
-          case "Admin":
-            redirectPath = "/admin/dashboard";
-            break;
-          case "Site Manager":
-            redirectPath = "/site-manager/dashboard";
-            break;
-          case "Supervisor":
-            redirectPath = "/supervisor/dashboard";
-            break;
-          case "Labor":
-            redirectPath = "/labor/dashboard";
-            break;
-          case "Client":
-            redirectPath = "/client/dashboard";
-            break;
-          default:
-            redirectPath = "/";
-        }
-        
-        console.log(`Redirecting to: ${redirectPath}`); // Debug log
-        navigate(redirectPath);
+        const role = response.data.user.role;
+        const roleMap = {
+          Admin: "/admin/dashboard",
+          Client: "/client/dashboard",
+          "Project Manager": "/pm/dashboard",
+          "Site Supervisor": "/site-supervisor/dashboard",
+          Labor: "/labor/dashboard",
+          // legacy fallbacks
+          "Site Manager": "/site-manager/dashboard",
+          Supervisor: "/site-supervisor/dashboard" // legacy supervisor now mapped to site-supervisor
+        };
+  const finalPath = roleMap[role] || "/";
+  console.log(`Redirecting to: ${finalPath}`); // Debug log
+  navigate(finalPath);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -106,21 +90,7 @@ function SignIn() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <select
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F5CB5C]"
-            >
-              <option value="Client">Client</option>
-              <option value="Admin">Admin</option>
-              <option value="Site Manager">Site Manager</option>
-              <option value="Supervisor">Supervisor</option>
-              <option value="Labor">Labor</option>
-            </select>
-          </div>
+          {/* Role selection removed: role resolved automatically from server */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Gmail</label>
             <input

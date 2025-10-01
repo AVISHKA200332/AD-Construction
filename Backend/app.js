@@ -11,12 +11,17 @@ const userRouter = require('./Route/UserRoutes');
 const messageRouter = require('./Route/MessageRoute');
 const serviceRouter = require('./Route/ServiceRoute');
 const financeRouter = require('./Route/FinanceRoutes');
+const roleRouter = require('./Route/RoleRoutes');
+const profileRouter = require('./Route/ProfileRoutes');
 
 const app = express();
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(cors());
+// Static for uploaded images
+const path = require('path');
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Health endpoint
 app.get('/health', (req, res) => {
@@ -31,6 +36,8 @@ app.use('/users', userRouter);
 app.use('/messages', messageRouter);
 app.use('/services', serviceRouter);
 app.use('/finances', financeRouter);
+app.use('/role', roleRouter);
+app.use('/profile', profileRouter);
 
 // Database and server
 const PORT = process.env.PORT || 5000;

@@ -103,7 +103,8 @@ function Nav() {
     switch (role) {
       case "Admin": return "/admin/communication";
       case "Site Manager": return "/site-manager/communication";
-      case "Supervisor": return "/supervisor/communication";
+  case "Site Supervisor": return "/site-supervisor/communication";
+  case "Supervisor": return "/site-supervisor/communication"; // legacy mapping
       case "Labor": return "/labor/communication";
       case "Client":
       default: return "/client/communication";
@@ -161,7 +162,8 @@ function Nav() {
             const isClient = role === "Client";
             const isAdmin = role === "Admin";
             const isSM = role === "Site Manager";
-            const isSup = role === "Supervisor";
+            const isSS = role === "Site Supervisor";
+            const isSup = role === "Supervisor"; // legacy label, map to site-supervisor pages
             const isLabor = role === "Labor";
 
             let links = [];
@@ -198,8 +200,9 @@ function Nav() {
                 { to: `${base}/inventory`, label: "Inventory" },
                 { to: `${base}/settings`, label: "Settings" },
               ];
-            } else if (isSup) {
-              const base = "/supervisor";
+            } else if (isSS || isSup) {
+              // Unify Site Supervisor + legacy Supervisor with Site Manager style nav
+              const base = "/site-supervisor";
               links = [
                 { to: `${base}/dashboard`, label: "Dashboard" },
                 { to: `${base}/projects`, label: "Projects" },
@@ -343,7 +346,7 @@ function Nav() {
               {/* Menu Items */}
               <div className="py-2">
                 <Link
-                  to={role === "Client" ? "/client/profile" : "/profile"}
+                  to={"/profile"}
                   onClick={() => setDropdownOpen(false)}
                   className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                 >

@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import Nav from "./Components/Nav/Nav";
 import AdminDashboard from "./Components/Admin/AdminDashboard";
 import FinanceDetails from "./Components/Finance/FinanceDetails/FinanceDetails";
@@ -27,20 +32,34 @@ import SMSettings from "./Components/SiteManager/SMSettings";
 import SMCommunication from "./Components/SiteManager/SMCommunication";
 import SMInventory from "./Components/SiteManager/SMInventory";
 import SMReports from "./Components/SiteManager/SMReports";
-import SupDashboard from "./Components/Supervisor/SupDashboard";
-import SupFinancial from "./Components/Supervisor/SupFinancial";
-import SupProjects from "./Components/Supervisor/SupProjects";
-import SupReports from "./Components/Supervisor/SupReports";
-import SupSettings from "./Components/Supervisor/SupSettings";
-import SupCommunication from "./Components/Supervisor/SupCommunication";
-import SupInventory from "./Components/Supervisor/SupInventory";
 import LaborProjects from "./Components/Labor/LaborProjects";
 import LaborReports from "./Components/Labor/LaborReports";
 import LaborSettings from "./Components/Labor/LaborSettings";
 import LaborCommunication from "./Components/Labor/LaborCommunication";
 import LaborInventory from "./Components/Labor/LaborInventory";
-import ClientProfile from "./Components/Profile/ClientProfile";
-import AdminProfile from "./Components/Profile/AdminProfile";
+import PMDashboard from "./Components/PM/PMDashboard";
+import PMProjects from "./Components/PM/PMProjects";
+import PMAssignSupervisor from "./Components/PM/PMAssignSupervisor";
+import PMProgress from "./Components/PM/PMProgress";
+import PMReports from "./Components/PM/PMReports";
+import PMDocuments from "./Components/PM/PMDocuments";
+import SSDashboard from "./Components/SiteSupervisor/SSDashboard";
+import SSProjects from "./Components/SiteSupervisor/SSProjects";
+import SSFinancial from "./Components/SiteSupervisor/SSFinancial";
+import SSReports from "./Components/SiteSupervisor/SSReports";
+import SSCommunication from "./Components/SiteSupervisor/SSCommunication";
+import SSInventory from "./Components/SiteSupervisor/SSInventory";
+import SSSettings from "./Components/SiteSupervisor/SSSettings";
+// Legacy specialized pages still available (not in nav now)
+import SSDailyUpdates from "./Components/SiteSupervisor/SSDailyUpdates";
+import SSLaborAssignments from "./Components/SiteSupervisor/SSLaborAssignments";
+import SSMaterialRequests from "./Components/SiteSupervisor/SSMaterialRequests";
+import SSIssues from "./Components/SiteSupervisor/SSIssues";
+import LaborDashboard from "./Components/Labor/LaborDashboard";
+import ClientProfile from "./Components/Profile/ClientProfile"; // legacy specific
+import AdminProfile from "./Components/Profile/AdminProfile"; // legacy specific
+import ProfilePage from "./Components/Profile/ProfilePage"; // new unified
+import SettingsPage from "./Components/Profile/SettingsPage";
 import UpdateFinance from "./Components/Finance/UpdateFinance/UpdateFinance";
 
 function AppContent() {
@@ -67,6 +86,7 @@ function AppContent() {
         <Route path="/client/communication" element={<ClientCommunication />} />
         <Route path="/client/inventory" element={<ClientInventory />} />
         <Route path="/client/profile" element={<ClientProfile />} />
+        <Route path="/profile" element={<ProfilePage />} />
         {/* Admin Routes */}
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/users" element={<AdminUsers />} />
@@ -76,6 +96,7 @@ function AppContent() {
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/communication" element={<AdminCommunication />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
+        <Route path="/settings" element={<SettingsPage />} />
         {/* Finance Records Route */}
         <Route path="/financeRecords" element={<FinanceDetails />} />
         {/* Update Finance Route */}
@@ -86,18 +107,33 @@ function AppContent() {
         <Route path="/site-manager/financial" element={<SMFinancial />} />
         <Route path="/site-manager/reports" element={<SMReports />} />
         <Route path="/site-manager/settings" element={<SMSettings />} />
-        <Route path="/site-manager/communication" element={<SMCommunication />} />
+        <Route
+          path="/site-manager/communication"
+          element={<SMCommunication />}
+        />
         <Route path="/site-manager/inventory" element={<SMInventory />} />
-        {/* Supervisor Routes */}
-        <Route path="/supervisor/dashboard" element={<SupDashboard />} />
-        <Route path="/supervisor/financial" element={<SupFinancial />} />
-        <Route path="/supervisor/projects" element={<SupProjects />} />
-        <Route path="/supervisor/reports" element={<SupReports />} />
-        <Route path="/supervisor/settings" element={<SupSettings />} />
-        <Route path="/supervisor/communication" element={<SupCommunication />} />
-        <Route path="/supervisor/inventory" element={<SupInventory />} />
         {/* Labor Routes */}
-                <Route path="/labor/projects" element={<LaborProjects />} />
+        <Route path="/pm/dashboard" element={<PMDashboard />} />
+        <Route path="/pm/projects" element={<PMProjects />} />
+        <Route path="/pm/assign" element={<PMAssignSupervisor />} />
+        <Route path="/pm/progress" element={<PMProgress />} />
+        <Route path="/pm/reports" element={<PMReports />} />
+        <Route path="/pm/documents" element={<PMDocuments />} />
+        {/* Site Supervisor (Site Manager style) */}
+        <Route path="/site-supervisor/dashboard" element={<SSDashboard />} />
+        <Route path="/site-supervisor/projects" element={<SSProjects />} />
+        <Route path="/site-supervisor/financial" element={<SSFinancial />} />
+        <Route path="/site-supervisor/reports" element={<SSReports />} />
+        <Route path="/site-supervisor/communication" element={<SSCommunication />} />
+        <Route path="/site-supervisor/inventory" element={<SSInventory />} />
+        <Route path="/site-supervisor/settings" element={<SSSettings />} />
+        {/* Legacy retained endpoints */}
+        <Route path="/site-supervisor/daily" element={<SSDailyUpdates />} />
+        <Route path="/site-supervisor/labor" element={<SSLaborAssignments />} />
+        <Route path="/site-supervisor/material" element={<SSMaterialRequests />} />
+        <Route path="/site-supervisor/issues" element={<SSIssues />} />
+        <Route path="/labor/dashboard" element={<LaborDashboard />} />
+        <Route path="/labor/projects" element={<LaborProjects />} />
         <Route path="/labor/reports" element={<LaborReports />} />
         <Route path="/labor/settings" element={<LaborSettings />} />
         <Route path="/labor/communication" element={<LaborCommunication />} />
