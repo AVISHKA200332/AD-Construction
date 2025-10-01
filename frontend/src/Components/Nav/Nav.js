@@ -303,7 +303,7 @@ function Nav() {
             className="flex items-center gap-2 hover:bg-white/10 rounded-lg p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-[#F5CB5C]/60"
           >
             <img
-              src={profilePic}
+              src={userData?.profileImage ? userData.profileImage : profilePic}
               alt="Profile"
               className="w-10 h-10 rounded-full border-2 border-white/70 object-cover shadow"
             />
@@ -343,7 +343,7 @@ function Nav() {
               {/* Menu Items */}
               <div className="py-2">
                 <Link
-                  to="/profile"
+                  to={role === "Client" ? "/client/profile" : "/profile"}
                   onClick={() => setDropdownOpen(false)}
                   className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
                 >

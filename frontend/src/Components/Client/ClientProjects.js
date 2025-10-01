@@ -27,6 +27,42 @@ function ProgressBar({ value, color = "#0B3954" }) {
 }
 
 function ClientProjects() {
+  const [uploading, setUploading] = useState({});
+  const [uploadError, setUploadError] = useState({});
+  const [documents, setDocuments] = useState({});
+
+  // Fetch documents for a project
+  const fetchDocuments = async (projectId) => {
+    try {
+      const res = await fetch(`/api/projects/${projectId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setDocuments((prev) => ({ ...prev, [projectId]: data.project.documents || [] }));
+    } catch {}
+  };
+
+  // Handle file upload
+  const handleUpload = async (projectId, file) => {
+    setUploading((prev) => ({ ...prev, [projectId]: true }));
+    setUploadError((prev) => ({ ...prev, [projectId]: null }));
+    try {
+      const formData = new FormData();
+      formData.append('document', file);
+      const token = localStorage.getItem('authToken');
+      const res = await fetch(`/api/projects/${projectId}/upload-document`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      await fetchDocuments(projectId);
+    } catch (e) {
+      setUploadError((prev) => ({ ...prev, [projectId]: e.message }));
+    } finally {
+      setUploading((prev) => ({ ...prev, [projectId]: false }));
+    }
+  };
+
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("All");
   const [sortBy, setSortBy] = useState("name");
@@ -245,19 +281,57 @@ function ClientProjects() {
                   }</p>
                 </div>
               </div>
-              <div className="mt-4 flex items-center justify-between">
-                <Link to="#" className="text-sm text-[#0B3954] hover:underline">View details</Link>
-                <div className="flex items-center gap-2">
-                  <button className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50">Documents</button>
-                  <button className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50">Messages</button>
+              <div className="mt-4 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <Link to="#" className="text-sm text-[#0B3954] hover:underline">View details</Link>
+                  <div className="flex items-center gap-2">
+                    <button className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-50">Messages</button>
+                  </div>
                 </div>
+                {/* Document Upload */}
+                <form
+                  className="flex items-center gap-2 mt-2"
+                  onSubmit={e => {
+                    e.preventDefault();
+                    const file = e.target.elements.document.files[0];
+                    if (file) handleUpload(p.id, file);
+                  }}
+                >
+                  <input type="file" name="document" className="text-xs" required />
+                  <button
+                    type="submit"
+                    className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 bg-[#0B3954] text-white hover:bg-[#082032]"
+                    disabled={uploading[p.id]}
+                  >
+                    {uploading[p.id] ? 'Uploading...' : 'Upload'}
+                  </button>
+                  {uploadError[p.id] && <span className="text-xs text-red-600">{uploadError[p.id]}</span>}
+                </form>
+                {/* Document List */}
+                <button
+                  className="text-xs text-[#0B3954] underline mt-1 mb-1"
+                  onClick={() => fetchDocuments(p.id)}
+                  type="button"
+                >
+                  Refresh Documents
+                </button>
+                <ul className="text-xs text-gray-700 space-y-1">
+                  {(documents[p.id] || []).length === 0 ? (
+                    <li className="text-gray-400">No documents uploaded.</li>
+                  ) : (
+                    documents[p.id].map((doc, i) => (
+                      <li key={i}>
+                        <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-[#0B3954] underline">{doc.filename}</a>
+                        <span className="ml-2 text-gray-400">{new Date(doc.uploadedAt).toLocaleDateString()}</span>
+                      </li>
+                    ))
+                  )}
+                </ul>
               </div>
             </div>
           ))}
         </div>
       )}
-
-      {/* Footer actions */}
       <div className="mt-6 flex items-center justify-between">
         <p className="text-xs text-gray-500">Showing {filtered.length} project(s)</p>
         <div className="flex items-center gap-2">

@@ -7,10 +7,6 @@ function StatCard({ title, value, subtitle, icon, accent = "#0B3954" }) {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-gray-500">{title}</p>
-          <p className="text-3xl font-extrabold mt-1" style={{ color: accent }}>
-            {value}
-          </p>
-          {title && <p className="text-xs uppercase tracking-wide text-gray-500">{title}</p>}
           <p className="text-3xl font-extrabold mt-1" style={{ color: accent }}>{value}</p>
           {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
         </div>
@@ -59,57 +55,57 @@ function ClientDashboard() {
           <p className="text-gray-600 mt-1">
             A quick overview of your projects, finances, and communications.
           </p>
-        </div>
+                            </div>
         <div className="text-sm text-gray-500">{niceDate}</div>
       </div>
 
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        <StatCard
-          title="Active Projects"
-          value="3"
-          subtitle="2 in construction, 1 in planning"
-          accent="#0B3954"
-          icon={
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-              <path d="M4 4h7v7H4V4zm0 9h7v7H4v-7zm9-9h7v7h-7V4zm0 9h7v7h-7v-7z" />
-            </svg>
-          }
-        />
-        <StatCard
-          title="Total Budget"
-          value="Rs. 25M"
-          subtitle="Committed across all projects"
-          accent="#E67E22"
-          icon={
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM7 11h10v2H7v-2z" />
-            </svg>
-          }
-        />
-        <StatCard
-          title="Avg. Completion"
-          value="62%"
-          subtitle="Weighted by budget"
-          accent="#16A34A"
-          icon={
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-              <path d="M13 2.05v3.02a7 7 0 1 1-6.95 6.2H3.02A9 9 0 1 0 13 2.05z" />
-            </svg>
-          }
-        />
-        <StatCard
-          title="Alerts"
-          value="2"
-          subtitle="Requires your attention"
-          accent="#DC2626"
-          icon={
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-              <path d="M12 2L2 22h20L12 2zm0 15h-1v-1h2v1h-1zm0-3h-1V8h2v6h-1z" />
-            </svg>
-          }
-        />
-      </div>
+  <StatCard
+    title="Active Projects"
+    value="3"
+    subtitle="2 in construction, 1 in planning"
+    accent="#0B3954"
+    icon={
+      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+        <path d="M4 4h7v7H4V4zm0 9h7v7H4v-7zm9-9h7v7h-7V4zm0 9h7v7h-7v-7z" />
+      </svg>
+    }
+  />
+  <StatCard
+    title="Total Budget"
+    value="Rs. 25M"
+    subtitle="Committed across all projects"
+    accent="#E67E22"
+    icon={
+      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM7 11h10v2H7v-2z" />
+      </svg>
+    }
+  />
+  <StatCard
+    title="Avg. Completion"
+    value="62%"
+    subtitle="Weighted by budget"
+    accent="#16A34A"
+    icon={
+      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+        <path d="M13 2.05v3.02a7 7 0 1 1-6.95 6.2H3.02A9 9 0 1 0 13 2.05z" />
+      </svg>
+    }
+  />
+  <StatCard
+    title="Alerts"
+    value="2"
+    subtitle="Requires your attention"
+    accent="#DC2626"
+    icon={
+      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+        <path d="M12 2L2 22h20L12 2zm0 15h-1v-1h2v1h-1zm0-3h-1V8h2v6h-1z" />
+      </svg>
+    }
+  />
+</div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
@@ -190,9 +186,6 @@ function ClientDashboard() {
                   value: 28,
                   color: "#DC2626",
                 },
-                { label: "Budget Used", value: 58, color: "#0B3954" },
-                { label: "Invoices Paid", value: 72, color: "#16A34A" },
-                { label: "Pending Payments", value: 28, color: "#DC2626" },
               ].map((f, i) => (
                 <div key={i}>
                   <div className="flex items-center justify-between mb-1">
@@ -264,9 +257,6 @@ function ClientDashboard() {
                   date: "Nov 02, 2025",
                   color: "#E67E22",
                 },
-                { label: "Roof slab casting", date: "Oct 08, 2025", color: "#0B3954" },
-                { label: "MEP rough-ins", date: "Oct 22, 2025", color: "#16A34A" },
-                { label: "Client site walk", date: "Nov 02, 2025", color: "#E67E22" },
               ].map((mil, i) => (
                 <div
                   key={i}

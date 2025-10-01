@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
-
+const authMiddleware = require('../middleware/authMiddleware');
 const MessageController = require('../Controllers/MessageController');
 const { body, param } = require('express-validator');
-const authMiddleware = require('../middleware/authMiddleware');
 
+// Get all messages
 router.get('/', MessageController.getMessages);
 
 // Authenticated inbox and sent routes (place BEFORE dynamic :id route)
@@ -64,14 +64,14 @@ router.delete(
   MessageController.deleteMessage
 );
 
-// Mark a message as read (recipient only) - place BEFORE dynamic :id route of GET
+// Mark a message as read (recipient only)
 router.patch(
   '/:id/read',
   [authMiddleware, param('id').isMongoId().withMessage('Invalid message id')],
   MessageController.markAsRead
 );
 
-// Get a single message by ID (keep last to avoid catching static routes)
+// Get a single message by ID
 router.get(
   '/:id',
   [param('id').isMongoId().withMessage('Invalid message id')],

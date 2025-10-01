@@ -74,7 +74,6 @@ const addUsers = async (req, res, next) => {
         await user.save();
         return res.status(200).json({ user });
     } catch (err) {
-        console.log(err);
         return res.status(500).json({ message: "Server error while creating user" });
     }
 };
@@ -82,13 +81,18 @@ const addUsers = async (req, res, next) => {
 // Get user by ID
 const getById = async (req, res, next) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized: No user context (auth required)" });
+        }
         const id = req.params.id;
+        // Only allow self or admin
+        if (String(req.user._id) !== String(id) && req.user.role !== "Admin") {
+            return res.status(403).json({ message: "Forbidden: You can only view your own profile." });
+        }
         let user = await User.findById(id);
-
         if (!user) {
             return res.status(404).json({ message: "User Not Found" });
         }
-
         return res.status(200).json({ user });
     } catch (err) {
         console.log(err);
@@ -101,13 +105,11 @@ const updateUser = async (req, res, next) => {
     try {
         const id = req.params.id;
         const { name, gmail, phone, role, age, address, password } = req.body;
-        
         // Find the user first
         let user = await User.findById(id);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-
         // Update fields
         if (name) user.name = name;
         if (gmail) user.gmail = gmail;
@@ -118,11 +120,14 @@ const updateUser = async (req, res, next) => {
         if (password && password.length >= 6) {
             user.password = password; // Let pre-save hook handle hashing
         }
-        if (profileImage) user.profileImage = profileImage;
-
+        // Handle profile image upload
+        if (req.file) {
+            user.profileImage = `/uploads/profileImages/${req.file.filename}`;
+        } else if (req.body.profileImage) {
+            user.profileImage = req.body.profileImage;
+        }
         // Save the user (this will trigger updatedAt update and password hashing if needed)
         await user.save();
-
         return res.status(200).json({ user });
     } catch (err) {
         console.log(err);

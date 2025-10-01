@@ -10,6 +10,15 @@ const api = axios.create({
   },
 });
 
+// Add interceptor to include JWT token
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+});
+
 // API service functions
 export const projectService = {
   // Get all projects with filtering and pagination
