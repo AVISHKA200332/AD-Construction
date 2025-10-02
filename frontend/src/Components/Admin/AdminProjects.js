@@ -5,7 +5,7 @@ import fileTextIcon from "../../assets/icons/file-text.png";
 import plusIcon from "../../assets/icons/plus.png";
 import AddProjectModal from "./AddProjectModelDynamic";
 import projectService from "../../services/projectService";
-// import { downloadProjectReport } from "../../services/pdfService";
+import { downloadProjectReport } from "../../services/pdfService";
 import {
   formatCurrency,
   formatDate,
