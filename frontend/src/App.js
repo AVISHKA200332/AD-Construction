@@ -25,6 +25,7 @@ import AdminFinancial from "./Components/Admin/AdminFinancial";
 import AdminReports from "./Components/Admin/AdminReports";
 import AdminSettings from "./Components/Admin/AdminSettings";
 import AdminCommunication from "./Components/Admin/AdminCommunication";
+import AdminInventory from "./Components/Admin/AdminInventory";
 import SMDashboard from "./Components/SiteManager/SMDashboard";
 import SMProjects from "./Components/SiteManager/SMProjects";
 import SMFinancial from "./Components/SiteManager/SMFinancial";
@@ -61,6 +62,7 @@ import AdminProfile from "./Components/Profile/AdminProfile"; // legacy specific
 import ProfilePage from "./Components/Profile/ProfilePage"; // new unified
 import SettingsPage from "./Components/Profile/SettingsPage";
 import UpdateFinance from "./Components/Finance/UpdateFinance/UpdateFinance";
+import { CartProvider } from "./Components/Admin/CartContext";
 
 function AppContent() {
   const location = useLocation();
@@ -95,6 +97,7 @@ function AppContent() {
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/communication" element={<AdminCommunication />} />
+  <Route path="/admin/inventory" element={<AdminInventory />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/settings" element={<SettingsPage />} />
         {/* Finance Records Route */}
@@ -147,7 +150,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <CartProvider>
+        <AppContent />
+      </CartProvider>
     </Router>
   );
 }

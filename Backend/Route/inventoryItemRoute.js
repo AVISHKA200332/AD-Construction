@@ -7,6 +7,9 @@ const InventoryItemController = require("../Controllers/InventoryItemController.
 router.get("/", InventoryItemController.getAllItems);
 router.post("/", InventoryItemController.addItems);
 
+// Stats
+router.get("/stats/summary", InventoryItemController.getStats);
+
 // Read/Update/Delete
 router.get("/:id", InventoryItemController.getItemById);
 router.put("/:id", InventoryItemController.updateItem);

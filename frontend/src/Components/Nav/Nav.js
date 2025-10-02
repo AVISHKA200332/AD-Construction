@@ -175,7 +175,6 @@ function Nav() {
                 { to: `${base}/financial`, label: "Financial" },
                 { to: `${base}/reports`, label: "Reports" },
                 { to: `${base}/communication`, label: "Communication" },
-                { to: `${base}/inventory`, label: "Inventory" },
                 { to: `${base}/settings`, label: "Settings" },
               ];
             } else if (isAdmin) {
@@ -187,6 +186,7 @@ function Nav() {
                 { to: `${base}/financial`, label: "Financial" },
                 { to: `${base}/reports`, label: "Reports" },
                 { to: `${base}/communication`, label: "Communication" },
+                { to: `${base}/inventory`, label: "Inventory" },
                 { to: `${base}/settings`, label: "Settings" },
               ];
             } else if (isSM) {

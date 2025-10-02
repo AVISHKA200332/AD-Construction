@@ -129,6 +129,21 @@ exports.deleteItem = async (req, res) => {
   }
 };
 
+// Inventory statistics
+exports.getStats = async (req, res) => {
+  try {
+    const items = await InventoryItem.find({});
+    const totalItems = items.length;
+    const totalValue = items.reduce((sum, it) => sum + (it.unitPrice * it.amount), 0);
+    const lowStock = items.filter(i => i.amount > 0 && i.amount < 10).length;
+    const outOfStock = items.filter(i => i.amount === 0).length;
+    return res.status(200).json({ totalItems, totalValue, lowStock, outOfStock });
+  } catch (err) {
+    console.error('Error in getStats:', err);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // Restock item (increase amount)
 exports.restockItem = async (req, res) => {
   try {
