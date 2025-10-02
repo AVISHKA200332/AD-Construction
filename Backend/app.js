@@ -14,6 +14,7 @@ const financeRouter = require('./Route/FinanceRoutes');
 const roleRouter = require('./Route/RoleRoutes');
 const profileRouter = require('./Route/ProfileRoutes');
 const inventoryRouter = require('./Route/inventoryItemRoute');
+const buyerInventoryRouter = require('./Route/BuyerInventoryRoute');
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/finances', financeRouter);
 app.use('/role', roleRouter);
 app.use('/profile', profileRouter);
 app.use('/inventory', inventoryRouter);
+app.use('/buyer-inventory', buyerInventoryRouter);
 
 // Database and server
 const PORT = process.env.PORT || 5000;
