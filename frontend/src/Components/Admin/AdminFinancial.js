@@ -17,6 +17,8 @@ import "jspdf-autotable";
 import html2canvas from "html2canvas";
 import logo from '../../assets/logo.png';
 import '../css-resources/FinanceDashboard.css';
+import inventoryService from '../../services/inventoryService';
+import projectService from '../../services/projectService';
 
 // Register Chart.js components
 ChartJS.register(
@@ -38,10 +40,14 @@ function FinanceDashboard() {
   const [financeData, setFinanceData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, budget, expenses, payments
+  const [inventoryValue, setInventoryValue] = useState(0);
+  const [projectBudget, setProjectBudget] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchFinanceData();
+    fetchInventoryStats();
+    fetchProjectStats();
   }, []);
 
   const fetchFinanceData = async () => {
@@ -59,24 +65,52 @@ function FinanceDashboard() {
     }
   };
 
+  const fetchInventoryStats = async () => {
+    try {
+      const stats = await inventoryService.getInventoryStats();
+      setInventoryValue(stats?.totalValue || 0);
+    } catch (error) {
+      console.error('Error fetching inventory stats:', error);
+      setInventoryValue(0);
+    }
+  };
+
+  const fetchProjectStats = async () => {
+    try {
+      const stats = await projectService.getProjectStats();
+      setProjectBudget(stats?.totalBudget || 0);
+    } catch (error) {
+      console.error('Error fetching project stats:', error);
+      setProjectBudget(0);
+    }
+  };
+
   // Calculate summary statistics
   const calculateSummary = () => {
     const data = Array.isArray(financeData) ? financeData : [];
 
-    const totalExpenses = data
+    const financeExpenses = data
       .filter(item => item.category === 'Expense')
       .reduce((sum, item) => sum + (item.amount || 0), 0);
 
-    const totalIncome = data
+    const financeIncome = data
       .filter(item => item.category === 'Income')
       .reduce((sum, item) => sum + (item.amount || 0), 0);
 
+    const aggregatedProjectBudget = Number(projectBudget) || 0;
+    const totalIncome = financeIncome + aggregatedProjectBudget;
+    const inventoryExpenses = Number(inventoryValue) || 0;
+    const totalExpenses = financeExpenses + inventoryExpenses;
     const netBalance = totalIncome - totalExpenses;
 
     return {
       totalExpenses,
       totalIncome,
-      netBalance
+      netBalance,
+      inventoryExpenses,
+      financeExpenses,
+      financeIncome,
+      aggregatedProjectBudget
     };
   };
 
@@ -97,6 +131,7 @@ function FinanceDashboard() {
   // Prepare data for category pie chart
   const getCategoryChartData = () => {
     const filteredData = getFilteredData();
+    const summary = calculateSummary();
     const categoryTotals = {};
 
     filteredData.forEach(item => {
@@ -104,28 +139,37 @@ function FinanceDashboard() {
       categoryTotals[category] = (categoryTotals[category] || 0) + (item.amount || 0);
     });
 
+    if (filter !== 'income' && summary.inventoryExpenses > 0) {
+      categoryTotals['Expense'] =
+        (categoryTotals['Expense'] || 0) + summary.inventoryExpenses;
+    }
+
     const labels = Object.keys(categoryTotals);
     const data = Object.values(categoryTotals);
-    const colors = [
-      '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
-      '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+    const baseColors = [
+      '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF'
     ];
+    const colors = labels.map((label, index) => {
+      if (label === 'Income') return '#FF6384';
+      if (label === 'Expense') return '#36A2EB';
+      return baseColors[index % baseColors.length];
+    });
 
     return {
       labels,
       datasets: [{
         data,
-        backgroundColor: colors.slice(0, labels.length),
-        borderColor: colors.slice(0, labels.length).map(color => color + '80'),
+        backgroundColor: colors,
+        borderColor: colors.map(color => color + '80'),
         borderWidth: 2,
         hoverOffset: 4
       }]
     };
   };
 
-  // Prepare data for status pie chart
   const getStatusChartData = () => {
     const filteredData = getFilteredData();
+    const summary = calculateSummary();
     const statusTotals = {};
 
     filteredData.forEach(item => {
@@ -133,16 +177,31 @@ function FinanceDashboard() {
       statusTotals[status] = (statusTotals[status] || 0) + (item.amount || 0);
     });
 
+    if (filter !== 'expenses' && summary.aggregatedProjectBudget > 0) {
+      statusTotals['Unpaid'] =
+        (statusTotals['Unpaid'] || 0) + summary.aggregatedProjectBudget;
+    }
+
+    if (filter !== 'income' && summary.inventoryExpenses > 0) {
+      statusTotals['Paid'] =
+        (statusTotals['Paid'] || 0) + summary.inventoryExpenses;
+    }
+
     const labels = Object.keys(statusTotals);
     const data = Object.values(statusTotals);
-    const colors = ['#28a745', '#ffc107', '#dc3545', '#17a2b8'];
+    const baseColors = ['#28a745', '#ffc107', '#dc3545', '#17a2b8'];
+    const colors = labels.map((label, index) => {
+      if (label === 'Paid') return '#28a745';
+      if (label === 'Unpaid') return '#ffc107';
+      return baseColors[index % baseColors.length];
+    });
 
     return {
       labels,
       datasets: [{
         data,
-        backgroundColor: colors.slice(0, labels.length),
-        borderColor: colors.slice(0, labels.length).map(color => color + '80'),
+        backgroundColor: colors,
+        borderColor: colors.map(color => color + '80'),
         borderWidth: 2,
         hoverOffset: 4
       }]
@@ -186,7 +245,7 @@ function FinanceDashboard() {
     const pdf = new jsPDF("p", "mm", "a4");
 
     // --- Cover Page ---
-    addLogo(pdf, 80, 30, 50, 50); // ✅ your company logo
+    addLogo(pdf, 80, 30, 50, 50); 
     pdf.setFontSize(28);
     pdf.setTextColor(59, 130, 246);
     pdf.setFont('helvetica', 'bold');
@@ -208,7 +267,7 @@ function FinanceDashboard() {
     );
     pdf.addPage();
 
-    // Step 1: Capture Pie Chart
+    // Capture Pie Chart
     const chartElement = document.querySelector("#finance-dashboard .chart-wrapper canvas");
     if (chartElement) {
       const canvas = await html2canvas(chartElement);
@@ -216,7 +275,7 @@ function FinanceDashboard() {
       pdf.addImage(chartImage, "PNG", 14, 40, 180, 90);
     }
 
-    // Step 2: Income Statement as a table
+    // Income Statement as a table
     pdf.setFontSize(14);
     pdf.text("Income Statement", 14, 145);
     pdf.setFontSize(11);
@@ -312,7 +371,7 @@ function FinanceDashboard() {
           <div className="card-icon">💰</div>
           <div className="card-content">
             <h3>Total Income</h3>
-            <p className="card-amount">Rs. {summary.totalIncome.toLocaleString()}</p>
+            <p className="card-amount">Rs. {summary.financeIncome.toLocaleString()}</p>
           </div>
         </div>
 
@@ -321,6 +380,7 @@ function FinanceDashboard() {
           <div className="card-content">
             <h3>Total Expenses</h3>
             <p className="card-amount">Rs. {summary.totalExpenses.toLocaleString()}</p>
+            <p className="card-subtext">Includes inventory value Rs. {summary.inventoryExpenses.toLocaleString()}</p>
           </div>
         </div>
 
@@ -400,7 +460,8 @@ function FinanceDashboard() {
         </button>
       </div>
 
-      {/* Data Summary */}
+      
+      {/* Data Summary 
       <div className="data-summary">
         <h3>Data Summary</h3>
         <div className="summary-stats">
@@ -423,6 +484,7 @@ function FinanceDashboard() {
           </div>
         </div>
       </div>
+      */}
     </div>
   );
 }

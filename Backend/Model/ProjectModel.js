@@ -61,6 +61,12 @@ const validateBankAccount = function(value) {
 };
 
 const projectSchema = new Schema({
+  documents: [{
+    filename: { type: String, required: true },
+    url: { type: String, required: true },
+    uploadedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    uploadedAt: { type: Date, default: Date.now }
+  }],
   // Custom ID generation - more specific than random
   projectId: {
     type: String,

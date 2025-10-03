@@ -5,10 +5,11 @@ import axios from "axios";
 
 function SignIn() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "", role: "Client" });
+  const [form, setForm] = useState({ gmail: "", password: "" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,7 +21,7 @@ function SignIn() {
 
   const validate = () => {
     const e = {};
-    if (!form.email || !validateEmail(form.email)) e.email = "Enter a valid email";
+    if (!form.gmail || !validateEmail(form.gmail)) e.gmail = "Enter a valid gmail"; // Changed email to gmail
     if (!form.password || form.password.length < 6) e.password = "Password must be 6+ chars";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -34,10 +35,14 @@ function SignIn() {
       setLoading(true);
       setApiError("");
 
-      const response = await axios.post("/login", {
-        email: form.email,
+  console.log("Attempting login with:", { gmail: form.gmail }); // Debug
+
+      const response = await axios.post("http://localhost:5000/login", {
+        gmail: form.gmail, // Changed from email to gmail
         password: form.password
       });
+
+      console.log("Login response:", response.data); // Debug
 
       if (response.data.success) {
         // Store token and user data
@@ -45,35 +50,23 @@ function SignIn() {
         localStorage.setItem("userData", JSON.stringify(response.data.user));
         localStorage.setItem("ad_role", response.data.user.role);
 
-        // Check for role mismatch for all roles
-        if (form.role !== response.data.user.role) {
-          setApiError(`You selected ${form.role}, but the entered email is not a ${form.role} account.`);
-          return;
-        }
+        console.log("User role from server:", response.data.user.role); // Debug
 
         // Role-based redirect
-        let redirectPath = "/";
-        switch (response.data.user.role) {
-          case "Admin":
-            redirectPath = "/admin/dashboard";
-            break;
-          case "Site Manager":
-            redirectPath = "/site-manager/dashboard";
-            break;
-          case "Supervisor":
-            redirectPath = "/supervisor/dashboard";
-            break;
-          case "Labor":
-            redirectPath = "/labor/dashboard";
-            break;
-          case "Client":
-            redirectPath = "/client/dashboard";
-            break;
-          default:
-            redirectPath = "/";
-        }
-        setApiError("Sign in successful! Redirecting...");
-        setTimeout(() => navigate(redirectPath), 1500);
+        const role = response.data.user.role;
+        const roleMap = {
+          Admin: "/admin/dashboard",
+          Client: "/client/dashboard",
+          "Project Manager": "/pm/dashboard",
+          "Site Supervisor": "/site-supervisor/dashboard",
+          Labor: "/labor/dashboard",
+          // legacy fallbacks
+          "Site Manager": "/site-manager/dashboard",
+          Supervisor: "/site-supervisor/dashboard" // legacy supervisor now mapped to site-supervisor
+        };
+  const finalPath = roleMap[role] || "/";
+  console.log(`Redirecting to: ${finalPath}`); // Debug log
+  navigate(finalPath);
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -97,43 +90,47 @@ function SignIn() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Role selection removed: role resolved automatically from server */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <select
-              name="role"
-              value={form.role}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F5CB5C]"
-            >
-              <option value="Client">Client</option>
-              <option value="Admin">Admin</option>
-              <option value="Site Manager">Site Manager</option>
-              <option value="Supervisor">Supervisor</option>
-              <option value="Labor">Labor</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Gmail</label>
             <input
               type="email"
-              name="email"
-              value={form.email}
+              name="gmail" 
+              value={form.gmail}
               onChange={handleChange}
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F5CB5C]"
-              placeholder="you@example.com"
+              placeholder="you@gmail.com"
             />
-            {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
+            {errors.gmail && <p className="text-sm text-red-600 mt-1">{errors.gmail}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F5CB5C]"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                className="w-full border rounded-lg px-3 py-2 pr-12 focus:outline-none focus:ring-2 focus:ring-[#F5CB5C]"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {showPassword ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L15 15M21 3l-6.878 6.878" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                )}
+              </button>
+            </div>
             {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
           </div>
           <button

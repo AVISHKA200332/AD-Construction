@@ -184,6 +184,22 @@
   background: #b91c1c; /* bg-red-700 */
 }
 
+.finance-button.disabled,
+.finance-button:disabled {
+  background: #9ca3af; /* gray-400 */
+  color: #f9fafb;
+  border: none;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.finance-button.disabled:hover,
+.finance-button:disabled:hover {
+  background: #9ca3af;
+  box-shadow: none;
+}
+
 /* Add Payment button */
 .finance-button.add-payment-button {
   background: #059669; /* bg-emerald-600 */

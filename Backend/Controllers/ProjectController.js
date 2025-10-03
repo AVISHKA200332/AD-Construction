@@ -42,6 +42,8 @@ const getAllProject = async (req, res, next) => {
       status, 
       priority, 
       search,
+      clientName,
+      clientEmail,
       sortBy = 'createdAt',
       sortOrder = 'desc'
     } = req.query;
@@ -56,6 +58,14 @@ const getAllProject = async (req, res, next) => {
         { client: { $regex: search, $options: 'i' } },
         { 'projectManager.name': { $regex: search, $options: 'i' } }
       ];
+    }
+
+    // Client-assignment filters
+    if (clientName) {
+      filter.client = { $regex: clientName, $options: 'i' };
+    }
+    if (clientEmail) {
+      filter['clientContact.email'] = { $regex: `^${clientEmail}$`, $options: 'i' };
     }
 
     // Build sort object
@@ -331,5 +341,25 @@ module.exports = {
   deleteProject,
   getProjectAuditLogs,
 };
+
+// Fetch all projects assigned to a specific client (by name or email)
+const getProjectsByClient = async (req, res) => {
+  try {
+    const { clientName, clientEmail } = req.query;
+    if (!clientName && !clientEmail) {
+      return res.status(400).json({ message: "clientName or clientEmail is required" });
+    }
+    const filter = {};
+    if (clientName) filter.client = { $regex: clientName, $options: 'i' };
+    if (clientEmail) filter['clientContact.email'] = { $regex: `^${clientEmail}$`, $options: 'i' };
+    const projects = await Project.find(filter).select('-auditLog').sort({ createdAt: -1 });
+    return res.status(200).json({ projects });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Error retrieving client projects" });
+  }
+};
+
+module.exports.getProjectsByClient = getProjectsByClient;
 
 

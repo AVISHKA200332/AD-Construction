@@ -4,24 +4,42 @@ import axios from 'axios';
 import './Finance.css';
 
 function Finance(props) {
-  const { Project_Name, category, amount, date, status, description, _id } = props.finance;
-  
+  const { Project_Name, category, amount, date, status, description, _id, bankSlipPath } = props.finance;
+
+  const resolveBankSlipUrl = () => {
+    if (!bankSlipPath) return null;
+    if (bankSlipPath.startsWith('http://') || bankSlipPath.startsWith('https://')) {
+      return bankSlipPath;
+    }
+    if (bankSlipPath.startsWith('/')) {
+      return `http://localhost:5000${bankSlipPath}`;
+    }
+    return `http://localhost:5000/${bankSlipPath}`;
+  };
+
+  const formatDate = (date) => {
+    if (!date) return 'Invalid Date';
+    const d = new Date(date);
+    if (isNaN(d)) return 'Invalid Date'; 
+    return d.toLocaleDateString('en-US', { 
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
   const navigate = useNavigate();
+  const isPaid = status?.toLowerCase() === 'paid';
 
   const deleteHandler = async () => {
-    try {
-      await axios.delete(`http://localhost:5000/finances/${_id}`);
-      // Notify parent list to remove this item from UI without full reload
-      if (typeof props.onDeleted === 'function') {
-        props.onDeleted(_id);
-      } else {
-        // Fallback: navigate back to records page
-        navigate('/financeRecords');
-      }
-    } catch (err) {
-      console.error('Failed to delete finance record', err);
-      alert('Failed to delete the record. Please try again.');
-    }
+    if (isPaid) return;
+
+    await axios.delete(`http://localhost:5000/finances/${_id}`)
+      .then(res => res.data)
+      .then(() => {
+        navigate("/financeRecords");
+        window.location.reload();
+      });
   };
 
   return (
@@ -45,7 +63,7 @@ function Finance(props) {
         
         <div className="finance-detail-item date-item">
           <div className="finance-detail-label">Date</div>
-          <div className="finance-detail-value">{new Date(date).toLocaleDateString()}</div>
+          <div className="finance-detail-value" title={date ? formatDate(date) : 'Invalid Date'}>{formatDate(date)}</div>
         </div>
         
         <div className="finance-detail-item status-item">
@@ -61,18 +79,42 @@ function Finance(props) {
           <div className="finance-detail-label">Description</div>
           <div className="finance-detail-value">{description}</div>
         </div>
+
+        {resolveBankSlipUrl() && (
+          <div className="finance-detail-item">
+            <div className="finance-detail-label">Bank Slip</div>
+            <div className="finance-detail-value">
+              <a
+                href={resolveBankSlipUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="finance-bank-slip-link"
+              >
+                View Bank Slip
+              </a>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="finance-actions">
-        <button 
-          className="finance-button update-button"
-          onClick={() => navigate(`/updateFinance/${props.finance._id}`, { state: { finance: props.finance } })}
+        <button
+          className={`finance-button update-button ${isPaid ? 'disabled' : ''}`}
+          onClick={() => {
+            if (!isPaid) {
+              navigate(`/updateFinance/${props.finance._id}`, { state: { finance: props.finance } });
+            }
+          }}
+          disabled={isPaid}
         >
           Update Record
         </button>
 
-        <button className="finance-button delete-button"
-          onClick={deleteHandler}>
+        <button
+          className={`finance-button delete-button ${isPaid ? 'disabled' : ''}`}
+          onClick={deleteHandler}
+          disabled={isPaid}
+        >
           Delete Record
         </button>
       </div>

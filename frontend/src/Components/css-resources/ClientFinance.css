@@ -1,0 +1,306 @@
+/* Client Finance Page Styles - harmonized with admin dashboard */
+.client-finance-container {
+    min-height: calc(100vh - 120px);
+    background: #d1d5db;
+    padding: 1.5rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .client-finance-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    background: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .client-finance-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0B3954, #F5CB5C, #0B3954);
+  }
+  
+  .client-finance-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0B3954;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.08);
+  }
+  
+  .client-finance-subtitle {
+    color: #6b7280;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  
+  .client-finance-card {
+    background: #ffffff;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+  }
+  
+  .client-finance-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0B3954, #F5CB5C, #0B3954);
+  }
+  
+  .client-finance-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border-color: #F5CB5C;
+  }
+  
+  .client-finance-card-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #0B3954;
+    margin-bottom: 0.5rem;
+  }
+  
+  .client-finance-card-subtitle {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .client-finance-alert {
+    border-radius: 0.75rem;
+    padding: 0.9rem 1.1rem;
+    font-weight: 600;
+    margin-top: 1rem;
+  }
+  
+  .client-finance-alert.error {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+  }
+  
+  .client-finance-alert.success {
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+  }
+  
+  .client-finance-form {
+    margin-top: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .client-finance-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .client-finance-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #0B3954;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .client-finance-select,
+  .client-finance-textarea,
+  .client-finance-file-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.65rem;
+    border: 1px solid #d1d5db;
+    color: #111827;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: #f9fafb;
+  }
+  
+  .client-finance-select:focus,
+  .client-finance-textarea:focus,
+  .client-finance-file-input:focus {
+    border-color: #0B3954;
+    box-shadow: 0 0 0 3px rgba(11, 57, 84, 0.15);
+    outline: none;
+  }
+  
+  .client-finance-textarea {
+    min-height: 130px;
+    resize: vertical;
+  }
+  
+  .client-finance-helper {
+    color: #6b7280;
+    font-size: 0.85rem;
+  }
+  
+  .client-finance-error-inline {
+    color: #b91c1c;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  .client-finance-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .client-finance-button {
+    padding: 0.75rem 1.75rem;
+    border-radius: 0.65rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  
+  .client-finance-button.secondary {
+    background: #0B3954;
+    color: #ffffff;
+  }
+  
+  .client-finance-button.secondary:hover {
+    transform: translateY(-2px);
+    background: #082b3e;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .client-finance-button.outline {
+    background: transparent;
+    color: #4b5563;
+    border: 2px solid #d1d5db;
+  }
+  
+  .client-finance-button.outline:hover {
+    background: #f9fafb;
+    color: #0B3954;
+    border-color: #0B3954;
+    transform: translateY(-2px);
+  }
+  
+  .client-finance-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    transform: none;
+  }
+  
+  .client-finance-summary {
+    margin-top: 2rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background: #f9fafb;
+    padding: 1.5rem;
+  }
+  
+  .client-finance-summary h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0B3954;
+    margin-bottom: 1rem;
+  }
+  
+  .client-finance-summary-list {
+    display: grid;
+    gap: 0.85rem;
+  }
+  
+  .client-finance-summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    color: #374151;
+  }
+  
+  .client-finance-summary-label {
+    font-weight: 600;
+  }
+  
+  .client-finance-summary-value {
+    font-weight: 700;
+    color: #0B3954;
+  }
+  
+  .client-finance-status {
+    font-weight: 700;
+  }
+  
+  .client-finance-status.paid {
+    color: #15803d;
+  }
+  
+  .client-finance-status.unpaid {
+    color: #b91c1c;
+  }
+  
+  .client-finance-result-card {
+    margin-top: 2rem;
+    border-radius: 0.75rem;
+    border: 1px solid #bbf7d0;
+    background: #ecfdf5;
+    padding: 1.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+  }
+  
+  .client-finance-result-card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0B3954;
+    margin-bottom: 1rem;
+  }
+  
+  .client-finance-result-list {
+    display: grid;
+    gap: 0.85rem;
+    font-size: 0.95rem;
+    color: #1f2937;
+  }
+  
+  .client-finance-result-link {
+    color: #0B3954;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+  
+  @media (max-width: 768px) {
+    .client-finance-card,
+    .client-finance-header {
+      padding: 1.5rem;
+    }
+  
+    .client-finance-actions {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+  
+    .client-finance-button {
+      width: 100%;
+      text-align: center;
+    }
+  }
+  

@@ -78,12 +78,13 @@ const downloadUserReport = (users) => {
   Object.keys(roleCounts).forEach(role => {
     statsText += `${role}: ${roleCounts[role]}\n`;
   });
+  doc.setFontSize(12);
   doc.text(statsText, 14, doc.lastAutoTable.finalY + 10);
 
   doc.save("users_report.pdf");
 };
 
-const UserPdfServices = {
+const userPdfService = {
   getAllUsers,
   createUser,
   updateUser,
@@ -91,4 +92,4 @@ const UserPdfServices = {
   downloadUserReport,
 };
 
-export default UserPdfServices;
+export default userPdfService;
