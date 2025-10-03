@@ -4,11 +4,20 @@ import "../css-resources/ClientFinance.css";
 
 const STATUS_COLORS = {
   Paid: "text-green-600",
+  Pending: "text-yellow-500",
+  Overdue: "text-red-500",
   Unpaid: "text-red-500"
+};
+
+const STAGE_LABELS = {
+  deposit: "60% Deposit Payment",
+  balance: "40% Balance Payment"
 };
 
 const MAX_BANK_SLIP_SIZE = 2 * 1024 * 1024; // 2 MB
 const ALLOWED_SLIP_EXTENSIONS = ["pdf", "jpg", "jpeg", "png"];
+
+const formatCurrency = (value) => `Rs. ${Number(value || 0).toLocaleString()}`;
 
 function ClientFinancial() {
   const [projects, setProjects] = useState([]);
@@ -19,6 +28,7 @@ function ClientFinancial() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [bankSlipError, setBankSlipError] = useState("");
 
   useEffect(() => {
     const loadProjects = async () => {
@@ -37,16 +47,54 @@ function ClientFinancial() {
     loadProjects();
   }, []);
 
-  const selectedProject = useMemo(
-    () => projects.find((project) => project._id === selectedProjectId),
+  const selectedEntry = useMemo(
+    () => projects.find((entry) => entry.project?._id === selectedProjectId),
     [projects, selectedProjectId]
   );
+
+  const selectedProject = selectedEntry?.project || null;
+
+  const expectedFromBudget = useMemo(() => {
+    if (!selectedProject?.budget) {
+      return { deposit: 0, balance: 0 };
+    }
+    const budget = Number(selectedProject.budget) || 0;
+    const deposit = Math.round(budget * 0.6);
+    const balance = budget - deposit;
+    return { deposit, balance };
+  }, [selectedProject]);
+
+  const depositSummary = selectedEntry?.payments?.deposit || null;
+  const balanceSummary = selectedEntry?.payments?.balance || null;
+
+  const depositExpected = depositSummary?.expectedAmount ?? expectedFromBudget.deposit;
+  const balanceExpected = balanceSummary?.expectedAmount ?? expectedFromBudget.balance;
+
+  const depositStatus = depositSummary?.status || (depositSummary?.paidAmount ? "Paid" : "Pending");
+  const balanceStatus = balanceSummary?.status || (balanceSummary?.paidAmount ? "Paid" : "Pending");
+
+  const depositPaid = depositStatus === "Paid";
+  const balancePaid = balanceStatus === "Paid";
+
+  const nextStage = useMemo(() => {
+    if (!selectedProject) return null;
+    if (!depositPaid) return "deposit";
+    if (!balancePaid) return "balance";
+    return null;
+  }, [selectedProject, depositPaid, balancePaid]);
+
+  const upcomingAmount = nextStage === "deposit"
+    ? depositExpected
+    : nextStage === "balance"
+      ? balanceExpected
+      : 0;
 
   const handleBankSlipChange = (event) => {
     const file = event.target.files?.[0];
 
     if (!file) {
       setBankSlip(null);
+      setBankSlipError("");
       return;
     }
 
@@ -54,20 +102,20 @@ function ClientFinancial() {
     const isValidExtension = extension && ALLOWED_SLIP_EXTENSIONS.includes(extension);
 
     if (!isValidExtension) {
-      setError("Bank slip must be a PDF, JPG, JPEG, or PNG file.");
+      setBankSlipError("Bank slip must be a PDF, JPG, JPEG, or PNG file.");
       setBankSlip(null);
       event.target.value = "";
       return;
     }
 
     if (file.size > MAX_BANK_SLIP_SIZE) {
-      setError("Bank slip size cannot exceed 2 MB.");
+      setBankSlipError("Bank slip size cannot exceed 2 MB.");
       setBankSlip(null);
       event.target.value = "";
       return;
     }
 
-    setError("");
+    setBankSlipError("");
     setBankSlip(file);
   };
 
@@ -75,40 +123,59 @@ function ClientFinancial() {
     event.preventDefault();
     setError("");
     setSuccess("");
+    setBankSlipError("");
 
     if (!selectedProjectId) {
       setError("Please choose a project before submitting.");
       return;
     }
 
+    if (!nextStage) {
+      setError("All payments for this project are already completed.");
+      return;
+    }
+
+    if (!bankSlip) {
+      setBankSlipError("Please upload a bank slip to confirm the payment.");
+      return;
+    }
+
     try {
       setLoading(true);
-      const payload = await clientFinanceService.createInvoice({
+      const payload = await clientFinanceService.submitInstallment({
         projectId: selectedProjectId,
+        stage: nextStage,
         description,
         bankSlip
       });
 
       setSubmission(payload.finance);
-      setSuccess("Invoice submitted successfully.");
+      setSuccess(`${STAGE_LABELS[nextStage]} submitted successfully.`);
 
-      if (payload.finance?.status === "Paid") {
-        window.alert("Payment successful");
-      } else {
-        window.alert("Payment unsuccessful");
-      }
+      setProjects((prev) =>
+        prev.map((entry) =>
+          entry.project?._id === selectedProjectId
+            ? { ...entry, payments: payload.payments }
+            : entry
+        )
+      );
 
       setDescription("");
       setBankSlip(null);
-      setSelectedProjectId("");
+      const form = event.target;
+      if (form && typeof form.reset === "function") {
+        form.reset();
+      }
     } catch (err) {
       console.error("Failed to submit invoice:", err);
       setError(err.response?.data?.message || "Failed to submit invoice. Please try again.");
-      window.alert("Payment unsuccessful");
     } finally {
       setLoading(false);
     }
   };
+
+  const depositStatusClass = STATUS_COLORS[depositStatus] || "";
+  const balanceStatusClass = STATUS_COLORS[balanceStatus] || "";
 
   return (
     <div className="client-finance-container">
@@ -123,16 +190,20 @@ function ClientFinancial() {
           Select your project, review the invoice details, and upload a bank slip to mark the payment as Paid.
         </p>
 
+        {loading && (
+          <div className="client-finance-alert info">Loading project payments...</div>
+        )}
+
+        {!loading && projects.length === 0 && (
+          <div className="client-finance-alert info">No projects available for payment yet.</div>
+        )}
+
         {error && (
-          <div className="client-finance-alert error">
-            {error}
-          </div>
+          <div className="client-finance-alert error">{error}</div>
         )}
 
         {success && (
-          <div className="client-finance-alert success">
-            {success}
-          </div>
+          <div className="client-finance-alert success">{success}</div>
         )}
 
         <form onSubmit={handleSubmit} className="client-finance-form">
@@ -140,7 +211,13 @@ function ClientFinancial() {
             <label className="client-finance-label">Project</label>
             <select
               value={selectedProjectId}
-              onChange={(event) => setSelectedProjectId(event.target.value)}
+              onChange={(event) => {
+                setSelectedProjectId(event.target.value);
+                setSubmission(null);
+                setSuccess("");
+                setError("");
+                setBankSlipError("");
+              }}
               disabled={loading}
               className="client-finance-select"
               required
@@ -148,9 +225,9 @@ function ClientFinancial() {
               <option value="" disabled>
                 {projects.length > 0 ? "Select project" : "No projects available"}
               </option>
-              {projects.map((project) => (
-                <option key={project._id} value={project._id}>
-                  {project.name}
+              {projects.map((entry) => (
+                <option key={entry.project?._id} value={entry.project?._id}>
+                  {entry.project?.name || "Unnamed Project"}
                 </option>
               ))}
             </select>
@@ -170,17 +247,61 @@ function ClientFinancial() {
                 </div>
                 <div className="client-finance-summary-row">
                   <span className="client-finance-summary-label">Budget</span>
-                  <span className="client-finance-summary-value">Rs. {Number(selectedProject.budget || 0).toLocaleString()}</span>
-                </div>
-                <div className="client-finance-summary-row">
-                  <span className="client-finance-summary-label">Status</span>
-                  <span className="client-finance-status unpaid">Unpaid</span>
+                  <span className="client-finance-summary-value">{formatCurrency(selectedProject.budget)}</span>
                 </div>
                 <div className="client-finance-summary-row">
                   <span className="client-finance-summary-label">Date</span>
                   <span className="client-finance-summary-value">{new Date().toLocaleDateString()}</span>
                 </div>
               </div>
+            </div>
+          )}
+
+          {selectedEntry && (
+            <div className="client-finance-summary">
+              <h3>Payment Progress</h3>
+              <div className="client-finance-summary-list">
+                <div className="client-finance-summary-row">
+                  <span className="client-finance-summary-label">Deposit (60%)</span>
+                  <span className={`client-finance-summary-value ${depositStatusClass}`}>
+                    {depositSummary?.paidAmount
+                      ? formatCurrency(depositSummary.paidAmount)
+                      : formatCurrency(depositExpected)}
+                    {` • ${depositStatus}`}
+                  </span>
+                </div>
+                <div className="client-finance-summary-row">
+                  <span className="client-finance-summary-label">Balance (40%)</span>
+                  <span className={`client-finance-summary-value ${balanceStatusClass}`}>
+                    {balanceSummary?.paidAmount
+                      ? formatCurrency(balanceSummary.paidAmount)
+                      : formatCurrency(balanceExpected)}
+                    {` • ${balanceStatus}`}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {selectedEntry && nextStage && (
+            <div className="client-finance-summary">
+              <h3>Upcoming Payment</h3>
+              <div className="client-finance-summary-list">
+                <div className="client-finance-summary-row">
+                  <span className="client-finance-summary-label">Stage</span>
+                  <span className="client-finance-summary-value">{STAGE_LABELS[nextStage]}</span>
+                </div>
+                <div className="client-finance-summary-row">
+                  <span className="client-finance-summary-label">Amount Due</span>
+                  <span className="client-finance-summary-value">{formatCurrency(upcomingAmount)}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {selectedEntry && !nextStage && (
+            <div className="client-finance-alert success">
+              All payments for this project have been completed. Thank you!
             </div>
           )}
 
@@ -202,8 +323,8 @@ function ClientFinancial() {
               onChange={handleBankSlipChange}
               className="client-finance-file-input"
             />
-            {error && (
-              <p className="client-finance-error-inline">{error}</p>
+            {bankSlipError && (
+              <p className="client-finance-error-inline">{bankSlipError}</p>
             )}
           </div>
 
@@ -217,6 +338,7 @@ function ClientFinancial() {
                 setSubmission(null);
                 setError("");
                 setSuccess("");
+                setBankSlipError("");
               }}
               className="client-finance-button outline"
             >
@@ -224,10 +346,10 @@ function ClientFinancial() {
             </button>
             <button
               type="submit"
-              disabled={loading || projects.length === 0}
+              disabled={loading || projects.length === 0 || !nextStage}
               className="client-finance-button secondary"
             >
-              {loading ? "Submitting..." : "Submit Invoice"}
+              {loading ? "Submitting..." : nextStage ? `Submit ${STAGE_LABELS[nextStage]}` : "Fully Paid"}
             </button>
           </div>
         </form>
@@ -241,12 +363,16 @@ function ClientFinancial() {
                 <span className="client-finance-summary-value">{submission.Project_Name}</span>
               </div>
               <div className="client-finance-summary-row">
+                <span className="client-finance-summary-label">Stage</span>
+                <span className="client-finance-summary-value">{STAGE_LABELS[submission.stage] || submission.stage}</span>
+              </div>
+              <div className="client-finance-summary-row">
                 <span className="client-finance-summary-label">Category</span>
                 <span className="client-finance-summary-value">{submission.category}</span>
               </div>
               <div className="client-finance-summary-row">
                 <span className="client-finance-summary-label">Amount</span>
-                <span className="client-finance-summary-value">Rs. {Number(submission.amount || 0).toLocaleString()}</span>
+                <span className="client-finance-summary-value">{formatCurrency(submission.amount)}</span>
               </div>
               <div className="client-finance-summary-row">
                 <span className="client-finance-summary-label">Status</span>
