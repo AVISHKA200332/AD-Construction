@@ -41,6 +41,7 @@ import LaborSettings from "./Components/Labor/LaborSettings";
 import LaborCommunication from "./Components/Labor/LaborCommunication";
 import LaborInventory from "./Components/Labor/LaborInventory";
 import UpdateFinance from "./Components/Finance/UpdateFinance/UpdateFinance";
+import AddFinance from "./Components/Finance/AddFinance/AddFinance";
 
 function AppContent() {
   const location = useLocation();
@@ -73,6 +74,8 @@ function AppContent() {
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/communication" element={<AdminCommunication />} />
+        {/* Add Finance Route */}
+        <Route path="/addFinance" element={<AddFinance />} />
         {/* Finance Records Route */}
         <Route path="/financeRecords" element={<FinanceDetails />} />
         {/* Update Finance Route */}
