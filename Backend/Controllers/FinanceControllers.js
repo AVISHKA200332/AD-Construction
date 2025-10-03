@@ -2,43 +2,34 @@ const Finance = require("../Model/FinanceModel");
 
 // display data
 const getAllFinance = async (req, res, next) => {
-    
-    let finance;
-    // Get All Finance
+    const { projectId } = req.query;
+
     try{
-        finance = await Finance.find();
+        const query = projectId ? { project: projectId } : {};
+        const finance = await Finance.find(query).sort({ date: -1 });
+
+        return res.status(200).json({ finance: finance || [] });
     }catch (err){
+        // faild to load finance data
         console.log(err);
+        return res.status(500).json({message:"Failed to load finance data"});
     }
-
-    // not found finance
-    if(!finance){
-        return res.status(404).json({message:"Finance data not found"});
-    }
-
-    // display all reports
-    return res.status(200).json({ finance });
 };
 
 // insert data
 const addFinance = async (req, res, next) => {
 
-    const {description,Project_Name,category,amount,date,status} = req.body;
-
-    let finance;
+    const {description,Project_Name,category,amount,date,status,project} = req.body;
+    const bankSlipPath = req.file ? `/uploads/bank-slips/${req.file.filename}` : req.body.bankSlipPath;
 
     try {
-        finance = new Finance({description,Project_Name,category,amount,date,status});
+        const finance = new Finance({description,Project_Name,category,amount,date,status,project,bankSlipPath});
         await finance.save();
+        return res.status(201).json({finance});
     }catch (err) {
         console.log(err);
+        return res.status(500).json({message:"Unable to add finance data"});
     }
-
-    // if not insert finance data
-    if (!finance){
-        return res.status(404).json({message:"Unable to add finance data"});
-    }
-    return res.status(200).json({finance});
 };
 
 //get by id
@@ -66,20 +57,34 @@ const updateFinance = async (req, res, next) => {
 
     const finance_Id = req.params.id;
     const {description,Project_Name,category,amount,date,status} = req.body;
+    const bankSlipPath = req.file ? `/uploads/bank-slips/${req.file.filename}` : req.body.bankSlipPath;
 
     let finance;
 
     try {
-        finance = await Finance.findByIdAndUpdate(finance_Id, 
-         { description: description,Project_Name: Project_Name,category: category,amount: amount,date: date,status: status});
-         finance = await finance.save();
+        finance = await Finance.findById(finance_Id);
+
+        if(!finance){
+            return res.status(404).json({message:"Finance data not found"});
+        }
+
+        finance.description = description;
+        finance.Project_Name = Project_Name;
+        finance.category = category;
+        finance.amount = amount;
+        finance.date = date;
+        finance.status = status;
+
+        if (bankSlipPath) {
+            finance.bankSlipPath = bankSlipPath;
+        }
+
+        await finance.save();
     }catch(err) {
         console.log(err);
+        return res.status(500).json({message:"Unable to update Finance Details"});
     }
-    // can not update reports
-    if(!finance){
-        return res.status(404).json({message:"Unable to update Finance Details"});
-    }
+    
     return res.status(200).json({finance});
 }
 
