@@ -229,7 +229,6 @@ function UpdateFinance() {
                             value={inputs.date}
                             required
                             className="form-input"
-                            disabled={isInventoryRecord}
                             min={new Date().toISOString().split("T")[0]}
                         />
                     </div>
