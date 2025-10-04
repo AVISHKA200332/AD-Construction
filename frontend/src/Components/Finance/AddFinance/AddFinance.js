@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './AddFinance.css';
 
+const MAX_BANK_SLIP_SIZE = 2 * 1024 * 1024; // 2 MB
+const ALLOWED_BANK_SLIP_TYPES = ["pdf", "jpg", "jpeg", "png"];
+
 function AddFinance() {
     const history = useNavigate();
     const [inputs, setInputs] = useState({
@@ -13,6 +16,8 @@ function AddFinance() {
         status: "",
         description: "",
     });
+    const [bankSlip, setBankSlip] = useState(null);
+    const [bankSlipError, setBankSlipError] = useState("");
 
     const handleChange = (e) => {
         setInputs((prevState) => ({
@@ -21,8 +26,40 @@ function AddFinance() {
         }));
     };
 
+    const handleBankSlipChange = (event) => {
+        const file = event.target.files?.[0];
+
+        if (!file) {
+            setBankSlip(null);
+            setBankSlipError("");
+            return;
+        }
+
+        const extension = file.name.split(".").pop()?.toLowerCase();
+        const isAllowedType = extension && ALLOWED_BANK_SLIP_TYPES.includes(extension);
+
+        if (!isAllowedType) {
+            setBankSlip(null);
+            setBankSlipError("Bank slip must be a PDF, JPG, JPEG, or PNG file.");
+            event.target.value = "";
+            return;
+        }
+
+        if (file.size > MAX_BANK_SLIP_SIZE) {
+            setBankSlip(null);
+            setBankSlipError("Bank slip size cannot exceed 2 MB.");
+            event.target.value = "";
+            return;
+        }
+
+        setBankSlipError("");
+        setBankSlip(file);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        setBankSlipError("");
 
         // Project Name
         if (!/^[a-zA-Z0-9\s]{3,100}$/.test(inputs.Project_Name)) {
@@ -53,8 +90,8 @@ function AddFinance() {
 
         // Date
         const today = new Date().toISOString().split("T")[0];
-        if (inputs.date > today) {
-            alert("Date cannot be in the future.");
+        if (inputs.date < today) {
+            alert("Date cannot be in the past.");
             return;
         }
 
@@ -75,18 +112,39 @@ function AddFinance() {
             return;
         }
 
+        if (bankSlipError) {
+            alert(bankSlipError);
+            return;
+        }
+
+        if (inputs.status === "Paid" && !bankSlip) {
+            const message = "Please upload a bank slip when marking the record as Paid.";
+            setBankSlipError(message);
+            alert(message);
+            return;
+        }
+
         console.log(inputs);
         sendRequest().then(() => history("/financeRecords"));
     };
 
     const sendRequest = async () => {
-        await axios.post(`http://localhost:5000/finance`, {
-            Project_Name: String(inputs.Project_Name),
-            category: String(inputs.category),
-            amount: Number(inputs.amount),
-            date: inputs.date,
-            status: String(inputs.status),
-            description: String(inputs.description),
+        const formData = new FormData();
+        formData.append("Project_Name", String(inputs.Project_Name));
+        formData.append("category", String(inputs.category));
+        formData.append("amount", Number(inputs.amount));
+        formData.append("date", inputs.date);
+        formData.append("status", String(inputs.status));
+        formData.append("description", String(inputs.description));
+
+        if (bankSlip) {
+            formData.append("bankSlip", bankSlip);
+        }
+
+        await axios.post(`http://localhost:5000/finances`, formData, {
+            headers: {
+                "Content-Type": "multipart/form-data"
+            }
         }).then(res => res.data);
     };
 
@@ -151,6 +209,7 @@ function AddFinance() {
                             value={inputs.date}
                             required
                             className="form-input"
+                            min={new Date().toISOString().split("T")[0]}
                         />
                     </div>
 
@@ -182,6 +241,17 @@ function AddFinance() {
                         />
                     </div>
 
+                    <div className="form-field-group">
+                        <label className="form-label">Bank Slip (optional)</label>
+                        <input
+                            type="file"
+                            accept="image/*,application/pdf"
+                            onChange={handleBankSlipChange}
+                            className="form-input"
+                        />
+                        {bankSlipError && <p className="form-error-text">{bankSlipError}</p>}
+                    </div>
+
                     <div className="button-group">
                         <button
                             type="submit"
@@ -191,7 +261,7 @@ function AddFinance() {
                         </button>
                         <button
                             type="button"
-                            onClick={() => history("/finance")}
+                            onClick={() => history("/financeRecords")}
                             className="cancel-button"
                         >
                             Cancel
