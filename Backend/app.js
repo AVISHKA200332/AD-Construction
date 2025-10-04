@@ -47,24 +47,16 @@ app.use('/buyer-inventory', buyerInventoryRouter);
 
 // Database and server
 const PORT = process.env.PORT || 5000;
-
-// Prefer env var; fall back to local MongoDB to avoid Atlas SRV/DNS issues by default
 const MONGODB_URI =
-  process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/ad_construction';
+  process.env.MONGODB_URI ||
+  'mongodb+srv://Admin:1jRinOK59GDesfiB@cluster0.pmkuy4i.mongodb.net/';
 
-// Use TLS only for Atlas/SRV URIs
-const isAtlas = MONGODB_URI.startsWith('mongodb+srv://') || /\.mongodb\.net/i.test(MONGODB_URI);
-
-const connectOptions = {
-  serverSelectionTimeoutMS: 8000,
-  // Set dbName if not provided in URI
-  dbName: process.env.DB_NAME || undefined,
-  ...(isAtlas ? { tls: true } : {}),
-};
-
-mongoose.connect("mongodb+srv://Admin:1jRinOK59GDesfiB@cluster0.pmkuy4i.mongodb.net/")
-.then(() => console.log("Connected to MongoDB"))
-.then(() => {
-    app.listen(5000, () => console.log("Server running on port 5000"));
-})
-.catch((err) => console.log(err));
+mongoose
+  .connect(MONGODB_URI)
+  .then(() => {
+    console.log('Connected to MongoDB');
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch((err) => {
+    console.error('MongoDB connection error:', err.message);
+  });
