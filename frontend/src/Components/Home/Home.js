@@ -8,14 +8,21 @@ function Home() {
       <section className="max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-10 items-center">
         <div>
           <div className="flex items-center gap-3 mb-6">
-            <img src={logo} alt="AD Construction" className="h-14 w-14 rounded-md shadow-md" />
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">AD Construction</h1>
+            <img
+              src={logo}
+              alt="AD Construction"
+              className="h-14 w-14 rounded-md shadow-md"
+            />
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+              AD Construction
+            </h1>
           </div>
           <h2 className="text-3xl md:text-5xl font-extrabold leading-tight">
             Build faster. Manage smarter.
           </h2>
           <p className="mt-4 text-[#E3EAF2] text-lg md:text-xl max-w-2xl">
-            A modern platform to plan, track, and deliver construction projects — all in one place.
+            A modern platform to plan, track, and deliver construction projects
+            — all in one place.
           </p>
 
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
@@ -60,14 +67,12 @@ function Home() {
         </div>
 
         <div className="relative">
-          <div className="aspect-[4/3] w-full rounded-2xl bg-gradient-to-br from-[#F5CB5C]/20 to-transparent border border-white/10 shadow-xl backdrop-blur overflow-hidden flex items-center justify-center">
-            <div className="p-6 text-center">
-              <p className="text-lg text-[#E3EAF2]">Visualize progress with</p>
-              <h3 className="text-3xl font-bold mt-1">Dashboards & Reports</h3>
-              <p className="mt-3 text-sm text-[#C9D6E2] max-w-md mx-auto">
-                Track budgets, timelines, and milestones. Collaborate with teams and clients in real-time.
-              </p>
-            </div>
+          <div className="aspect-[4/3] w-full rounded-2xl border border-white/10 shadow-xl overflow-hidden">
+            <img
+              src="/images/home.jpg" 
+              alt="Dashboard Preview"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       </section>
