@@ -69,7 +69,7 @@ function Home() {
         <div className="relative">
           <div className="aspect-[4/3] w-full rounded-2xl border border-white/10 shadow-xl overflow-hidden">
             <img
-              src="/images/home.jpg" // put your image in public/images/
+              src="/images/home.jpg" 
               alt="Dashboard Preview"
               className="w-full h-full object-cover"
             />

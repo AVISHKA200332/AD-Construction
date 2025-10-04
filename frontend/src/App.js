@@ -66,7 +66,7 @@ import { CartProvider } from "./Components/Admin/CartContext";
 
 function AppContent() {
   const location = useLocation();
-  const hideNavOn = ["/", "/signin", "/signup", "/apply"]; // Hide Nav on public and apply job pages
+  const hideNavOn = ["/", "/signin", "/signup"]; // Hide Nav on public pages
   const showNav = !hideNavOn.includes(location.pathname);
   const hideFootOn = ["/signin", "/signup"]; // Hide Footer on auth pages
   const showFoot = !hideFootOn.includes(location.pathname);

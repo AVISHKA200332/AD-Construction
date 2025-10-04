@@ -35,10 +35,10 @@ function SignIn() {
       setLoading(true);
       setApiError("");
 
-      console.log("Attempting login with:", { gmail: form.gmail }); // Debug
+  console.log("Attempting login with:", { gmail: form.gmail }); // Debug
 
       const response = await axios.post("http://localhost:5000/login", {
-        gmail: form.gmail, // Now admin login will redirect to AdminDashboard first, not AdminInventory.
+        gmail: form.gmail, // Changed from email to gmail
         password: form.password
       });
 
@@ -48,12 +48,14 @@ function SignIn() {
         // Store token and user data
         localStorage.setItem("authToken", response.data.token);
         localStorage.setItem("userData", JSON.stringify(response.data.user));
+        localStorage.setItem("ad_role", response.data.user.role);
+
         console.log("User role from server:", response.data.user.role); // Debug
 
         // Role-based redirect
         const role = response.data.user.role;
         const roleMap = {
-          Admin: "/admin/dashboard",
+          Admin: "/admin/inventory",
           Client: "/client/dashboard",
           "Project Manager": "/pm/dashboard",
           "Site Supervisor": "/site-supervisor/dashboard",
@@ -62,9 +64,9 @@ function SignIn() {
           "Site Manager": "/site-manager/dashboard",
           Supervisor: "/site-supervisor/dashboard" // legacy supervisor now mapped to site-supervisor
         };
-        const finalPath = roleMap[role] || "/";
-        console.log(`Redirecting to: ${finalPath}`); // Debug log
-        navigate(finalPath);
+  const finalPath = roleMap[role] || "/";
+  console.log(`Redirecting to: ${finalPath}`); // Debug log
+  navigate(finalPath);
       }
     } catch (error) {
       console.error("Login error:", error);
