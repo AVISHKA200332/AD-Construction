@@ -3,15 +3,15 @@ import userService from "../../services/userService";
 import userPdfService from "../../services/UserPdfServices";
 
 function AdminUsers() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState(""); // "add" or "edit"
-  const [selectedUser, setSelectedUser] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [users, setUsers] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [showModal, setShowModal] = useState(false);
+    const [modalType, setModalType] = useState("");
+    const [selectedUser, setSelectedUser] = useState(null);
   
-  // Pagination and filtering states
+ 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
@@ -30,7 +30,7 @@ function AdminUsers() {
     password: ""
   });
 
-  // Fetch users with pagination and filtering
+  
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -67,6 +67,7 @@ function AdminUsers() {
   }, [currentPage, searchTerm, roleFilter, sortBy, sortOrder]);
 
  
+
   const handleDownloadPdf = async () => {
     try {
       setExporting(true);
@@ -131,7 +132,7 @@ function AdminUsers() {
     }
   };
 
-  // Modal handlers
+ 
   const handleAddUser = () => {
     setModalType("add");
     setFormData({
@@ -156,10 +157,11 @@ function AdminUsers() {
       role: user.role || "Admin",
       age: user.age || "",
       address: user.address || "",
-      password: "" // Don't pre-fill password for security
+      password: ""
     });
     setShowModal(true);
   };
+
 
   const handleCloseModal = () => {
     setShowModal(false);
@@ -179,7 +181,7 @@ function AdminUsers() {
     try {
       let submitData = { ...formData };
       
-      // For edit mode, only include password if it's provided
+      
       if (modalType === "edit" && !submitData.password) {
         delete submitData.password;
       }
@@ -189,7 +191,7 @@ function AdminUsers() {
       } else if (modalType === "edit") {
         await userService.updateUser(selectedUser._id, submitData);
       }
-      await fetchUsers(); // Refresh the user list
+      await fetchUsers(); 
       handleCloseModal();
     } catch (error) {
       console.error("Error saving user:", error);
@@ -197,12 +199,12 @@ function AdminUsers() {
     }
   };
 
-  // Delete user function
+  
   const handleDeleteUser = async (userId, userName) => {
     if (window.confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
       try {
         await userService.deleteUser(userId);
-        await fetchUsers(); // Refresh the user list
+        await fetchUsers(); 
       } catch (error) {
         console.error("Error deleting user:", error);
         setError("Failed to delete user: " + (error.response?.data?.message || error.message));
@@ -210,7 +212,7 @@ function AdminUsers() {
     }
   };
 
-  // Analytics (this page)
+  
   const roleList = ['Admin', 'Site Manager', 'Supervisor', 'Labor', 'Client'];
   const roleColorMap = {
     Admin: 'bg-red-500',
@@ -234,7 +236,7 @@ function AdminUsers() {
       <div className="max-w-full mx-auto">
         <h1 className="text-2xl font-bold mb-4 text-gray-800">User Management</h1>
         
-        {/* Header Section */}
+        
         <div className="bg-white rounded-xl shadow-lg p-4 mb-4">
           <div className="flex justify-between items-center mb-4">
             <div>
@@ -266,7 +268,7 @@ function AdminUsers() {
             </div>
           </div>
           
-          {/* Search Bar and Filters */}
+          
           <div className="flex flex-col space-y-4">
             <div className="flex items-center space-x-4">
               <div className="w-full sm:w-64">
@@ -283,7 +285,7 @@ function AdminUsers() {
               </div>
             </div>
             
-            {/* Filters Row */}
+            
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
@@ -327,7 +329,7 @@ function AdminUsers() {
                 </div>
               </div>
               
-              {/* Clear Filters Button */}
+              
               {(roleFilter || searchTerm || sortBy !== 'createdAt' || sortOrder !== 'desc') && (
                 <button
                   onClick={() => {
@@ -346,7 +348,7 @@ function AdminUsers() {
           </div>
         </div>
 
-        {/* Loading State */}
+        
         {loading && (
           <div className="bg-white rounded-xl shadow-lg p-8">
             <div className="flex items-center justify-center">

@@ -131,7 +131,7 @@ const Message = () => {
               />
             </div>
             <div className="flex gap-2">
-              <button onClick={openNew} className="px-4 py-2 rounded-md bg-[#0B3954] text-white font-semibold hover:bg-[#0a2f46]">+ New Message</button>
+              <button onClick={openNew} className="px-2 py-2 rounded-md bg-[#0B3954] text-white font-semibold hover:bg-[#0a2f46]">+ New Message</button>
               <button onClick={() => generateMessagesPDF(filteredMessages)} className="px-4 py-2 rounded-md bg-green-600 text-white font-semibold hover:bg-green-700">Generate PDF</button>
             </div>
           </div>
