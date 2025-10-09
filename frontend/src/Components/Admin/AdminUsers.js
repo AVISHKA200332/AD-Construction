@@ -170,15 +170,24 @@ function AdminUsers() {
   };
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    // Sanitize phone to digits only and limit to 10
+    if (name === 'phone') {
+      const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
+      setFormData((prev) => ({ ...prev, phone: digitsOnly }));
+      return;
+    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Frontend phone validation: optional but must be exactly 10 digits if provided
+      if (formData.phone && formData.phone.replace(/\D/g, '').length !== 10) {
+        setError('Phone number must be exactly 10 digits');
+        return;
+      }
       let submitData = { ...formData };
       
       
@@ -609,7 +618,7 @@ function AdminUsers() {
                 {modalType === "add" ? "Add New User" : "Edit User"}
               </h3>
               
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} noValidate className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Name
@@ -664,7 +673,11 @@ function AdminUsers() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    inputMode="numeric"
+                    maxLength={10}
+                    autoComplete="tel"
                   />
+                  <p className="mt-1 text-xs text-gray-500">Enter exactly 10 digits (e.g., 0712345678).</p>
                 </div>
 
                 <div>

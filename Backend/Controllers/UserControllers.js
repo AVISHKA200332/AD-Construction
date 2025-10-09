@@ -69,16 +69,28 @@ const addUsers = async (req, res, next) => {
         if (!password || password.length < 6) {
             return res.status(400).json({ message: "Password must be at least 6 characters" });
         }
-       
-        let user = new User({ name, gmail, phone, role, age, address, password });
+
+        // Normalize and validate phone (optional but must be 10 digits if provided)
+        let normalizedPhone = undefined;
+        if (phone !== undefined && phone !== null && phone !== '') {
+            const digits = phone.toString().replace(/\D/g, '');
+            if (digits.length !== 10) {
+                return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
+            }
+            normalizedPhone = digits;
+        }
+
+        let user = new User({ name, gmail, phone: normalizedPhone, role, age, address, password });
         await user.save();
         return res.status(200).json({ user });
     } catch (err) {
         console.log(err);
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ message: err.message });
+        }
         return res.status(500).json({ message: "Server error while creating user" });
     }
 };
-
 
 const getById = async (req, res, next) => {
     try {
@@ -96,22 +108,30 @@ const getById = async (req, res, next) => {
     }
 };
 
-
 const updateUser = async (req, res, next) => {
     try {
         const id = req.params.id;
         const { name, gmail, phone, role, age, address, password } = req.body;
-        
-        
+
         let user = await User.findById(id);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        
         if (name) user.name = name;
         if (gmail) user.gmail = gmail;
-        if (phone) user.phone = phone;
+        // Update phone only if provided in payload
+        if (phone !== undefined) {
+            if (phone === null || phone === '') {
+                user.phone = '';
+            } else {
+                const digits = phone.toString().replace(/\D/g, '');
+                if (digits.length !== 10) {
+                    return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
+                }
+                user.phone = digits;
+            }
+        }
         if (role) user.role = role;
         if (age !== undefined) user.age = age;
         if (address) user.address = address;
@@ -119,16 +139,17 @@ const updateUser = async (req, res, next) => {
             user.password = password; 
         }
 
-        
         await user.save();
 
         return res.status(200).json({ user });
     } catch (err) {
         console.log(err);
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ message: err.message });
+        }
         return res.status(500).json({ message: "Server error while updating user" });
     }
 };
-
 
 const deleteUser = async (req, res, next) => {
     try {

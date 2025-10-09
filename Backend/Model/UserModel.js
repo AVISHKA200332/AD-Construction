@@ -18,7 +18,20 @@ const userSchema = new Schema({
   phone: {
     type: String,
     required: false,
-    trim: true
+    trim: true,
+    set: v => {
+      if (v === null || v === undefined) return v;
+      const s = v.toString();
+      return s.replace(/\D/g, '');
+    },
+    validate: {
+      validator: function(v) {
+        if (v === null || v === undefined || v === '') return true; // optional
+        const digits = v.toString().replace(/\D/g, '');
+        return digits.length === 10;
+      },
+      message: 'Phone number must be exactly 10 digits'
+    }
   },
   role: {
     type: String,
@@ -42,7 +55,7 @@ const userSchema = new Schema({
     minlength: 6
   }
 }, {
-  timestamps: true // This will automatically add createdAt and updatedAt
+  timestamps: true //  add createdAt and updatedAt
 });
 
 // Hash password before saving

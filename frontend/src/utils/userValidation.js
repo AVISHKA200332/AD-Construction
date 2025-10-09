@@ -19,7 +19,7 @@ export const validatePhoneNumber = (phone) => {
   if (!phone) return false;
   const phoneString = phone.toString(); // Convert to string first
   const cleanPhone = phoneString.replace(/\D/g, '');
-  return cleanPhone.length >= 10 && cleanPhone.length <= 15;
+  return cleanPhone.length === 10;
 };
 
 // Email validation
@@ -50,7 +50,7 @@ export const validateUserPhone = (phone) => {
   if (!phone) return { isValid: false, message: 'Phone number is required' };
   
   const phoneString = phone.toString(); // Convert to string first
-  if (!validatePhoneNumber(phoneString)) return { isValid: false, message: 'Please enter a valid phone number (10-15 digits)' };
+  if (!validatePhoneNumber(phoneString)) return { isValid: false, message: 'Please enter a valid phone number (exactly 10 digits)' };
   
   return { 
     isValid: true, 
