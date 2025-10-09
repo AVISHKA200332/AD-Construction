@@ -30,6 +30,9 @@ function AdminUsers() {
     password: ""
   });
 
+  // Field-level errors for inline messages
+  const [fieldErrors, setFieldErrors] = useState({});
+
   
   const fetchUsers = useCallback(async () => {
     try {
@@ -175,36 +178,88 @@ function AdminUsers() {
     if (name === 'phone') {
       const digitsOnly = value.replace(/\D/g, '').slice(0, 10);
       setFormData((prev) => ({ ...prev, phone: digitsOnly }));
+      setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
       return;
     }
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Frontend phone validation: optional but must be exactly 10 digits if provided
-      if (formData.phone && formData.phone.replace(/\D/g, '').length !== 10) {
-        setError('Phone number must be exactly 10 digits');
+      setError(null);
+      setFieldErrors({});
+
+      const errors = {};
+
+      // Validate Name (required, min 2 chars)
+      const nameVal = (formData.name || '').trim();
+      if (!nameVal) {
+        errors.name = 'Name is required';
+      } else if (nameVal.length < 2) {
+        errors.name = 'Name must be at least 2 characters';
+      }
+
+      // Validate Email (required, basic format)
+      const emailVal = (formData.gmail || '').trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailVal) {
+        errors.gmail = 'Email is required';
+      } else if (!emailRegex.test(emailVal)) {
+        errors.gmail = 'Please enter a valid email address';
+      }
+
+      // Validate Age (required, 18-100)
+      if (formData.age === '' || formData.age === null || formData.age === undefined) {
+        errors.age = 'Age is required';
+      } else {
+        const ageNum = parseInt(formData.age, 10);
+        if (isNaN(ageNum)) {
+          errors.age = 'Age must be a number';
+        } else if (ageNum < 18 || ageNum > 100) {
+          errors.age = 'Age must be between 18 and 100';
+        }
+      }
+
+      // Validate Address (required, min 5 chars)
+      const addressVal = (formData.address || '').trim();
+      if (!addressVal) {
+        errors.address = 'Address is required';
+      } else if (addressVal.length < 5) {
+        errors.address = 'Address must be at least 5 characters';
+      }
+
+      // Phone required and must be exactly 10 digits
+      const phoneDigits = (formData.phone || '').replace(/\D/g, '');
+      if (!phoneDigits) {
+        errors.phone = 'Phone number is required';
+      } else if (phoneDigits.length !== 10) {
+        errors.phone = 'Phone number must be exactly 10 digits';
+      }
+
+      if (Object.keys(errors).length > 0) {
+        setFieldErrors(errors);
+        setError('Please fill all required fields correctly');
         return;
       }
+
       let submitData = { ...formData };
-      
-      
-      if (modalType === "edit" && !submitData.password) {
+
+      if (modalType === 'edit' && !submitData.password) {
         delete submitData.password;
       }
-      
-      if (modalType === "add") {
+
+      if (modalType === 'add') {
         await userService.createUser(submitData);
-      } else if (modalType === "edit") {
+      } else if (modalType === 'edit') {
         await userService.updateUser(selectedUser._id, submitData);
       }
-      await fetchUsers(); 
+      await fetchUsers();
       handleCloseModal();
     } catch (error) {
-      console.error("Error saving user:", error);
-      setError("Failed to save user: " + (error.response?.data?.message || error.message));
+      console.error('Error saving user:', error);
+      setError('Failed to save user: ' + (error.response?.data?.message || error.message));
     }
   };
 
@@ -631,6 +686,9 @@ function AdminUsers() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
+                  {fieldErrors.name && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.name}</p>
+                  )}
                 </div>
 
                 <div>
@@ -645,6 +703,9 @@ function AdminUsers() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
+                  {fieldErrors.gmail && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.gmail}</p>
+                  )}
                 </div>
 
                 <div>
@@ -676,8 +737,12 @@ function AdminUsers() {
                     inputMode="numeric"
                     maxLength={10}
                     autoComplete="tel"
+                    required
                   />
                   <p className="mt-1 text-xs text-gray-500">Enter exactly 10 digits (e.g., 0712345678).</p>
+                  {fieldErrors.phone && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.phone}</p>
+                  )}
                 </div>
 
                 <div>
@@ -710,7 +775,11 @@ function AdminUsers() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     min="18"
                     max="100"
+                    required
                   />
+                  {fieldErrors.age && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.age}</p>
+                  )}
                 </div>
 
                 <div>
@@ -723,7 +792,11 @@ function AdminUsers() {
                     onChange={handleInputChange}
                     rows="3"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
                   />
+                  {fieldErrors.address && (
+                    <p className="mt-1 text-xs text-red-600">{fieldErrors.address}</p>
+                  )}
                 </div>
 
                 {modalType === "edit" && (

@@ -17,7 +17,7 @@ const userSchema = new Schema({
   },
   phone: {
     type: String,
-    required: false,
+    required: true,
     trim: true,
     set: v => {
       if (v === null || v === undefined) return v;

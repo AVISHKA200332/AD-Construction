@@ -66,19 +66,31 @@ const getAllUsers = async (req, res, next) => {
 const addUsers = async (req, res, next) => {
     try {
         const { name, gmail, phone, role, age, address, password } = req.body;
+        // Required checks
+        if (!name || !name.toString().trim()) {
+            return res.status(400).json({ message: "Name is required" });
+        }
+        if (!gmail || !gmail.toString().trim()) {
+            return res.status(400).json({ message: "Email is required" });
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(gmail.toString().trim())) {
+            return res.status(400).json({ message: "Please enter a valid email address" });
+        }
         if (!password || password.length < 6) {
             return res.status(400).json({ message: "Password must be at least 6 characters" });
         }
 
         // Normalize and validate phone (optional but must be 10 digits if provided)
-        let normalizedPhone = undefined;
-        if (phone !== undefined && phone !== null && phone !== '') {
-            const digits = phone.toString().replace(/\D/g, '');
-            if (digits.length !== 10) {
-                return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
-            }
-            normalizedPhone = digits;
+        // Now phone is required
+        if (phone === undefined || phone === null || phone === '') {
+            return res.status(400).json({ message: 'Phone number is required' });
         }
+        const digits = phone.toString().replace(/\D/g, '');
+        if (digits.length !== 10) {
+            return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
+        }
+        const normalizedPhone = digits;
 
         let user = new User({ name, gmail, phone: normalizedPhone, role, age, address, password });
         await user.save();
@@ -118,19 +130,35 @@ const updateUser = async (req, res, next) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-        if (name) user.name = name;
-        if (gmail) user.gmail = gmail;
+        if (name !== undefined) {
+            const nameVal = name.toString().trim();
+            if (!nameVal) {
+                return res.status(400).json({ message: 'Name is required' });
+            }
+            user.name = nameVal;
+        }
+        if (gmail !== undefined) {
+            const emailVal = gmail.toString().trim();
+            if (!emailVal) {
+                return res.status(400).json({ message: 'Email is required' });
+            }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailVal)) {
+                return res.status(400).json({ message: 'Please enter a valid email address' });
+            }
+            user.gmail = emailVal;
+        }
         // Update phone only if provided in payload
         if (phone !== undefined) {
-            if (phone === null || phone === '') {
-                user.phone = '';
-            } else {
-                const digits = phone.toString().replace(/\D/g, '');
-                if (digits.length !== 10) {
-                    return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
-                }
-                user.phone = digits;
+            const phoneStr = phone.toString();
+            const digits = phoneStr.replace(/\D/g, '');
+            if (!digits) {
+                return res.status(400).json({ message: 'Phone number is required' });
             }
+            if (digits.length !== 10) {
+                return res.status(400).json({ message: 'Phone number must be exactly 10 digits' });
+            }
+            user.phone = digits;
         }
         if (role) user.role = role;
         if (age !== undefined) user.age = age;
