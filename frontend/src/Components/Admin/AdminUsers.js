@@ -116,7 +116,7 @@ function AdminUsers() {
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, roleFilter]);
+  }, [searchTerm, roleFilter, fetchUsers]);
 
   
   const handlePageChange = (page) => {
