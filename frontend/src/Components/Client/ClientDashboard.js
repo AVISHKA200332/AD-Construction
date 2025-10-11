@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { projectService } from '../../services/projectService';
+import { roleOpsService } from '../../services/roleOpsService';
 import axios from 'axios';
 
 // Shared small components
@@ -37,12 +37,19 @@ export default function ClientDashboard() {
     const load = async () => {
       setLoading(true);
       try {
-        const stats = await projectService.getProjectStats();
-        setDistribution(stats.distribution || []);
-        setProjectTotal(stats.total || 0);
-        const all = await projectService.getAllProjects();
-        const list = Array.isArray(all?.projects) ? all.projects : [];
+        // Fetch only this client's projects from role-scoped endpoint
+        const scoped = await roleOpsService.clientProjects();
+        const list = Array.isArray(scoped?.projects) ? scoped.projects : (Array.isArray(scoped) ? scoped : []);
         setProjects(list);
+        setProjectTotal(list.length || 0);
+        // Build distribution locally from subset
+        const counts = list.reduce((acc, p) => {
+          const s = p.status || 'Planning';
+          acc[s] = (acc[s] || 0) + 1;
+          return acc;
+        }, {});
+        const dist = Object.entries(counts).map(([status, count]) => ({ status, count }));
+        setDistribution(dist);
         // derive fake milestones: choose top 3 mid-progress projects
         const mid = list.filter(p => (p.completion||0) > 10 && (p.completion||0) < 90)
           .sort((a,b)=> (b.completion||0)-(a.completion||0))

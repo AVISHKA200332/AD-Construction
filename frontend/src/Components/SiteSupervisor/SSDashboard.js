@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { projectService } from '../../services/projectService';
+import { roleOpsService } from '../../services/roleOpsService';
 
 // Reusable stat card matching Admin style
 const Stat = ({ icon, label, value, color }) => (
@@ -36,12 +36,11 @@ export default function SSDashboard() {
     const load = async () => {
       setLoading(true);
       try {
-  const projStats = await projectService.getProjectStats();
-  setProjectTotal(projStats.total || 0);
-
-        const allProjectsData = await projectService.getAllProjects();
-        const list = Array.isArray(allProjectsData?.projects) ? allProjectsData.projects : [];
+        // Fetch only projects assigned to this Site Supervisor
+        const scoped = await roleOpsService.getSSProjects();
+        const list = Array.isArray(scoped?.projects) ? scoped.projects : [];
         setProjects(list);
+        setProjectTotal(list.length);
       } catch (e) { /* silent */ }
       try {
         setIssues(JSON.parse(localStorage.getItem('ss_issues') || '[]'));

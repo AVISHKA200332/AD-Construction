@@ -16,6 +16,7 @@ router.get('/ss/projects', requireRole('Site Supervisor', 'Supervisor'), ctrl.ge
 router.post('/ss/tasks', requireRole('Site Supervisor', 'Supervisor'), ctrl.createTask);
 router.get('/ss/tasks', requireRole('Site Supervisor', 'Supervisor'), ctrl.listMyTasks);
 router.put('/ss/tasks/:id', requireRole('Site Supervisor', 'Supervisor'), ctrl.updateTask);
+router.delete('/ss/tasks', requireRole('Site Supervisor', 'Supervisor'), ctrl.clearMyTasks);
 
 // Labor endpoints
 router.get('/labor/tasks', requireRole('Labor'), ctrl.myAssignedTasks);

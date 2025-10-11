@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { projectService } from '../../services/projectService';
+import { roleOpsService } from '../../services/roleOpsService';
 
 // A creative Labor Dashboard mirroring the visual language of AdminDashboard
 // while focusing on what a laborer would care about: assignments, progress,
@@ -17,23 +17,30 @@ export default function LaborDashboard() {
     try { return JSON.parse(localStorage.getItem('userData')) || {}; } catch { return {}; }
   }, []);
 
-  // Fetch all projects (placeholder until labor-specific assignment exists)
+  // Fetch only projects tied to tasks assigned to this labor user
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
-        const data = await projectService.getAllProjects();
-        const list = Array.isArray(data?.projects) ? data.projects : [];
+        const data = await roleOpsService.laborTasks();
+        const tasks = Array.isArray(data?.tasks) ? data.tasks : [];
+        // Derive unique projects from assigned tasks
+        const byId = new Map();
+        tasks.forEach(t => {
+          const p = t.project;
+          if (!p) return;
+          const id = typeof p === 'object' ? (p._id || p.id || p.projectId) : p;
+          const name = typeof p === 'object' ? (p.name || p.projectId || 'Project') : String(p);
+          const status = typeof p === 'object' ? (p.status || 'In Progress') : 'In Progress';
+          const completion = typeof p === 'object' ? Number(p.completion||0) : 0;
+          const updatedAt = typeof p === 'object' ? (p.updatedAt || t.updatedAt) : t.updatedAt;
+          const createdAt = typeof p === 'object' ? (p.createdAt || t.createdAt) : t.createdAt;
+          if (!byId.has(id)) byId.set(id, { _id: id, name, status, completion, updatedAt, createdAt, projectId: p?.projectId });
+        });
+        const list = Array.from(byId.values());
         setProjects(list);
-        // Simulated recent activity: pick latest updated projects
         const sorted = list.slice().sort((a,b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
-        setActivity(sorted.slice(0,5).map(p => ({
-          id: p._id,
-            name: p.name,
-            status: p.status,
-            completion: p.completion,
-            timestamp: p.updatedAt || p.createdAt
-        })));
+        setActivity(sorted.slice(0,5).map(p => ({ id: p._id, name: p.name, status: p.status, completion: p.completion, timestamp: p.updatedAt || p.createdAt })));
       } catch (e) {
         console.error('Labor dashboard load error:', e);
       } finally {
@@ -49,7 +56,7 @@ export default function LaborDashboard() {
     localStorage.setItem('labor_availability', next);
   };
 
-  // Derive stats (heuristics until real assignment model exists)
+  // Derive stats from the assigned-projects subset
   const stats = useMemo(() => {
     const inProgress = projects.filter(p => p.status === 'In Progress');
     const completed = projects.filter(p => p.status === 'Completed');

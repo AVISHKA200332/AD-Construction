@@ -36,7 +36,7 @@ export default function SSProjects() {
   const [laborLoading, setLaborLoading] = useState(false);
   const [laborError, setLaborError] = useState('');
   const [labors, setLabors] = useState([]);
-  const [taskForm, setTaskForm] = useState({ title:'', description:'', dueDate:'', laborIds:[] });
+  const [taskForm, setTaskForm] = useState({ title:'', description:'', dueDate:'', dueTime:'', laborIds:[], bankAccount:'' });
 
   // Load projects & logs
   const load = async () => {
@@ -157,10 +157,45 @@ export default function SSProjects() {
     });
   }, [myTasks, selected]);
 
+  const clearCompletedTasks = async () => {
+    if (!selected) return;
+    const completedCount = projectTasks.filter(t => t.status === 'Completed').length;
+    if (completedCount === 0) { alert('No completed assignments to clear.'); return; }
+    if (!window.confirm(`Clear ${completedCount} completed assignment(s) for this project?`)) return;
+    try {
+      await roleOpsService.clearTasks({ projectId: selected._id, status: 'Completed' });
+      // Refresh tasks
+      setTasksLoading(true);
+      const list = await roleOpsService.myTasks();
+      setMyTasks(Array.isArray(list?.tasks)? list.tasks : []);
+    } catch (e) {
+      alert(e?.response?.data?.message || e.message || 'Failed to clear completed assignments');
+    } finally {
+      setTasksLoading(false);
+    }
+  };
+
+  const clearAllTasks = async () => {
+    if (!selected) return;
+    const count = projectTasks.length;
+    if (count === 0) { alert('No assignments to clear.'); return; }
+    if (!window.confirm(`Clear ALL ${count} assignment(s) for this project? This cannot be undone.`)) return;
+    try {
+      await roleOpsService.clearTasks({ projectId: selected._id });
+      setTasksLoading(true);
+      const list = await roleOpsService.myTasks();
+      setMyTasks(Array.isArray(list?.tasks)? list.tasks : []);
+    } catch (e) {
+      alert(e?.response?.data?.message || e.message || 'Failed to clear assignments');
+    } finally {
+      setTasksLoading(false);
+    }
+  };
+
   const openAssignLabor = async () => {
     setAssignOpen(true);
     setLaborLoading(true); setLaborError('');
-    setTaskForm({ title:'', description:'', dueDate:'', laborIds:[] });
+    setTaskForm({ title:'', description:'', dueDate:'', dueTime:'', laborIds:[], bankAccount:'' });
     try {
       const res = await userService.getAllUsers({ role: 'Labor', limit: 200 });
       const list = Array.isArray(res?.users) ? res.users : [];
@@ -177,13 +212,29 @@ export default function SSProjects() {
 
   const createAssignment = async (e) => {
     e.preventDefault(); if (!selected) return;
-    if (!taskForm.title.trim() || taskForm.laborIds.length===0) { alert('Provide a task title and select at least one labor.'); return; }
+    // Title checks: required, no ! # $ % and reasonable length
+    const title = taskForm.title.trim();
+    if (!title) { alert('Provide a task title.'); return; }
+    if (/[!#$%]/.test(title)) { alert('Title cannot contain !, #, $, %'); return; }
+    if (title.length > 80) { alert('Title is too long (max 80 characters)'); return; }
+    if (taskForm.laborIds.length===0) { alert('Select at least one labor.'); return; }
+    // Bank account numeric only if provided
+    if (taskForm.bankAccount && /[^0-9]/.test(taskForm.bankAccount)) { alert('Bank account must contain only digits'); return; }
+    // Due date/time: prevent past dates
+    let dueISO = undefined;
+    if (taskForm.dueDate) {
+      const today = new Date(); today.setHours(0,0,0,0);
+      const due = new Date(taskForm.dueDate + (taskForm.dueTime ? ('T' + taskForm.dueTime) : 'T00:00'));
+      const dueDay = new Date(due); dueDay.setHours(0,0,0,0);
+      if (dueDay < today) { alert('Due date cannot be in the past'); return; }
+      dueISO = due.toISOString();
+    }
     try {
       await roleOpsService.createTask({
         project: selected._id,
-        title: taskForm.title.trim(),
+        title,
         description: taskForm.description?.trim() || '',
-        dueDate: taskForm.dueDate || undefined,
+        dueDate: dueISO,
         status: 'Planned',
         laborers: taskForm.laborIds,
         progress: 0,
@@ -338,7 +389,11 @@ export default function SSProjects() {
               <section>
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Labor Assignments</h3>
-                  <button onClick={openAssignLabor} className="px-3 py-1.5 text-xs rounded bg-emerald-600 text-white font-medium hover:bg-emerald-700">+ Assign Labor</button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={clearCompletedTasks} className="px-3 py-1.5 text-xs rounded border border-gray-300 text-gray-700 hover:bg-gray-50" title="Remove completed assignments">Clear Completed</button>
+                    <button onClick={clearAllTasks} className="px-3 py-1.5 text-xs rounded border border-red-300 text-red-700 hover:bg-red-50" title="Remove all assignments for this project">Clear All</button>
+                    <button onClick={openAssignLabor} className="px-3 py-1.5 text-xs rounded bg-emerald-600 text-white font-medium hover:bg-emerald-700">+ Assign Labor</button>
+                  </div>
                 </div>
                 {tasksLoading ? (
                   <div className="text-xs text-gray-500">Loading tasks…</div>
@@ -371,6 +426,7 @@ export default function SSProjects() {
                         <div className="text-[11px] text-gray-500 flex flex-wrap gap-3 mt-2 items-center">
                           {t.dueDate && <span>Due {new Date(t.dueDate).toLocaleDateString()}</span>}
                           <span>Laborers {(t.laborers||[]).length}</span>
+                          {(t.laborers||[]).length>0 && <span className="text-gray-600">{(t.laborers||[]).map(lb=>lb?.name||'Unknown').join(', ')}</span>}
                           <div className="flex items-center gap-2">
                             <span>Progress</span>
                             <input
@@ -392,6 +448,10 @@ export default function SSProjects() {
                           </div>
                         </div>
                         {t.description && <p className="text-[11px] text-gray-600 mt-1">{t.description}</p>}
+                        <div className="text-[10px] text-gray-500 mt-1 flex gap-3">
+                          <span>Created {new Date(t.createdAt).toLocaleString()}</span>
+                          <span>Updated {new Date(t.updatedAt).toLocaleString()}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -510,18 +570,26 @@ export default function SSProjects() {
             <form onSubmit={createAssignment} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <label className="block">
                 <span className="text-gray-600 font-medium">Task Title</span>
-                <input value={taskForm.title} onChange={e=>setTaskForm(f=>({...f,title:e.target.value}))} className="mt-1 w-full px-3 py-2 border rounded-lg" required />
+                <input value={taskForm.title} onChange={e=>setTaskForm(f=>({...f,title:e.target.value}))} className="mt-1 w-full px-3 py-2 border rounded-lg" maxLength={80} pattern="^[^!#$%]+$" title="Cannot contain !, #, $, %" required />
               </label>
               <label className="block">
                 <span className="text-gray-600 font-medium">Due Date</span>
-                <input type="date" value={taskForm.dueDate} onChange={e=>setTaskForm(f=>({...f,dueDate:e.target.value}))} className="mt-1 w-full px-3 py-2 border rounded-lg" />
+                <input type="date" value={taskForm.dueDate} onChange={e=>setTaskForm(f=>({...f,dueDate:e.target.value}))} className="mt-1 w-full px-3 py-2 border rounded-lg" min={new Date().toISOString().slice(0,10)} />
+              </label>
+              <label className="block">
+                <span className="text-gray-600 font-medium">Due Time (optional)</span>
+                <input type="time" value={taskForm.dueTime} onChange={e=>setTaskForm(f=>({...f,dueTime:e.target.value}))} className="mt-1 w-full px-3 py-2 border rounded-lg" />
               </label>
               <div className="md:col-span-2">
                 <label className="block">
                   <span className="text-gray-600 font-medium">Description</span>
-                  <textarea value={taskForm.description} onChange={e=>setTaskForm(f=>({...f,description:e.target.value}))} rows={3} className="mt-1 w-full px-3 py-2 border rounded-lg resize-y" />
+                  <textarea value={taskForm.description} onChange={e=>setTaskForm(f=>({...f,description:e.target.value}))} rows={3} className="mt-1 w-full px-3 py-2 border rounded-lg resize-y" maxLength={400} />
                 </label>
               </div>
+              <label className="block">
+                <span className="text-gray-600 font-medium">Bank Account (optional)</span>
+                <input value={taskForm.bankAccount} onChange={e=>setTaskForm(f=>({...f,bankAccount:e.target.value.replace(/[^0-9]/g,'')}))} className="mt-1 w-full px-3 py-2 border rounded-lg" inputMode="numeric" pattern="^[0-9]*$" title="Digits only" />
+              </label>
               <div className="md:col-span-2">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-gray-600 font-medium">Select Laborers</span>
