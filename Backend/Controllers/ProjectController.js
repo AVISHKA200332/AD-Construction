@@ -48,8 +48,8 @@ const getAllProject = async (req, res, next) => {
       sortOrder = 'desc'
     } = req.query;
 
-    // Build filter object
-    const filter = {};
+  // Build filter object
+  const filter = {};
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
     if (search) {
@@ -109,6 +109,8 @@ const getProjectById = async (req, res, next) => {
       return res.status(404).json({ message: "Project not found" });
     }
 
+    // Note: RBAC for project access is enforced via separate role-ops endpoints to avoid changing existing admin flows
+
     // Add audit log for view action
     await addAuditLog(project, 'VIEW', 'single', null, `Project ${project.projectId} viewed`, req);
 
@@ -146,6 +148,7 @@ const getProjectStats = async (req, res, next) => {
 // Add new project with comprehensive validation
 const addProject = async (req, res, next) => {
   try {
+    // Note: Creation permissions are handled at the router level for admin flows; preserving existing behavior
     // Validate required fields
     const requiredFields = ['name', 'client', 'startDate', 'endDate', 'budget'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
@@ -221,6 +224,8 @@ const updateProject = async (req, res, next) => {
       return res.status(404).json({ message: "Project not found" });
     }
 
+    // Note: Update permissions are not altered here to avoid impacting existing admin flows
+
     // Store old values for audit log
     const oldValues = {
       name: existingProject.name,
@@ -291,6 +296,7 @@ const deleteProject = async (req, res, next) => {
   const { id } = req.params;
 
   try {
+    // Note: Delete permissions unchanged here to preserve existing behavior
     const project = await Project.findById(id);
     if (!project) {
       return res.status(404).json({ message: "Project not found" });

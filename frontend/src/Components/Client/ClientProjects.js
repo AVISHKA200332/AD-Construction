@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import projectService from "../../services/projectService";
+import { roleOpsService } from "../../services/roleOpsService";
 
 function StatusBadge({ status }) {
   const map = {
@@ -86,19 +87,30 @@ function ClientProjects() {
       try {
         setLoading(true);
         setError("");
-        // Determine client identity keys
+        // Derive identifiers for client matching
         const userName = currentUser?.name || currentUser?.fullName || currentUser?.username || "";
-        const userEmail = currentUser?.email || "";
-        const params = ["limit=1000"];
-        if (userName) params.push(`clientName=${encodeURIComponent(userName)}`);
-        if (userEmail) params.push(`clientEmail=${encodeURIComponent(userEmail)}`);
-        const data = await projectService.getAllProjects(params.join('&'));
-        const list = Array.isArray(data?.projects) ? data.projects : Array.isArray(data) ? data : [];
+        const userEmail = currentUser?.email || currentUser?.gmail || "";
+        // Prefer backend-scoped client projects
+        let list = [];
+        try {
+          const scoped = await roleOpsService.clientProjects();
+          list = Array.isArray(scoped?.projects) ? scoped.projects : [];
+        } catch (_) {
+          // Fallback to query by client name/email
+          const params = ["limit=1000"];
+          if (userName) params.push(`clientName=${encodeURIComponent(userName)}`);
+          if (userEmail) params.push(`clientEmail=${encodeURIComponent(userEmail)}`);
+          const data = await projectService.getAllProjects(params.join('&'));
+          list = Array.isArray(data?.projects) ? data.projects : Array.isArray(data) ? data : [];
+        }
         const mapped = list.map((p) => ({
           _raw: p,
           id: p.projectId || p._id || p.id,
           name: p.name,
-          location: p.location?.city || p.location || "",
+          location:
+            typeof p.location === "string"
+              ? p.location
+              : (p.location?.city || p.location?.address || ""),
           status: p.status || "Planning",
           progress: Number(p.completion ?? p.progress ?? 0),
           budget: Number(p.budget ?? 0) / 1000000 > 0 ? Number(p.budget) / 1000000 : Number(p.budget ?? 0),

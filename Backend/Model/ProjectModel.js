@@ -61,6 +61,11 @@ const validateBankAccount = function(value) {
 };
 
 const projectSchema = new Schema({
+  // Role assignments (relationships)
+  siteManager: { type: Schema.Types.ObjectId, ref: 'User' },
+  supervisors: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  clients: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+
   documents: [{
     filename: { type: String, required: true },
     url: { type: String, required: true },

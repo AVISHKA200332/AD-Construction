@@ -30,8 +30,98 @@ export const generateProjectReport = (projects) => {
   pdf.setFont('helvetica', 'normal');
   pdf.text('Project Report', 35, 26);
 
-  // --- Project Table (One Page) ---
-  const startY = 35;
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  let y = 35;
+
+  // --- Executive Summary ---
+  const total = Array.isArray(projects) ? projects.length : 0;
+  const byStatus = (projects || []).reduce((acc, p) => { const k = p.status || 'Unknown'; acc[k] = (acc[k]||0)+1; return acc; }, {});
+  const byPriority = (projects || []).reduce((acc, p) => { const k = p.priority || 'Unknown'; acc[k] = (acc[k]||0)+1; return acc; }, {});
+  const completed = byStatus['Completed'] || 0;
+  const active = byStatus['In Progress'] || 0;
+  const avgCompletion = total ? Math.round((projects||[]).reduce((s,p)=> s + (Number(p.completion)||0), 0) / total) : 0;
+  const budgetSum = (projects||[]).reduce((s,p)=> s + (Number(p.budget)||0), 0);
+
+  pdf.setFont('helvetica','bold');
+  pdf.setTextColor('#0B3954');
+  pdf.setFontSize(14);
+  pdf.text('Executive Summary', 10, y);
+  y += 4;
+
+  // Summary cards (2 rows x 2 cols)
+  const cardW = (pageWidth - 10 - 10 - 6) / 2; // margins 10 each, gap 6
+  const cardH = 16;
+  const colors = {
+    total: [11, 57, 84],
+    active: [37, 99, 235],
+    completed: [22, 163, 74],
+    avg: [245, 158, 11],
+  };
+  drawBox(pdf, 10, y, cardW, cardH, colors.total, `Total Projects: ${total}`);
+  drawBox(pdf, 10 + cardW + 6, y, cardW, cardH, colors.active, `Active: ${active}`);
+  y += cardH + 4;
+  drawBox(pdf, 10, y, cardW, cardH, colors.completed, `Completed: ${completed}`);
+  const budgetText = `Budget: Rs. ${budgetSum.toLocaleString()}`;
+  drawBox(pdf, 10 + cardW + 6, y, cardW, cardH, colors.avg, `Avg Completion: ${avgCompletion}%`);
+  y += cardH + 6;
+
+  // Budget pill
+  pdf.setFont('helvetica','normal');
+  pdf.setTextColor('#333');
+  pdf.setFontSize(11);
+  pdf.text(budgetText, 10, y);
+  y += 6;
+
+  // --- Distributions ---
+  const sectionTop = y;
+  pdf.setFont('helvetica','bold');
+  pdf.setTextColor('#0B3954');
+  pdf.setFontSize(13);
+  pdf.text('Status Distribution', 10, y);
+  pdf.text('Priority Distribution', pageWidth/2 + 5, y);
+  y += 4;
+  pdf.setFont('helvetica','normal');
+  pdf.setTextColor('#333');
+  pdf.setFontSize(10);
+
+  const drawBars = (x, yStart, dict) => {
+    const entries = Object.entries(dict || {});
+    if (entries.length === 0) {
+      pdf.text('No data', x, yStart + 4);
+      return 8;
+    }
+    const max = Math.max(1, ...entries.map(([,v])=>v));
+    let yy = yStart;
+    entries.forEach(([k,v]) => {
+      // label
+      pdf.text(String(k), x, yy + 4);
+      // bar
+      const barX = x + 40;
+      const barW = (pageWidth/2 - 55);
+      const w = Math.max(2, Math.round((v/max) * barW));
+      pdf.setFillColor(200, 215, 230);
+      pdf.rect(barX, yy, barW, 4, 'F');
+      pdf.setFillColor(11, 57, 84);
+      pdf.rect(barX, yy, w, 4, 'F');
+      pdf.setTextColor('#666');
+      pdf.text(String(v), barX + barW + 3, yy + 3.5);
+      pdf.setTextColor('#333');
+      yy += 6;
+    });
+    return (entries.length * 6) + 2;
+  };
+
+  const leftH = drawBars(10, y, byStatus);
+  const rightH = drawBars(pageWidth/2 + 5, y, byPriority);
+  y = sectionTop + Math.max(leftH, rightH) + 6;
+
+  // Divider line before table
+  pdf.setDrawColor(230, 230, 230);
+  pdf.line(10, y, pageWidth-10, y);
+  y += 4;
+
+  // --- Project Table ---
+  const startY = y;
   const columns = [
     'Project Name',
     'Client',

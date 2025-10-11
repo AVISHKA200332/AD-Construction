@@ -172,8 +172,11 @@ export const validateProject = (project, options = {}) => {
   const nameValidation = validateProjectName(project.name);
   if (!nameValidation.isValid) errors.push(nameValidation.message);
   
-  const clientValidation = validateClientName(project.client);
-  if (!clientValidation.isValid) errors.push(clientValidation.message);
+  // Client name is optional if a portal client user is linked
+  if (!project.linkedClientUserId) {
+    const clientValidation = validateClientName(project.client);
+    if (!clientValidation.isValid) errors.push(clientValidation.message);
+  }
   
   const budgetValidation = validateAndFormatBudget(project.budget);
   if (!budgetValidation.isValid) errors.push(budgetValidation.message);
