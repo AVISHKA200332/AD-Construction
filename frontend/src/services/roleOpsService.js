@@ -34,6 +34,13 @@ export const roleOpsService = {
     };
     return api.put(`/ss/tasks/${id}`, body).then(r=>r.data);
   },
+  clearTasks: ({ projectId, status } = {}) => {
+    const params = new URLSearchParams();
+    if (projectId) params.set('projectId', projectId);
+    if (status) params.set('status', status);
+    const suffix = params.toString() ? ('?' + params.toString()) : '';
+    return api.delete('/ss/tasks' + suffix).then(r => r.data);
+  },
 
   // Labor
   laborTasks: () => api.get('/labor/tasks').then(r=>r.data),

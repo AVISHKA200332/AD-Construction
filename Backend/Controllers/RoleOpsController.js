@@ -81,7 +81,15 @@ exports.createTask = async (req, res) => {
     // must be assigned supervisor on the project
     const project = await Project.findOne({ _id: projectId, supervisors: req.user._id });
     if (!project) return res.status(403).json({ success: false, message: 'Not assigned to this project' });
-    const task = await Task.create({ project: projectId, title, description, dueDate, supervisor: req.user._id, laborers: laborerIds });
+    const task = await Task.create({
+      project: projectId,
+      title,
+      description,
+      dueDate,
+      supervisor: req.user._id,
+      laborers: laborerIds,
+      workLogs: [{ note: `Task created. Assigned ${Array.isArray(laborerIds) ? laborerIds.length : 0} laborer(s).`, createdBy: req.user._id }]
+    });
     res.status(201).json({ success: true, task });
   } catch (e) {
     res.status(500).json({ success: false, message: 'Failed to create task', error: e.message });
@@ -91,7 +99,9 @@ exports.createTask = async (req, res) => {
 // Supervisor: list tasks for their projects
 exports.listMyTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({ supervisor: req.user._id }).populate('project', 'name projectId');
+    const tasks = await Task.find({ supervisor: req.user._id })
+      .populate('project', 'name projectId')
+      .populate('laborers', 'name gmail email');
     res.json({ success: true, tasks });
   } catch (e) {
     res.status(500).json({ success: false, message: 'Failed to fetch tasks', error: e.message });
@@ -106,12 +116,28 @@ exports.updateTask = async (req, res) => {
     if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
     if (String(task.supervisor) !== String(req.user._id)) return res.status(403).json({ success: false, message: 'Not your task' });
     const { title, description, status, progress, laborerIds, logNote } = req.body;
+    const logs = [];
     if (title !== undefined) task.title = title;
     if (description !== undefined) task.description = description;
-    if (status) task.status = status;
-    if (progress !== undefined) task.progress = Math.max(0, Math.min(100, Number(progress)));
-    if (Array.isArray(laborerIds)) task.laborers = laborerIds;
-    if (logNote) task.workLogs.push({ note: logNote, createdBy: req.user._id });
+    if (status && status !== task.status) {
+      logs.push(`Status: ${task.status || 'N/A'} → ${status}`);
+      task.status = status;
+    }
+    if (progress !== undefined) {
+      const nextProg = Math.max(0, Math.min(100, Number(progress)));
+      if (Number.isFinite(nextProg) && nextProg !== task.progress) {
+        logs.push(`Progress: ${task.progress || 0}% → ${nextProg}%`);
+        task.progress = nextProg;
+      }
+    }
+    if (Array.isArray(laborerIds)) {
+      const before = (task.laborers || []).length;
+      task.laborers = laborerIds;
+      const after = laborerIds.length;
+      if (before !== after) logs.push(`Laborers changed: ${before} → ${after}`);
+    }
+    if (logNote) logs.push(logNote);
+    if (logs.length) task.workLogs.push({ note: logs.join(' | '), createdBy: req.user._id });
     await task.save();
     res.json({ success: true, task });
   } catch (e) {
@@ -119,10 +145,26 @@ exports.updateTask = async (req, res) => {
   }
 };
 
+// Supervisor: clear tasks history (optionally by status/project)
+exports.clearMyTasks = async (req, res) => {
+  try {
+    const { projectId, status } = req.query;
+    const filter = { supervisor: req.user._id };
+    if (projectId) filter.project = projectId;
+    if (status) filter.status = status;
+
+    const result = await Task.deleteMany(filter);
+    res.json({ success: true, deletedCount: result.deletedCount });
+  } catch (e) {
+    res.status(500).json({ success: false, message: 'Failed to clear tasks', error: e.message });
+  }
+};
+
 // Labor: list only tasks assigned to them
 exports.myAssignedTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({ laborers: req.user._id }).populate('project', 'name projectId');
+    const tasks = await Task.find({ laborers: req.user._id })
+      .populate('project', 'name projectId status completion updatedAt createdAt priority');
     res.json({ success: true, tasks });
   } catch (e) {
     res.status(500).json({ success: false, message: 'Failed to fetch my tasks', error: e.message });

@@ -142,6 +142,22 @@ export default function LaborProjects(){
     persist(tasks.map(t => t.id===task.id ? { ...t, progress:value, status: value===100?'Completed': (t.status==='Pending' && value>0 ? 'In Progress': t.status) } : t));
   };
 
+  // Clear options (local list only)
+  const clearCompleted = () => {
+    const completed = tasks.filter(t => t.status === 'Completed').length;
+    if (completed === 0) { alert('No completed tasks to clear.'); return; }
+    if (!window.confirm(`Remove ${completed} completed task(s) from the list?`)) return;
+    persist(tasks.filter(t => t.status !== 'Completed'));
+  };
+
+  const clearAll = async () => {
+    if (tasks.length === 0) { alert('No tasks to clear.'); return; }
+    if (!window.confirm('Clear ALL tasks from the list? Server-assigned tasks can be reloaded via Refresh.')) return;
+    persist([]);
+    // Optionally repopulate with server tasks immediately
+    try { await refreshFromServer(); } catch (_) { /* ignore */ }
+  };
+
   const importFromAssignments = () => {
     setImporting(true);
     try {
@@ -208,6 +224,9 @@ export default function LaborProjects(){
             <option value='all'>All Dates</option>
           </select>
           <button disabled={importing} onClick={importFromAssignments} className='px-4 py-2 rounded-lg bg-[#0B3954] text-white text-sm font-semibold shadow hover:bg-[#092c40] disabled:opacity-50'>Import Assignments</button>
+          <div className='h-6 w-px bg-gray-300 mx-1 hidden md:block' />
+          <button onClick={clearCompleted} className='px-3 py-2 rounded-lg border text-sm hover:bg-gray-50'>Clear Completed</button>
+          <button onClick={clearAll} className='px-3 py-2 rounded-lg border border-red-300 text-red-700 text-sm hover:bg-red-50'>Clear All</button>
         </div>
       </div>
 
