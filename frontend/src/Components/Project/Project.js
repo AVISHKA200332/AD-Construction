@@ -137,17 +137,21 @@ function Project({ initialProjects = [] }) {
     try {
       setLoading(true);
       setError(null);
+      const payload = {
+        ...newProject,
+        client: newProject.client && String(newProject.client).trim().length > 0 ? newProject.client : 'Unassigned Client',
+      };
 
       if (isEditing && editIndex !== null) {
         // Update existing project
         const projectToUpdate = projects[editIndex];
-        await projectService.updateProject(projectToUpdate._id, newProject);
+        await projectService.updateProject(projectToUpdate._id, payload);
         await fetchProjects(); // Refresh the list
         setIsEditing(false);
         setEditIndex(null);
       } else {
         // Create new project
-        await projectService.createProject(newProject);
+        await projectService.createProject(payload);
         await fetchProjects(); // Refresh the list
       }
 

@@ -26,6 +26,9 @@ function AddProjectModal({
   const [managers, setManagers] = useState([]);
   const [mgrLoading, setMgrLoading] = useState(false);
   const [mgrError, setMgrError] = useState("");
+  const [clients, setClients] = useState([]);
+  const [clientsLoading, setClientsLoading] = useState(false);
+  const [clientsError, setClientsError] = useState("");
 
   useEffect(() => {
     const loadManagers = async () => {
@@ -49,6 +52,31 @@ function AddProjectModal({
       }
     };
     loadManagers();
+  }, [showModal]);
+
+  // Load Clients list (for portal linking) when modal opens
+  useEffect(() => {
+    const loadClients = async () => {
+      if (!showModal) return;
+      try {
+        setClientsLoading(true);
+        setClientsError("");
+        const res = await userService.getAllUsers({
+          role: "Client",
+          limit: 200,
+          sortBy: "name",
+          sortOrder: "asc",
+        });
+        setClients(Array.isArray(res?.users) ? res.users : []);
+      } catch (e) {
+        console.error(e);
+        setClients([]);
+        setClientsError("Unable to load clients");
+      } finally {
+        setClientsLoading(false);
+      }
+    };
+    loadClients();
   }, [showModal]);
 
   // Format budget display (placeholder)
@@ -219,24 +247,7 @@ function AddProjectModal({
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Client Name *
-                </label>
-                <input
-                  type="text"
-                  name="client"
-                  value={newProject.client || ""}
-                  onChange={handleInputChange}
-                  placeholder="Enter client name"
-                  className={`w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                    errors.client ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.client && (
-                  <p className="text-red-500 text-xs mt-1">{errors.client}</p>
-                )}
-              </div>
+              {/* Client Name removed: we link a Client user instead */}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -488,6 +499,35 @@ function AddProjectModal({
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Client Portal User Link (Required) */}
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Client Portal Access</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Link Client User *</label>
+                  <select
+                    name="linkedClientUserId"
+                    value={newProject.linkedClientUserId || ""}
+                    onChange={handleInputChange}
+                    className="w-full border rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 transition border-gray-300"
+                    required
+                  >
+                    <option value="">
+                      {clientsLoading ? "Loading clients..." : "Select a Client to link"}
+                    </option>
+                    {clients.map((c) => (
+                      <option key={c._id} value={c._id}>
+                        {c.name}
+                        {c.gmail ? ` (${c.gmail})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  {clientsError && <p className="text-yellow-700 text-xs mt-1">{clientsError}</p>}
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">Selecting a client here is required and grants portal access.</p>
             </div>
 
             {/* Project Location */}

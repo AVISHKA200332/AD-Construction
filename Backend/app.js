@@ -13,9 +13,11 @@ const serviceRouter = require('./Route/ServiceRoute');
 const financeRouter = require('./Route/FinanceRoutes');
 const clientFinanceRouter = require('./Route/ClientFinanceRoutes');
 const roleRouter = require('./Route/RoleRoutes');
+const roleOpsRouter = require('./Route/RoleOpsRoutes');
 const profileRouter = require('./Route/ProfileRoutes');
 const inventoryRouter = require('./Route/inventoryItemRoute');
 const buyerInventoryRouter = require('./Route/BuyerInventoryRoute');
+const projectAssignmentRouter = require('./Route/ProjectAssignmentRoutes');
 
 const app = express();
 
@@ -41,9 +43,11 @@ app.use('/services', serviceRouter);
 app.use('/finances', financeRouter);
 app.use('/client-finance', clientFinanceRouter);
 app.use('/role', roleRouter);
+app.use('/role-ops', roleOpsRouter);
 app.use('/profile', profileRouter);
 app.use('/inventory', inventoryRouter);
 app.use('/buyer-inventory', buyerInventoryRouter);
+app.use('/project-assign', projectAssignmentRouter);
 
 // Database and server
 const PORT = process.env.PORT || 5000;

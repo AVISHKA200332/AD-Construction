@@ -4,6 +4,7 @@ const router = express.Router();
 const Project = require("../Model/ProjectModel");
 //Insert Project Controller
 const ProjectController = require("../Controllers/ProjectController");
+const { requireRole } = require('../middleware/rbac');
 
 // Project routes
 
@@ -16,9 +17,11 @@ router.use(authMiddleware);
 
 router.get("/:id", ProjectController.getProjectById);
 router.get("/:id/audit-logs", ProjectController.getProjectAuditLogs);
-router.post("/", ProjectController.addProject);
+// Only Admin can create projects
+router.post("/", requireRole('Admin'), ProjectController.addProject);
 router.put("/:id", ProjectController.updateProject);
-router.delete("/:id", ProjectController.deleteProject);
+// Only Admin can delete projects
+router.delete("/:id", requireRole('Admin'), ProjectController.deleteProject);
 
 //export
 module.exports = router;

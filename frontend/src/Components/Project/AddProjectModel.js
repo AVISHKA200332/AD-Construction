@@ -103,15 +103,20 @@ function AddProjectModal({ showModal, setShowModal, newProject, handleChange, ha
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validate the entire project
-    const validation = validateProject(newProject);
+    // Validate the project (default a client string since field is removed)
+    const toValidate = {
+      ...newProject,
+      client: newProject.client && String(newProject.client).trim().length > 0 ? newProject.client : 'Unassigned Client',
+    };
+    const validation = validateProject(toValidate);
     
     if (!validation.isValid) {
       const errorObj = {};
-      validation.errors.forEach(error => {
+      // Ignore client name validation since we no longer collect it in this form
+      const filtered = validation.errors.filter(err => !String(err).includes('Client name'));
+      filtered.forEach(error => {
         // Map validation errors to field names
         if (error.includes('Project name')) errorObj.name = error;
-        else if (error.includes('Client name')) errorObj.client = error;
         else if (error.includes('Budget')) errorObj.budget = error;
         else if (error.includes('Start date')) errorObj.startDate = error;
         else if (error.includes('End date')) errorObj.endDate = error;
@@ -125,8 +130,11 @@ function AddProjectModal({ showModal, setShowModal, newProject, handleChange, ha
         else if (error.includes('Description')) errorObj.description = error;
         else errorObj.general = error;
       });
-      setErrors(errorObj);
-      return;
+      if (Object.keys(errorObj).length > 0) {
+        setErrors(errorObj);
+        return;
+      }
+      // If only client error existed, allow submit
     }
 
     // Clear errors and submit
@@ -171,22 +179,7 @@ function AddProjectModal({ showModal, setShowModal, newProject, handleChange, ha
                 {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Client Name *
-                </label>
-                <input
-                  type="text"
-                  name="client"
-                  value={newProject.client || ''}
-                  onChange={handleInputChange}
-                  placeholder="Enter client name"
-                  className={`w-full border rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 transition ${
-                    errors.client ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                />
-                {errors.client && <p className="text-red-500 text-xs mt-1">{errors.client}</p>}
-              </div>
+              {/* Client Name removed: linking Client users happens elsewhere */}
             </div>
 
             {/* Project Details */}

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { roleOpsService } from '../../services/roleOpsService';
 
 // Labor-centric Projects / Tasks view
 // A laborer typically: sees assigned tasks, starts/completes them, records hours, adds notes, flags safety issues.
@@ -9,7 +10,7 @@ export default function LaborProjects(){
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [dateFilter, setDateFilter] = useState('today');
+  const [dateFilter, setDateFilter] = useState('all');
   const [selected, setSelected] = useState(null); // task details
   const [noteDraft, setNoteDraft] = useState('');
   const [importing, setImporting] = useState(false);
@@ -23,17 +24,67 @@ export default function LaborProjects(){
 
   const persist = (next) => { setTasks(next); localStorage.setItem(storageKey, JSON.stringify(next)); };
 
+  const todayStr = new Date().toISOString().slice(0,10);
+
   useEffect(()=>{
-    // Load tasks
-    try { const stored = JSON.parse(localStorage.getItem(storageKey)||'[]'); setTasks(Array.isArray(stored)? stored: []);} catch {}
-    // Load minimal project list for context (optional)
-    // No remote fetch required for labor local tasks; mark loading complete
-    setLoading(false);
+    const load = async () => {
+      // Load local tasks first
+      try { const stored = JSON.parse(localStorage.getItem(storageKey)||'[]'); setTasks(Array.isArray(stored)? stored: []);} catch {}
+      // Try pull assigned tasks from backend
+      try {
+        const data = await roleOpsService.laborTasks();
+        const serverTasks = Array.isArray(data?.tasks) ? data.tasks : [];
+        if (serverTasks.length) {
+          // Merge without duplicates by id/sourceId
+          const byKey = new Map();
+          [...serverTasks.map(t=>({
+            id: t._id,
+            sourceId: t._id,
+            title: t.title,
+            project: t.project?.name || t.project?.projectId || 'Project',
+            date: (t.dueDate? new Date(t.dueDate).toISOString().slice(0,10): todayStr),
+            status: t.status === 'Assigned' ? 'Pending' : (t.status||'Pending'),
+            progress: Number(t.progress||0),
+            notes: '',
+            safetyFlag:false,
+            createdAt: t.createdAt || new Date().toISOString()
+          })), ...tasks].forEach(item => { const key = item.sourceId || item.id; if (!byKey.has(key)) byKey.set(key, item); });
+          const merged = Array.from(byKey.values()).sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+          persist(merged);
+        }
+      } catch (_) { /* ignore if backend not ready */ }
+      setLoading(false);
+    };
+    load();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const refreshFromServer = async () => {
+    setLoading(true);
+    try {
+      const data = await roleOpsService.laborTasks();
+      const serverTasks = Array.isArray(data?.tasks) ? data.tasks : [];
+      const mapped = serverTasks.map(t => ({
+        id: t._id,
+        sourceId: t._id,
+        title: t.title,
+        project: t.project?.name || t.project?.projectId || 'Project',
+        date: (t.dueDate? new Date(t.dueDate).toISOString().slice(0,10): todayStr),
+        status: t.status === 'Assigned' ? 'Pending' : (t.status||'Pending'),
+        progress: Number(t.progress||0),
+        notes: '',
+        safetyFlag:false,
+        createdAt: t.createdAt || new Date().toISOString()
+      }));
+      persist(mapped);
+    } catch (e) {
+      // ignore fetch error in UI, keep local tasks
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Derived metrics
-  const todayStr = new Date().toISOString().slice(0,10);
   const filtered = useMemo(()=>{
     return tasks
       .filter(t => statusFilter==='All' || t.status===statusFilter)
@@ -63,12 +114,21 @@ export default function LaborProjects(){
     if(task.status!=='Pending') return;
     persist(tasks.map(t => t.id===task.id ? { ...t, status:'In Progress', startTime:new Date().toISOString() } : t));
   };
-  const completeTask = (task) => {
-    if(task.status==='Completed') return;
+  const completeTask = async (task) => {
+    if (task.status === 'Completed') return;
+    const serverId = task.sourceId || task.id;
+    try {
+      if (serverId) {
+        await roleOpsService.completeTask(serverId);
+      }
+    } catch (e) {
+      // Non-fatal: still mark locally, but log for visibility
+      console.warn('Backend completeTask failed:', e?.response?.data?.message || e.message);
+    }
     const end = new Date();
-    let start = task.startTime? new Date(task.startTime) : end;
-    const hours = Math.max(0, ((end - start)/ (1000*60*60)).toFixed(2));
-    persist(tasks.map(t => t.id===task.id ? { ...t, status:'Completed', endTime:end.toISOString(), hours, progress:100 } : t));
+    const start = task.startTime ? new Date(task.startTime) : end;
+    const hours = Math.max(0, Number(((end - start) / (1000 * 60 * 60)).toFixed(2)));
+    persist(tasks.map(t => t.id === task.id ? { ...t, status: 'Completed', endTime: end.toISOString(), hours, progress: 100 } : t));
   };
   const toggleSafety = (task) => {
     persist(tasks.map(t => t.id===task.id ? { ...t, safetyFlag: !t.safetyFlag } : t));
@@ -225,6 +285,13 @@ export default function LaborProjects(){
           </div>
         )}
       </div>
+
+      {!loading && tasks.length===0 && (
+        <div className='mt-4 p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-center justify-between'>
+          <span>No assigned tasks found from server. If your supervisor just assigned you, press Refresh.</span>
+          <button onClick={refreshFromServer} className='px-3 py-1.5 rounded bg-amber-600 text-white text-xs hover:bg-amber-700'>Refresh</button>
+        </div>
+      )}
 
       {/* Task Detail Drawer */}
       {selected && (

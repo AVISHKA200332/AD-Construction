@@ -219,25 +219,7 @@ function AddProjectModal({
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Client Name *
-                </label>
-                <select
-  name="client"
-  value={newProject.client || ""}
-  onChange={handleInputChange}
-  className={`w-full border rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 transition ${errors.client ? "border-red-500" : "border-gray-300"}`}
->
-  <option value="">Select Client</option>
-  {clients.map((client) => (
-    <option key={client._id} value={client.name}>{client.name}</option>
-  ))}
-</select>
-                {errors.client && (
-                  <p className="text-red-500 text-xs mt-1">{errors.client}</p>
-                )}
-              </div>
+              {/* Client Name removed: link Client user via portal access section elsewhere */}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">

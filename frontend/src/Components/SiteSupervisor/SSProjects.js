@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { projectService } from '../../services/projectService';
+import { roleOpsService } from '../../services/roleOpsService';
+import userService from '../../services/userService';
 
 // Site Supervisor Project Management (limited CRUD)
 // - View & filter projects
@@ -26,15 +28,26 @@ export default function SSProjects() {
   const [logModal, setLogModal] = useState(false);
   const [logEditing, setLogEditing] = useState(false);
 
+  // Tasks/Labor assignment
+  const [tasksLoading, setTasksLoading] = useState(false);
+  const [tasksError, setTasksError] = useState('');
+  const [myTasks, setMyTasks] = useState([]);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [laborLoading, setLaborLoading] = useState(false);
+  const [laborError, setLaborError] = useState('');
+  const [labors, setLabors] = useState([]);
+  const [taskForm, setTaskForm] = useState({ title:'', description:'', dueDate:'', laborIds:[] });
+
   // Load projects & logs
   const load = async () => {
     setLoading(true); setError('');
     try {
-      const data = await projectService.getAllProjects();
-      const list = Array.isArray(data?.projects) ? data.projects : [];
+      const scoped = await roleOpsService.getSSProjects();
+      const list = Array.isArray(scoped?.projects) ? scoped.projects : [];
       setProjects(list);
     } catch (e) {
-      setError(e.response?.data?.message || e.message || 'Failed to load projects');
+      setProjects([]);
+      setError(e.response?.data?.message || e.message || 'Failed to load projects. Please ensure you are logged in as a Site Supervisor and assigned to projects by a Site Manager.');
     } finally {
       setLoading(false);
     }
@@ -65,12 +78,20 @@ export default function SSProjects() {
     setAuditError('');
     setShowAudit(false);
     setAuditLoading(true);
+    // Load my tasks
+    setTasksLoading(true); setTasksError('');
     try {
       const data = await projectService.getProjectAuditLogs(p._id);
       setAuditLogs(data.auditLogs || []);
     } catch (e) {
       setAuditError(e.response?.data?.message || e.message || 'Failed to load audit logs');
     } finally { setAuditLoading(false); }
+    try {
+      const list = await roleOpsService.myTasks();
+      setMyTasks(Array.isArray(list?.tasks)? list.tasks : []);
+    } catch (e) {
+      setTasksError(e.response?.data?.message || e.message || 'Failed to load tasks');
+    } finally { setTasksLoading(false); }
   };
 
   const allowedStatus = ['In Progress','On Hold','Completed']; // Supervisor can toggle only these
@@ -127,6 +148,57 @@ export default function SSProjects() {
 
   const selectedLogs = useMemo(()=> selected ? (logs[selected._id]||[]).slice().sort((a,b)=> new Date(b.date||b.createdAt) - new Date(a.date||a.createdAt)) : [], [logs, selected]);
 
+  const projectTasks = useMemo(() => {
+    if (!selected) return [];
+    const selId = String(selected._id);
+    return (myTasks || []).filter(t => {
+      const pid = t?.project && typeof t.project === 'object' ? (t.project._id || t.project.id) : t.project;
+      return String(pid) === selId;
+    });
+  }, [myTasks, selected]);
+
+  const openAssignLabor = async () => {
+    setAssignOpen(true);
+    setLaborLoading(true); setLaborError('');
+    setTaskForm({ title:'', description:'', dueDate:'', laborIds:[] });
+    try {
+      const res = await userService.getAllUsers({ role: 'Labor', limit: 200 });
+      const list = Array.isArray(res?.users) ? res.users : [];
+      setLabors(list);
+    } catch (e) {
+      setLaborError(e.response?.data?.message || e.message || 'Failed to load labors');
+      setLabors([]);
+    } finally { setLaborLoading(false); }
+  };
+
+  const toggleLabor = (id) => {
+    setTaskForm(f => ({ ...f, laborIds: f.laborIds.includes(id) ? f.laborIds.filter(x=>x!==id) : [...f.laborIds, id] }));
+  };
+
+  const createAssignment = async (e) => {
+    e.preventDefault(); if (!selected) return;
+    if (!taskForm.title.trim() || taskForm.laborIds.length===0) { alert('Provide a task title and select at least one labor.'); return; }
+    try {
+      await roleOpsService.createTask({
+        project: selected._id,
+        title: taskForm.title.trim(),
+        description: taskForm.description?.trim() || '',
+        dueDate: taskForm.dueDate || undefined,
+        status: 'Planned',
+        laborers: taskForm.laborIds,
+        progress: 0,
+      });
+      // refresh tasks and keep drawer open with updated list
+      setTasksLoading(true);
+      const list = await roleOpsService.myTasks();
+      setMyTasks(Array.isArray(list?.tasks)? list.tasks : []);
+      setTasksLoading(false);
+      setAssignOpen(false);
+    } catch (e) {
+      alert(e.response?.data?.message || e.message || 'Failed to create assignment');
+    }
+  };
+
   return (
     <div className="px-6 py-8 bg-gray-50 min-h-screen">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
@@ -149,7 +221,6 @@ export default function SSProjects() {
             ))}
           </div>
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..." className="px-3 py-2 rounded-lg border bg-white shadow text-sm focus:outline-none focus:ring-2 focus:ring-[#0B3954]" />
-          <button disabled className="px-4 py-2 rounded-lg bg-gray-300 text-gray-600 text-sm font-semibold shadow cursor-not-allowed" title="Supervisors cannot create new projects">+ New Project</button>
         </div>
       </div>
       {error && <div className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded text-sm whitespace-pre-line">{error}</div>}
@@ -263,6 +334,70 @@ export default function SSProjects() {
                 </div>
               </section>
 
+              {/* Labor assignments */}
+              <section>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">Labor Assignments</h3>
+                  <button onClick={openAssignLabor} className="px-3 py-1.5 text-xs rounded bg-emerald-600 text-white font-medium hover:bg-emerald-700">+ Assign Labor</button>
+                </div>
+                {tasksLoading ? (
+                  <div className="text-xs text-gray-500">Loading tasks…</div>
+                ) : tasksError ? (
+                  <div className="text-xs text-red-600">{tasksError}</div>
+                ) : projectTasks.length===0 ? (
+                  <div className="text-xs text-gray-500">No assignments yet.</div>
+                ) : (
+                  <div className="space-y-2">
+                    {projectTasks.map(t => (
+                      <div key={t._id} className="p-3 rounded-lg border bg-gray-50 hover:bg-white transition text-xs">
+                        <div className="flex items-center justify-between">
+                          <div className="font-semibold text-gray-800">{t.title}</div>
+                          <select
+                            className="text-[10px] px-2 py-0.5 rounded border bg-white"
+                            value={t.status || 'Assigned'}
+                            onChange={async (e) => {
+                              const next = e.target.value;
+                              try {
+                                await roleOpsService.updateTask(t._id, { status: next });
+                                setMyTasks(prev => prev.map(x => x._id === t._id ? { ...x, status: next } : x));
+                              } catch (err) {
+                                alert(err?.response?.data?.message || err.message || 'Failed to update status');
+                              }
+                            }}
+                          >
+                            {['Assigned','In Progress','Completed'].map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                        </div>
+                        <div className="text-[11px] text-gray-500 flex flex-wrap gap-3 mt-2 items-center">
+                          {t.dueDate && <span>Due {new Date(t.dueDate).toLocaleDateString()}</span>}
+                          <span>Laborers {(t.laborers||[]).length}</span>
+                          <div className="flex items-center gap-2">
+                            <span>Progress</span>
+                            <input
+                              type="range"
+                              min={0}
+                              max={100}
+                              value={Number(t.progress||0)}
+                              onChange={async (e) => {
+                                const val = Number(e.target.value);
+                                try {
+                                  await roleOpsService.updateTask(t._id, { progress: val });
+                                  setMyTasks(prev => prev.map(x => x._id === t._id ? { ...x, progress: val } : x));
+                                } catch (err) {
+                                  alert(err?.response?.data?.message || err.message || 'Failed to update progress');
+                                }
+                              }}
+                            />
+                            <span className="w-8 text-right">{Number(t.progress||0)}%</span>
+                          </div>
+                        </div>
+                        {t.description && <p className="text-[11px] text-gray-600 mt-1">{t.description}</p>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
               {/* Site Logs */}
               <section>
                 <div className="flex items-center justify-between mb-3">
@@ -361,6 +496,60 @@ export default function SSProjects() {
           </div>
           {/* Click outside to close */}
           <button onClick={()=>setSelected(null)} className="flex-1 h-full" aria-label="Close drawer background" />
+        </div>
+      )}
+
+      {/* Assign Labor Modal */}
+      {assignOpen && selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl border border-gray-200 max-h-[90vh] overflow-y-auto">
+            <div className="p-5 border-b flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-800">Assign Labor to {selected.name}</h2>
+              <button onClick={()=>setAssignOpen(false)} className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            <form onSubmit={createAssignment} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <label className="block">
+                <span className="text-gray-600 font-medium">Task Title</span>
+                <input value={taskForm.title} onChange={e=>setTaskForm(f=>({...f,title:e.target.value}))} className="mt-1 w-full px-3 py-2 border rounded-lg" required />
+              </label>
+              <label className="block">
+                <span className="text-gray-600 font-medium">Due Date</span>
+                <input type="date" value={taskForm.dueDate} onChange={e=>setTaskForm(f=>({...f,dueDate:e.target.value}))} className="mt-1 w-full px-3 py-2 border rounded-lg" />
+              </label>
+              <div className="md:col-span-2">
+                <label className="block">
+                  <span className="text-gray-600 font-medium">Description</span>
+                  <textarea value={taskForm.description} onChange={e=>setTaskForm(f=>({...f,description:e.target.value}))} rows={3} className="mt-1 w-full px-3 py-2 border rounded-lg resize-y" />
+                </label>
+              </div>
+              <div className="md:col-span-2">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-gray-600 font-medium">Select Laborers</span>
+                  {laborLoading && <span className="text-[11px] text-gray-500">Loading…</span>}
+                  {laborError && <span className="text-[11px] text-red-600">{laborError}</span>}
+                </div>
+                <div className="max-h-56 overflow-y-auto border rounded-lg p-3 bg-gray-50">
+                  {labors.length===0 && !laborLoading ? (
+                    <div className="text-[12px] text-gray-500">No labor users found.</div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {labors.map(l => (
+                        <label key={l._id} className="flex items-center gap-2 text-[13px] bg-white border rounded p-2">
+                          <input type="checkbox" checked={taskForm.laborIds.includes(l._id)} onChange={()=>toggleLabor(l._id)} />
+                          <span className="text-gray-800">{l.name}</span>
+                          <span className="text-gray-500 text-[11px]">{l.gmail || l.email}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="md:col-span-2 flex justify-end gap-3 pt-2">
+                <button type="button" onClick={()=>setAssignOpen(false)} className="px-4 py-2 border rounded-lg">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-emerald-600 text-white rounded-lg">Create Assignment</button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

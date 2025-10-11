@@ -5,6 +5,8 @@ import fileTextIcon from "../../assets/icons/file-text.png";
 import plusIcon from "../../assets/icons/plus.png";
 import AddProjectModal from "./AddProjectModelDynamic";
 import projectService from "../../services/projectService";
+import projectAssignService from "../../services/projectAssignService";
+import userService from "../../services/userService";
 import { downloadProjectReport } from "../../services/pdfService";
 import {
   formatCurrency,
@@ -31,6 +33,7 @@ function Project({ initialProjects = [] }) {
   const [showAuditLogs, setShowAuditLogs] = useState(false);
   const [auditLogs, setAuditLogs] = useState([]);
   const [originalStartDate, setOriginalStartDate] = useState(null);
+  const [clientUsers, setClientUsers] = useState([]);
 
   const [projects, setProjects] = useState(initialProjects);
 
@@ -87,6 +90,19 @@ function Project({ initialProjects = [] }) {
     fetchProjectStats();
   }, [fetchProjects]);
 
+  // Load client users once for name lookup on save
+  useEffect(() => {
+    const loadClients = async () => {
+      try {
+        const res = await userService.getAllUsers({ role: 'Client', limit: 500, sortBy: 'name', sortOrder: 'asc' });
+        setClientUsers(Array.isArray(res?.users) ? res.users : []);
+      } catch (e) {
+        setClientUsers([]);
+      }
+    };
+    loadClients();
+  }, []);
+
   const [newProject, setNewProject] = useState({
     name: "",
     client: "",
@@ -96,6 +112,7 @@ function Project({ initialProjects = [] }) {
     endDate: "",
     budget: "",
     completion: 0,
+    linkedClientUserId: "",
     clientContact: {
       phone: "",
       email: "",
@@ -136,17 +153,42 @@ function Project({ initialProjects = [] }) {
     try {
       setLoading(true);
       setError(null);
+      // Require linked client user and propagate selected client's name into payload.client
+      if (!newProject.linkedClientUserId) {
+        setError('Please select a Client user to link');
+        return;
+      }
+  // Set client string from selected client user
+  const selected = clientUsers.find(u => String(u._id) === String(newProject.linkedClientUserId));
+  const payload = { ...newProject, client: selected?.name || '' };
 
       if (isEditing && editIndex !== null) {
         // Update existing project
         const projectToUpdate = projects[editIndex];
-        await projectService.updateProject(projectToUpdate._id, newProject);
+        const updateRes = await projectService.updateProject(projectToUpdate._id, payload);
+        // Link client portal user if selected
+        const targetId = updateRes?.project?._id || projectToUpdate._id;
+        if (payload.linkedClientUserId) {
+          try {
+            await projectAssignService.addClientToProject(targetId, payload.linkedClientUserId);
+          } catch (e) {
+            console.warn('Client link after update failed:', e?.response?.data?.message || e.message);
+          }
+        }
         await fetchProjects(); // Refresh the list
         setIsEditing(false);
         setEditIndex(null);
       } else {
         // Create new project
-        await projectService.createProject(newProject);
+        const createRes = await projectService.createProject(payload);
+        const createdId = createRes?.project?._id;
+        if (createdId && payload.linkedClientUserId) {
+          try {
+            await projectAssignService.addClientToProject(createdId, payload.linkedClientUserId);
+          } catch (e) {
+            console.warn('Client link after create failed:', e?.response?.data?.message || e.message);
+          }
+        }
         await fetchProjects(); // Refresh the list
       }
 
@@ -159,6 +201,7 @@ function Project({ initialProjects = [] }) {
         endDate: "",
         budget: "",
         completion: 0,
+        linkedClientUserId: "",
         clientContact: { phone: "", email: "", bankAccount: "" },
         projectManager: { name: "", age: "", experience: "" },
         location: { address: "", city: "" },
@@ -224,10 +267,8 @@ function Project({ initialProjects = [] }) {
       },
       location: projectToEdit.location || { address: "", city: "" },
       description: projectToEdit.description || "",
+      linkedClientUserId: Array.isArray(projectToEdit.clients) && projectToEdit.clients.length > 0 ? projectToEdit.clients[0] : "",
     });
-    setOriginalStartDate(
-      projectToEdit.startDate ? projectToEdit.startDate.split("T")[0] : null
-    );
     setIsEditing(true);
     setEditIndex(index);
     setShowModal(true);

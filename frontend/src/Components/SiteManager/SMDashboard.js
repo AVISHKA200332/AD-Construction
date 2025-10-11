@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { projectService } from '../../services/projectService';
+import { roleOpsService } from '../../services/roleOpsService';
 
 // Enhanced Site Manager Dashboard aligned with the richer style of Admin & Labor dashboards.
 // Focuses on site oversight: active projects, issues (heuristic), inspections scheduling, materials tracking.
@@ -14,8 +15,15 @@ export default function SMDashboard() {
     const load = async () => {
       setLoading(true);
       try {
-        const data = await projectService.getAllProjects();
-        const list = Array.isArray(data?.projects) ? data.projects : [];
+        // Prefer role-scoped projects
+        let list = [];
+        try {
+          const scoped = await roleOpsService.getSMProjects();
+          list = Array.isArray(scoped?.projects) ? scoped.projects : [];
+        } catch (_) {
+          const data = await projectService.getAllProjects();
+          list = Array.isArray(data?.projects) ? data.projects : [];
+        }
         setProjects(list);
         const sorted = list.slice().sort((a,b) => new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
         setActivity(sorted.slice(0,6));
