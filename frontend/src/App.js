@@ -37,12 +37,6 @@ import SMCommunication from "./Components/SiteManager/SMCommunication";
 import SMInventory from "./Components/SiteManager/SMInventory";
 import SMReports from "./Components/SiteManager/SMReports";
 import SiteManagerServices from "./Components/SiteManager/SiteManagerServices";
-import SupDashboard from "./Components/Supervisor/SupDashboard";
-import SupProjects from "./Components/Supervisor/SupProjects";
-import SupReports from "./Components/Supervisor/SupReports";
-import SupSettings from "./Components/Supervisor/SupSettings";
-import SupCommunication from "./Components/Supervisor/SupCommunication";
-import SupInventory from "./Components/Supervisor/SupInventory";
 import LaborDashboard from "./Components/Labor/LaborDashboard.js";
 import LaborProjects from "./Components/Labor/LaborProjects";
 import LaborReports from "./Components/Labor/LaborReports";
@@ -68,7 +62,6 @@ import SSDailyUpdates from "./Components/SiteSupervisor/SSDailyUpdates";
 import SSLaborAssignments from "./Components/SiteSupervisor/SSLaborAssignments";
 import SSMaterialRequests from "./Components/SiteSupervisor/SSMaterialRequests";
 import SSIssues from "./Components/SiteSupervisor/SSIssues";
-import LaborDashboard from "./Components/Labor/LaborDashboard";
 import ClientProfile from "./Components/Profile/ClientProfile"; // legacy specific
 import AdminProfile from "./Components/Profile/AdminProfile"; // legacy specific
 import ProfilePage from "./Components/Profile/ProfilePage"; // new unified
@@ -76,8 +69,6 @@ import SettingsPage from "./Components/Profile/SettingsPage";
 import UpdateFinance from "./Components/Finance/UpdateFinance/UpdateFinance";
 import { CartProvider } from "./Components/Admin/CartContext";
 import LaborServices from "./Components/Labor/LaborServices";
-import ClientProfile from "./Components/Profile/ClientProfile";
-import AdminProfile from "./Components/Profile/AdminProfile";
 
 function AppContent() {
   const location = useLocation();
@@ -128,13 +119,8 @@ function AppContent() {
         <Route path="/site-manager/financial" element={<SMFinancial />} />
         <Route path="/site-manager/reports" element={<SMReports />} />
         <Route path="/site-manager/settings" element={<SMSettings />} />
-        <Route
-          path="/site-manager/communication"
-          element={<SMCommunication />}
-        />
-        <Route path="/site-manager/settings" element={<SMSettings />} />
-        <Route path="/site-manager/services" element={<SiteManagerServices />} />
         <Route path="/site-manager/communication" element={<SMCommunication />} />
+        <Route path="/site-manager/services" element={<SiteManagerServices />} />
         <Route path="/site-manager/inventory" element={<SMInventory />} />
         {/* Labor Routes */}
         <Route path="/pm/dashboard" element={<PMDashboard />} />
@@ -145,37 +131,37 @@ function AppContent() {
         <Route path="/pm/documents" element={<PMDocuments />} />
         {/* Site Supervisor (Site Manager style) - restricted to Site Supervisor roles */}
         <Route path="/site-supervisor/dashboard" element={
-          <RequireRole allowed={["Site Supervisor","Supervisor"]}>
+          <RequireRole allow={["Site Supervisor","Supervisor"]}>
             <SSDashboard />
           </RequireRole>
         } />
         <Route path="/site-supervisor/projects" element={
-          <RequireRole allowed={["Site Supervisor","Supervisor"]}>
+          <RequireRole allow={["Site Supervisor","Supervisor"]}>
             <SSProjects />
           </RequireRole>
         } />
         <Route path="/site-supervisor/financial" element={
-          <RequireRole allowed={["Site Supervisor","Supervisor"]}>
+          <RequireRole allow={["Site Supervisor","Supervisor"]}>
             <SSFinancial />
           </RequireRole>
         } />
         <Route path="/site-supervisor/reports" element={
-          <RequireRole allowed={["Site Supervisor","Supervisor"]}>
+          <RequireRole allow={["Site Supervisor","Supervisor"]}>
             <SSReports />
           </RequireRole>
         } />
         <Route path="/site-supervisor/communication" element={
-          <RequireRole allowed={["Site Supervisor","Supervisor"]}>
+          <RequireRole allow={["Site Supervisor","Supervisor"]}>
             <SSCommunication />
           </RequireRole>
         } />
         <Route path="/site-supervisor/inventory" element={
-          <RequireRole allowed={["Site Supervisor","Supervisor"]}>
+          <RequireRole allow={["Site Supervisor","Supervisor"]}>
             <SSInventory />
           </RequireRole>
         } />
         <Route path="/site-supervisor/settings" element={
-          <RequireRole allowed={["Site Supervisor","Supervisor"]}>
+          <RequireRole allow={["Site Supervisor","Supervisor"]}>
             <SSSettings />
           </RequireRole>
         } />
