@@ -66,6 +66,7 @@ import ClientProfile from "./Components/Profile/ClientProfile"; // legacy specif
 import AdminProfile from "./Components/Profile/AdminProfile"; // legacy specific
 import ProfilePage from "./Components/Profile/ProfilePage"; // new unified
 import SettingsPage from "./Components/Profile/SettingsPage";
+import AddFinance from "./Components/Finance/AddFinance/AddFinance";
 import UpdateFinance from "./Components/Finance/UpdateFinance/UpdateFinance";
 import { CartProvider } from "./Components/Admin/CartContext";
 import LaborServices from "./Components/Labor/LaborServices";
@@ -111,6 +112,8 @@ function AppContent() {
         <Route path="/settings" element={<SettingsPage />} />
         {/* Finance Records Route */}
         <Route path="/financeRecords" element={<FinanceDetails />} />
+        {/* Add Finance Route */}
+        <Route path="/addFinance" element={<AddFinance />} />
         {/* Update Finance Route */}
         <Route path="/updateFinance/:id" element={<UpdateFinance />} />
         {/* Site Manager Routes */}
