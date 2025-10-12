@@ -10,6 +10,7 @@ router.get('/', MessageController.getMessages);
 
 // Authenticated inbox and sent routes (place BEFORE dynamic :id route)
 router.get('/inbox', authMiddleware, MessageController.getInbox);
+router.get('/my', authMiddleware, MessageController.getInbox); // Alias for inbox
 router.get('/sent', authMiddleware, MessageController.getSent);
 
 // Create a new message
@@ -74,7 +75,7 @@ router.patch(
 // Get a single message by ID
 router.get(
   '/:id',
-  [param('id').isMongoId().withMessage('Invalid message id')],
+  [authMiddleware, param('id').isMongoId().withMessage('Invalid message id')],
   MessageController.getMessageById
 );
 

@@ -18,6 +18,7 @@ import ClientReports from "./Components/Client/ClientReports";
 import ClientSettings from "./Components/Client/ClientSettings";
 import ClientCommunication from "./Components/Client/ClientCommunication";
 import ClientInventory from "./Components/Client/ClientInventory";
+import ClientServices from "./Components/Client/ClientServices";
 import ApplyJob from "./Components/Apply/ApplyJob";
 import AdminUsers from "./Components/Admin/AdminUsers";
 import AdminProjects from "./Components/Admin/AdminProjects";
@@ -35,6 +36,14 @@ import SMSettings from "./Components/SiteManager/SMSettings";
 import SMCommunication from "./Components/SiteManager/SMCommunication";
 import SMInventory from "./Components/SiteManager/SMInventory";
 import SMReports from "./Components/SiteManager/SMReports";
+import SiteManagerServices from "./Components/SiteManager/SiteManagerServices";
+import SupDashboard from "./Components/Supervisor/SupDashboard";
+import SupProjects from "./Components/Supervisor/SupProjects";
+import SupReports from "./Components/Supervisor/SupReports";
+import SupSettings from "./Components/Supervisor/SupSettings";
+import SupCommunication from "./Components/Supervisor/SupCommunication";
+import SupInventory from "./Components/Supervisor/SupInventory";
+import LaborDashboard from "./Components/Labor/LaborDashboard.js";
 import LaborProjects from "./Components/Labor/LaborProjects";
 import LaborReports from "./Components/Labor/LaborReports";
 import LaborSettings from "./Components/Labor/LaborSettings";
@@ -66,6 +75,9 @@ import ProfilePage from "./Components/Profile/ProfilePage"; // new unified
 import SettingsPage from "./Components/Profile/SettingsPage";
 import UpdateFinance from "./Components/Finance/UpdateFinance/UpdateFinance";
 import { CartProvider } from "./Components/Admin/CartContext";
+import LaborServices from "./Components/Labor/LaborServices";
+import ClientProfile from "./Components/Profile/ClientProfile";
+import AdminProfile from "./Components/Profile/AdminProfile";
 
 function AppContent() {
   const location = useLocation();
@@ -89,6 +101,7 @@ function AppContent() {
         <Route path="/client/reports" element={<ClientReports />} />
         <Route path="/client/settings" element={<ClientSettings />} />
         <Route path="/client/communication" element={<ClientCommunication />} />
+        <Route path="/client/services" element={<ClientServices />} />
         <Route path="/client/inventory" element={<ClientInventory />} />
         <Route path="/client/profile" element={<ClientProfile />} />
         <Route path="/profile" element={<ProfilePage />} />
@@ -119,6 +132,9 @@ function AppContent() {
           path="/site-manager/communication"
           element={<SMCommunication />}
         />
+        <Route path="/site-manager/settings" element={<SMSettings />} />
+        <Route path="/site-manager/services" element={<SiteManagerServices />} />
+        <Route path="/site-manager/communication" element={<SMCommunication />} />
         <Route path="/site-manager/inventory" element={<SMInventory />} />
         {/* Labor Routes */}
         <Route path="/pm/dashboard" element={<PMDashboard />} />
@@ -172,6 +188,7 @@ function AppContent() {
         <Route path="/labor/projects" element={<LaborProjects />} />
         <Route path="/labor/reports" element={<LaborReports />} />
         <Route path="/labor/settings" element={<LaborSettings />} />
+        <Route path="/labor/services" element={<LaborServices />} />
         <Route path="/labor/communication" element={<LaborCommunication />} />
         <Route path="/labor/inventory" element={<LaborInventory />} />
       </Routes>
