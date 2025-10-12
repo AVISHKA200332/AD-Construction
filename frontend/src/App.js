@@ -105,9 +105,9 @@ function AppContent() {
         <Route path="/admin/reports" element={<AdminReports />} />
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/communication" element={<AdminCommunication />} />
-  <Route path="/admin/inventory" element={<AdminInventory />} />
-  <Route path="/cart" element={<CartPage />} />
-  <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/admin/inventory" element={<AdminInventory />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/settings" element={<SettingsPage />} />
         {/* Finance Records Route */}
@@ -122,8 +122,14 @@ function AppContent() {
         <Route path="/site-manager/financial" element={<SMFinancial />} />
         <Route path="/site-manager/reports" element={<SMReports />} />
         <Route path="/site-manager/settings" element={<SMSettings />} />
-        <Route path="/site-manager/communication" element={<SMCommunication />} />
-        <Route path="/site-manager/services" element={<SiteManagerServices />} />
+        <Route
+          path="/site-manager/communication"
+          element={<SMCommunication />}
+        />
+        <Route
+          path="/site-manager/services"
+          element={<SiteManagerServices />}
+        />
         <Route path="/site-manager/inventory" element={<SMInventory />} />
         {/* Labor Routes */}
         <Route path="/pm/dashboard" element={<PMDashboard />} />
@@ -133,45 +139,69 @@ function AppContent() {
         <Route path="/pm/reports" element={<PMReports />} />
         <Route path="/pm/documents" element={<PMDocuments />} />
         {/* Site Supervisor (Site Manager style) - restricted to Site Supervisor roles */}
-        <Route path="/site-supervisor/dashboard" element={
-          <RequireRole allow={["Site Supervisor","Supervisor"]}>
-            <SSDashboard />
-          </RequireRole>
-        } />
-        <Route path="/site-supervisor/projects" element={
-          <RequireRole allow={["Site Supervisor","Supervisor"]}>
-            <SSProjects />
-          </RequireRole>
-        } />
-        <Route path="/site-supervisor/financial" element={
-          <RequireRole allow={["Site Supervisor","Supervisor"]}>
-            <SSFinancial />
-          </RequireRole>
-        } />
-        <Route path="/site-supervisor/reports" element={
-          <RequireRole allow={["Site Supervisor","Supervisor"]}>
-            <SSReports />
-          </RequireRole>
-        } />
-        <Route path="/site-supervisor/communication" element={
-          <RequireRole allow={["Site Supervisor","Supervisor"]}>
-            <SSCommunication />
-          </RequireRole>
-        } />
-        <Route path="/site-supervisor/inventory" element={
-          <RequireRole allow={["Site Supervisor","Supervisor"]}>
-            <SSInventory />
-          </RequireRole>
-        } />
-        <Route path="/site-supervisor/settings" element={
-          <RequireRole allow={["Site Supervisor","Supervisor"]}>
-            <SSSettings />
-          </RequireRole>
-        } />
+        <Route
+          path="/site-supervisor/dashboard"
+          element={
+            <RequireRole allow={["Site Supervisor", "Supervisor"]}>
+              <SSDashboard />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/site-supervisor/projects"
+          element={
+            <RequireRole allow={["Site Supervisor", "Supervisor"]}>
+              <SSProjects />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/site-supervisor/financial"
+          element={
+            <RequireRole allow={["Site Supervisor", "Supervisor"]}>
+              <SSFinancial />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/site-supervisor/reports"
+          element={
+            <RequireRole allow={["Site Supervisor", "Supervisor"]}>
+              <SSReports />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/site-supervisor/communication"
+          element={
+            <RequireRole allow={["Site Supervisor", "Supervisor"]}>
+              <SSCommunication />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/site-supervisor/inventory"
+          element={
+            <RequireRole allow={["Site Supervisor", "Supervisor"]}>
+              <SSInventory />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/site-supervisor/settings"
+          element={
+            <RequireRole allow={["Site Supervisor", "Supervisor"]}>
+              <SSSettings />
+            </RequireRole>
+          }
+        />
         {/* Legacy retained endpoints */}
         <Route path="/site-supervisor/daily" element={<SSDailyUpdates />} />
         <Route path="/site-supervisor/labor" element={<SSLaborAssignments />} />
-        <Route path="/site-supervisor/material" element={<SSMaterialRequests />} />
+        <Route
+          path="/site-supervisor/material"
+          element={<SSMaterialRequests />}
+        />
         <Route path="/site-supervisor/issues" element={<SSIssues />} />
         <Route path="/labor/dashboard" element={<LaborDashboard />} />
         <Route path="/labor/projects" element={<LaborProjects />} />
