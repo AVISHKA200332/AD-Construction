@@ -103,7 +103,7 @@ export default function CheckoutPage() {
             >
               Download PDF
             </button>
-            <button onClick={() => navigate('/')} className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-semibold shadow-lg">Back to Dashboard</button>
+            <button onClick={() => navigate('/admin/dashboard')} className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 font-semibold shadow-lg">Back to Dashboard</button>
           </div>
         </div>
       </div>
