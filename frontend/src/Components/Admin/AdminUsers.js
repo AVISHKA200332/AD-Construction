@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import userService from "../../services/userService";
 import userPdfService from "../../services/UserPdfServices";
+import { validateEmail, validateSpecialCharacters } from "../../utils/validation";
 
 function AdminUsers() {
   const [loading, setLoading] = useState(false);
@@ -29,6 +30,7 @@ function AdminUsers() {
     address: "",
     password: ""
   });
+  const [formErrors, setFormErrors] = useState({});
 
   
   const fetchUsers = useCallback(async () => {
@@ -168,14 +170,89 @@ function AdminUsers() {
   };
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    // Enforce 10-digit numeric only for phone input while typing
+    if (name === "phone") {
+      const digits = (value || "").replace(/\D/g, "").slice(0, 10);
+      setFormData(prev => ({ ...prev, phone: digits }));
+      // Clear phone error as user types if now valid length
+      setFormErrors(prev => ({ ...prev, phone: digits.length === 10 ? "" : prev.phone }));
+      return;
+    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Validate form fields before submit
+  const validateForm = () => {
+    const errors = {};
+    const name = (formData.name || "").trim();
+    const gmail = (formData.gmail || "").trim();
+    const phone = (formData.phone || "").trim();
+    const role = (formData.role || "").trim();
+    const age = formData.age;
+    const password = formData.password || "";
+
+    // Name: required, min 2, no forbidden special chars (! # $ %)
+    if (!name) {
+      errors.name = "Name is required";
+    } else if (name.length < 2) {
+      errors.name = "Name must be at least 2 characters";
+    } else if (!validateSpecialCharacters(name)) {
+      errors.name = "Name cannot include ! # $ %";
+    }
+
+    // Email (gmail): required and must be valid
+    if (!gmail) {
+      errors.gmail = "Email is required";
+    } else if (!validateEmail(gmail)) {
+      errors.gmail = "Enter a valid email address";
+    }
+
+    // Phone: required, exactly 10 digits
+    if (!phone) {
+      errors.phone = "Phone number is required";
+    } else if (!/^\d{10}$/.test(phone)) {
+      errors.phone = "Phone must be exactly 10 digits";
+    }
+
+    // Role: required
+    if (!role) {
+      errors.role = "Role is required";
+    }
+
+    // Age: optional but if provided must be an integer between 18 and 100
+    if (age !== "" && age !== null && age !== undefined) {
+      const n = Number(age);
+      if (!Number.isInteger(n)) {
+        errors.age = "Age must be a whole number";
+      } else if (n < 18) {
+        errors.age = "Age must be 18 or older";
+      } else if (n > 100) {
+        errors.age = "Age must be 100 or less";
+      }
+    }
+
+    // Password: required on add, optional on edit; min length 6 when provided
+    if (modalType === "add") {
+      if (!password) {
+        errors.password = "Password is required";
+      } else if (password.length < 6) {
+        errors.password = "Password must be at least 6 characters";
+      }
+    } else if (password && password.length < 6) {
+      errors.password = "Password must be at least 6 characters";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // client-side validation first
+    if (!validateForm()) {
+      return;
+    }
     try {
       let submitData = { ...formData };
       
@@ -626,6 +703,7 @@ function AdminUsers() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
+                  {formErrors.name && <p className="text-xs text-red-600 mt-1">{formErrors.name}</p>}
                 </div>
 
                 <div>
@@ -640,6 +718,7 @@ function AdminUsers() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
                   />
+                  {formErrors.gmail && <p className="text-xs text-red-600 mt-1">{formErrors.gmail}</p>}
                 </div>
 
                 <div>
@@ -656,6 +735,7 @@ function AdminUsers() {
                     placeholder={modalType === "edit" ? "Leave blank to keep current password" : "Enter password"}
                     minLength="6"
                   />
+                  {formErrors.password && <p className="text-xs text-red-600 mt-1">{formErrors.password}</p>}
                 </div>
 
                 <div>
@@ -668,7 +748,12 @@ function AdminUsers() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    inputMode="numeric"
+                    pattern="\d{10}"
+                    maxLength={10}
+                    placeholder="10-digit number"
                   />
+                  {formErrors.phone && <p className="text-xs text-red-600 mt-1">{formErrors.phone}</p>}
                 </div>
 
                 <div>
@@ -702,6 +787,7 @@ function AdminUsers() {
                     min="18"
                     max="100"
                   />
+                  {formErrors.age && <p className="text-xs text-red-600 mt-1">{formErrors.age}</p>}
                 </div>
 
                 <div>
