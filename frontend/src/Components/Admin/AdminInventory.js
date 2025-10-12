@@ -12,7 +12,6 @@ import { generateInventoryReportPDF } from "./inventoryReportPdfUtil";
 export default function AdminInventory() {
   const { addToCart, cart } = useCart();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("stock");
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
@@ -26,7 +25,6 @@ export default function AdminInventory() {
   const [sortOrder, setSortOrder] = useState("desc");
   const [inventoryStats, setInventoryStats] = useState(null);
   const [items, setItems] = useState([]);
-  const [buyerOrders, setBuyerOrders] = useState([]);
   const [showStockAlert, setShowStockAlert] = useState(false);
   const [stockAlerts, setStockAlerts] = useState({ low: [], out: [] });
 
@@ -78,20 +76,9 @@ export default function AdminInventory() {
     }
   };
 
-  // Fetch buyer orders
-  const fetchBuyerOrders = async () => {
-    try {
-      const data = await inventoryService.getAllBuyerItems();
-      setBuyerOrders(data);
-    } catch (err) {
-      console.error("Error fetching buyer orders:", err);
-    }
-  };
-
   useEffect(() => {
     fetchItems();
     fetchInventoryStats();
-    fetchBuyerOrders();
   }, [fetchItems]);
 
   // Handle input change

@@ -55,7 +55,7 @@ function SignIn() {
         // Role-based redirect
         const role = response.data.user.role;
         const roleMap = {
-          Admin: "/admin/inventory",
+          Admin: "/admin/dashboard",
           Client: "/client/dashboard",
           "Project Manager": "/pm/dashboard",
           "Site Supervisor": "/site-supervisor/dashboard",
