@@ -13,6 +13,7 @@ exports.getMessages = async (req, res) => {
 };
 
 // Get a single message by ID
+// Requires authentication so we can determine if the requester is the recipient
 exports.getMessageById = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -21,6 +22,20 @@ exports.getMessageById = async (req, res) => {
   try {
     const message = await Message.findById(req.params.id);
     if (!message) return res.status(404).json({ error: 'Message not found' });
+
+    // If the requester is the recipient and message is unread, mark it as read
+    try {
+      if (req.user && String(message.recipientId) === String(req.user._id) && !message.isRead) {
+        message.isRead = true;
+        message.status = 'Read';
+        message.readAt = new Date();
+        await message.save();
+      }
+    } catch (innerErr) {
+      // don't block returning the message if marking read fails
+      console.warn('Failed to mark message as read:', innerErr.message);
+    }
+
     res.json({ message });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -29,8 +44,12 @@ exports.getMessageById = async (req, res) => {
 
 // Create a new message
 exports.createMessage = async (req, res) => {
+  console.log('Creating message with body:', req.body);
+  console.log('User from token:', req.user);
+  
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    console.log('Validation errors:', errors.array());
     return res.status(422).json({ errors: errors.array() });
   }
   try {
@@ -63,6 +82,7 @@ exports.createMessage = async (req, res) => {
       isRead: false
     });
     await newMessage.save();
+    console.log('Message created successfully:', newMessage);
     res.status(201).json({ message: newMessage });
   } catch (err) {
     res.status(400).json({ error: err.message });

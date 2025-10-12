@@ -51,8 +51,12 @@ function Nav() {
     // Try to read role and user data from storage set during sign-in
     const storedRole = localStorage.getItem("ad_role");
     const storedUserData = localStorage.getItem("userData");
-    
-    if (storedRole) setRole(storedRole);
+
+    if (storedRole) {
+      // normalize role to a consistent format (capitalized words)
+      const normalized = storedRole.trim();
+      setRole(normalized);
+    }
     if (storedUserData) {
       try {
         setUserData(JSON.parse(storedUserData));
@@ -66,10 +70,12 @@ function Nav() {
   useEffect(() => {
     const BASE_URL = "http://localhost:5000";
     let timer;
+
+    // stable fetch function so other listeners can call it
     const fetchUnread = async () => {
       try {
         const token = localStorage.getItem("authToken");
-        if (!token) { setUnreadCount(0); return; }
+        if (!token) { setUnreadCount(0); setRecent([]); return; }
         const res = await axios.get(`${BASE_URL}/messages/inbox`, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -83,9 +89,16 @@ function Nav() {
         // silent fail
       }
     };
+
     fetchUnread();
-    timer = setInterval(fetchUnread, 30000); // poll every 30s
-    return () => { if (timer) clearInterval(timer); };
+    // poll every 30s
+    timer = setInterval(fetchUnread, 30000);
+
+    // listen for immediate read events (so nav updates instantly)
+    const onMessageRead = () => { fetchUnread(); };
+    window.addEventListener('messageRead', onMessageRead);
+
+    return () => { if (timer) clearInterval(timer); window.removeEventListener('messageRead', onMessageRead); };
   }, []);
 
   // Load users for quick compose
@@ -158,11 +171,12 @@ function Nav() {
           }`}
         >
           {(() => {
-            const isClient = role === "Client";
-            const isAdmin = role === "Admin";
-            const isSM = role === "Site Manager";
-            const isSup = role === "Supervisor";
-            const isLabor = role === "Labor";
+            const r = (role || '').toLowerCase();
+            const isClient = r === "client";
+            const isAdmin = r === "admin";
+            const isSM = r === "site manager" || r === 'sitemanager' || r === 'site-manager';
+            const isSup = r === "supervisor";
+            const isLabor = r === "labor" || r === 'labour';
 
             let links = [];
             if (isClient) {
@@ -172,6 +186,7 @@ function Nav() {
                 { to: `${base}/projects`, label: "Projects" },
                 { to: `${base}/financial`, label: "Financial" },
                 { to: `${base}/reports`, label: "Reports" },
+                { to: `${base}/services`, label: "Services" },
                 { to: `${base}/communication`, label: "Communication" },
                 { to: `${base}/inventory`, label: "Inventory" },
                 { to: `${base}/settings`, label: "Settings" },
@@ -194,6 +209,7 @@ function Nav() {
                 { to: `${base}/projects`, label: "Projects" },
                 { to: `${base}/financial`, label: "Financial" },
                 { to: `${base}/reports`, label: "Reports" },
+                { to: `${base}/services`, label: "Services" },
                 { to: `${base}/communication`, label: "Communication" },
                 { to: `${base}/inventory`, label: "Inventory" },
                 { to: `${base}/settings`, label: "Settings" },
@@ -215,6 +231,7 @@ function Nav() {
                 { to: `${base}/dashboard`, label: "Dashboard" },
                 { to: `${base}/projects`, label: "Projects" },
                 { to: `${base}/reports`, label: "Reports" },
+                { to: `${base}/services`, label: "Services" },
                 { to: `${base}/communication`, label: "Communication" },
                 { to: `${base}/inventory`, label: "Inventory" },
                 { to: `${base}/settings`, label: "Settings" },
