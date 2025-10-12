@@ -125,7 +125,7 @@ function AdminUsers() {
 
   const handlePrevPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);ffff
+      setCurrentPage(currentPage - 1);
     }
   };
 
