@@ -205,6 +205,7 @@ function AdminUsers() {
     const phone = (formData.phone || "").trim();
     const role = (formData.role || "").trim();
     const age = formData.age;
+    const address = (formData.address || "").trim();
     const password = formData.password || "";
 
     // Name: required, min 2, no forbidden special chars (! # $ %)
@@ -235,6 +236,11 @@ function AdminUsers() {
     // Role: required
     if (!role) {
       errors.role = "Role is required";
+    }
+
+    // Address: required for Add New User form
+    if (!address) {
+      errors.address = "Address is required";
     }
 
     // Age: optional but if provided must be an integer between 18 and 100
@@ -819,7 +825,9 @@ function AdminUsers() {
                     onChange={handleInputChange}
                     rows="3"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
                   />
+                  {formErrors.address && <p className="text-xs text-red-600 mt-1">{formErrors.address}</p>}
                 </div>
 
                 {modalType === "edit" && (
