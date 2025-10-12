@@ -10,7 +10,7 @@ import inventoryService from "../../services/inventoryService";
 import { generateInventoryReportPDF } from "./inventoryReportPdfUtil";
 
 export default function AdminInventory() {
-  const { addToCart } = useCart();
+  const { addToCart, cart } = useCart();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("stock");
   const [showModal, setShowModal] = useState(false);
@@ -97,6 +97,35 @@ export default function AdminInventory() {
   // Handle input change
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // Prevent negative numbers from being entered for amount and unitPrice
+    if (name === 'amount' || name === 'unitPrice') {
+      // don't allow a leading minus sign
+      if (String(value).startsWith('-')) return;
+
+      // Allow empty value so user can clear input while typing
+      if (value === '') {
+        setNewItem({ ...newItem, [name]: '' });
+        return;
+      }
+
+      if (name === 'amount') {
+        // Only allow integer digits for amount
+        const digitsOnly = String(value).replace(/[^0-9]/g, '');
+        // keep it as a string while typing; convert on save
+        setNewItem({ ...newItem, [name]: digitsOnly === '' ? '' : digitsOnly });
+        return;
+      }
+
+      if (name === 'unitPrice') {
+        // Allow numbers with optional single decimal point
+        const valid = /^\d*\.?\d*$/.test(value);
+        if (!valid) return;
+        setNewItem({ ...newItem, [name]: value });
+        return;
+      }
+    }
+
     setNewItem({ ...newItem, [name]: value });
   };
 
@@ -201,11 +230,25 @@ export default function AdminInventory() {
   const handleOrder = (item) => {
     const amount = window.prompt("Enter order quantity:", "1");
     if (!amount || Number(amount) <= 0) return;
-    addToCart(item, Number(amount));
+    const qty = Number(amount);
+
+    // Determine existing quantity in cart for this item (match by backend id or fallback to name+price)
+    const existing = cart.find(i => (i._id && i._id === item._id) || (!i._id && i.name === item.name && Number(i.unitPrice) === Number(item.unitPrice)));
+    const existingQty = existing ? existing.quantity : 0;
+
+    if (existingQty + qty > (item.amount || 0)) {
+      const available = (item.amount || 0) - existingQty;
+      setError(`Cannot add ${qty} units. Only ${available} unit(s) available in stock.`);
+      // Clear the error automatically after a short delay
+      setTimeout(() => setError(null), 4000);
+      return;
+    }
+
+    addToCart(item, qty);
     setSuccess("Added to cart!");
     setTimeout(() => setSuccess(null), 2000);
-    // Optionally, navigate to cart page directly:
-    // navigate('/cart');
+    // Navigate to cart page after adding
+    navigate('/cart');
   };
 
   // Generate report

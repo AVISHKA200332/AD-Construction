@@ -30,10 +30,12 @@ export default function CheckoutPage() {
     // Update inventory for each item in cart
     try {
       await Promise.all(
-        cart.map(item =>
-          inventoryService.orderItem(item._id, item.quantity)
-        )
-      );
+          cart.map(item => {
+            // Only call backend update for items that have a real backend _id
+            if (!item._id) return Promise.resolve();
+            return inventoryService.orderItem(item._id, item.quantity);
+          })
+        );
     } catch (err) {
       // Optionally handle error (show error message)
       console.error('Error updating inventory:', err);
@@ -80,14 +82,14 @@ export default function CheckoutPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {cart.map(item => (
-                <tr key={item._id}>
-                  <td className="px-4 py-2">{item.name}</td>
-                  <td className="px-4 py-2 text-center">{item.quantity}</td>
-                  <td className="px-4 py-2 text-right">Rs. {Number(item.unitPrice).toLocaleString()}</td>
-                  <td className="px-4 py-2 text-right">Rs. {(item.unitPrice * item.quantity).toLocaleString()}</td>
-                </tr>
-              ))}
+                    {cart.map(item => (
+                      <tr key={item._id ?? item._cartId}>
+                        <td className="px-4 py-2">{item.name}</td>
+                        <td className="px-4 py-2 text-center">{item.quantity}</td>
+                        <td className="px-4 py-2 text-right">Rs. {Number(item.unitPrice).toLocaleString()}</td>
+                        <td className="px-4 py-2 text-right">Rs. {(item.unitPrice * item.quantity).toLocaleString()}</td>
+                      </tr>
+                    ))}
             </tbody>
           </table>
           <div className="flex justify-end mb-2">

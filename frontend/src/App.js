@@ -26,6 +26,8 @@ import AdminReports from "./Components/Admin/AdminReports";
 import AdminSettings from "./Components/Admin/AdminSettings";
 import AdminCommunication from "./Components/Admin/AdminCommunication";
 import AdminInventory from "./Components/Admin/AdminInventory";
+import CartPage from "./Components/Admin/CartPage";
+import CheckoutPage from "./Components/Admin/CheckoutPage";
 import SMDashboard from "./Components/SiteManager/SMDashboard";
 import SMProjects from "./Components/SiteManager/SMProjects";
 import SMFinancial from "./Components/SiteManager/SMFinancial";
@@ -98,6 +100,8 @@ function AppContent() {
         <Route path="/admin/settings" element={<AdminSettings />} />
         <Route path="/admin/communication" element={<AdminCommunication />} />
   <Route path="/admin/inventory" element={<AdminInventory />} />
+  <Route path="/cart" element={<CartPage />} />
+  <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/settings" element={<SettingsPage />} />
         {/* Finance Records Route */}

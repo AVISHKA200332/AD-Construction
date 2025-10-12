@@ -31,13 +31,13 @@ export default function CartPage() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {cart.map(item => (
-                  <tr key={item._id}>
+                  <tr key={item._id ?? item._cartId}>
                     <td className="px-4 py-3">{item.name}</td>
                     <td className="px-4 py-3 text-center">{item.quantity}</td>
                     <td className="px-4 py-3 text-right">Rs. {Number(item.unitPrice).toLocaleString()}</td>
                     <td className="px-4 py-3 text-right font-semibold">Rs. {(item.unitPrice * item.quantity).toLocaleString()}</td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => removeFromCart(item._id)} className="text-red-500 hover:underline text-xs">Remove</button>
+                      <button onClick={() => removeFromCart(item._id ?? item._cartId)} className="text-red-500 hover:underline text-xs">Remove</button>
                     </td>
                   </tr>
                 ))}

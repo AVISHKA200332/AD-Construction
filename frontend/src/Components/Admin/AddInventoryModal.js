@@ -39,11 +39,15 @@ function AddInventoryModal({ showModal, setShowModal, newItem, handleChange, han
       newErrors.seller = 'Seller/Supplier name is required';
     }
     
-    if (newItem.amount === undefined || newItem.amount < 0) {
+    // Coerce empty string to number for validation
+    const amountVal = newItem.amount === '' ? NaN : Number(newItem.amount);
+    const unitPriceVal = newItem.unitPrice === '' ? NaN : Number(newItem.unitPrice);
+
+    if (Number.isNaN(amountVal) || amountVal < 0) {
       newErrors.amount = 'Amount must be 0 or greater';
     }
-    
-    if (newItem.unitPrice === undefined || newItem.unitPrice < 0) {
+
+    if (Number.isNaN(unitPriceVal) || unitPriceVal < 0) {
       newErrors.unitPrice = 'Unit price must be 0 or greater';
     }
     
