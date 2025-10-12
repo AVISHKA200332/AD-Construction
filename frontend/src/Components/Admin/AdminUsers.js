@@ -179,6 +179,21 @@ function AdminUsers() {
       setFormErrors(prev => ({ ...prev, phone: digits.length === 10 ? "" : prev.phone }));
       return;
     }
+    // Normalize and validate gmail on the fly
+    if (name === "gmail") {
+      const trimmed = (value || "").trim();
+      setFormData(prev => ({ ...prev, gmail: trimmed }));
+      setFormErrors(prev => {
+        const next = { ...prev };
+        if (trimmed) {
+          const isEmail = validateEmail(trimmed);
+          const isGmail = /@gmail\.com$/i.test(trimmed);
+          next.gmail = isEmail && isGmail ? "" : (next.gmail || "");
+        }
+        return next;
+      });
+      return;
+    }
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -206,6 +221,8 @@ function AdminUsers() {
       errors.gmail = "Email is required";
     } else if (!validateEmail(gmail)) {
       errors.gmail = "Enter a valid email address";
+    } else if (!/@gmail\.com$/i.test(gmail)) {
+      errors.gmail = "Email must be a @gmail.com address";
     }
 
     // Phone: required, exactly 10 digits
@@ -717,6 +734,8 @@ function AdminUsers() {
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     required
+                    pattern="^[^\s@]+@gmail\.com$"
+                    placeholder="name@gmail.com"
                   />
                   {formErrors.gmail && <p className="text-xs text-red-600 mt-1">{formErrors.gmail}</p>}
                 </div>
