@@ -77,7 +77,7 @@ function AppContent() {
   const location = useLocation();
   const hideNavOn = ["/", "/signin", "/signup", "/forgot-password", "/reset-password"]; // Hide Nav on public/auth pages
   const showNav = !hideNavOn.includes(location.pathname);
-  const hideFootOn = ["/signin", "/signup"]; // Hide Footer on auth pages
+  const hideFootOn = ["/signin", "/signup", "/forgot-password", "/reset-password"]; // Hide Footer on auth pages
   const showFoot = !hideFootOn.includes(location.pathname);
 
   return (

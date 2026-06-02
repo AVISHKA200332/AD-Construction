@@ -12,8 +12,7 @@ exports.forgotPassword = async (req, res) => {
     const normalizedGmail = String(gmail).trim().toLowerCase();
     const user = await User.findOne({ gmail: normalizedGmail });
     if (!user) {
-      // Do not reveal whether user exists in production; return generic message
-      return res.status(200).json({ success: true, message: 'If an account exists, a reset token has been generated' });
+      return res.status(404).json({ success: false, message: 'This account not exists' });
     }
 
     const token = crypto.randomBytes(20).toString('hex');

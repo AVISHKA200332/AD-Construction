@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import logo from '../../assets/logo.png';
 
 function ResetPassword() {
   const [token, setToken] = useState('');
@@ -44,9 +45,7 @@ function ResetPassword() {
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-b from-[#0B3954] to-[#092638]">
       <div className="w-full max-w-md bg-white/95 rounded-2xl shadow-2xl p-8 backdrop-blur-sm">
         <div className="mb-6 flex items-center justify-center gap-3">
-          <div className="h-11 w-11 rounded-xl bg-[#0B3954] text-white flex items-center justify-center font-bold text-lg shadow-md">
-            AD
-          </div>
+          <img src={logo} alt="AD Construction" className="h-11 w-11 rounded-xl object-cover shadow-md" />
           <div className="text-left">
             <p className="text-xs uppercase tracking-[0.22em] text-gray-400">AD Construction</p>
             <h1 className="text-lg font-bold text-[#0B3954] leading-tight">Reset Password</h1>
