@@ -151,7 +151,7 @@ function Nav() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur bg-[#0B3954]/80 text-white px-6 py-3 border-b border-white/10 shadow-lg">
+    <nav className="sticky top-0 z-50 bg-[#0B3954] text-white px-6 py-3 border-b border-white/10 shadow-lg">
       {/* Accent gradient bar */}
       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-[#F5CB5C] via-transparent to-[#F5CB5C]/60 pointer-events-none"></div>
       <div className="relative flex items-center justify-between">
@@ -186,10 +186,8 @@ function Nav() {
                 { to: `${base}/dashboard`, label: "Dashboard" },
                 { to: `${base}/projects`, label: "Projects" },
                 { to: `${base}/financial`, label: "Financial" },
-                { to: `${base}/reports`, label: "Reports" },
                 { to: `${base}/services`, label: "Services" },
                 { to: `${base}/communication`, label: "Communication" },
-                { to: `${base}/settings`, label: "Settings" },
               ];
             } else if (isAdmin) {
               const base = "/admin";
@@ -198,10 +196,8 @@ function Nav() {
                 { to: `${base}/users`, label: "Users" },
                 { to: `${base}/projects`, label: "Projects" },
                 { to: `${base}/financial`, label: "Financial" },
-                { to: `${base}/reports`, label: "Reports" },
                 { to: `${base}/communication`, label: "Communication" },
                 { to: `${base}/inventory`, label: "Inventory" },
-                { to: `${base}/settings`, label: "Settings" },
               ];
             } else if (isSM) {
               const base = "/site-manager";
@@ -209,11 +205,9 @@ function Nav() {
                 { to: `${base}/dashboard`, label: "Dashboard" },
                 { to: `${base}/projects`, label: "Projects" },
                 { to: `${base}/financial`, label: "Financial" },
-                { to: `${base}/reports`, label: "Reports" },
                 { to: `${base}/services`, label: "Services" },
                 { to: `${base}/communication`, label: "Communication" },
                 { to: `${base}/inventory`, label: "Inventory" },
-                { to: `${base}/settings`, label: "Settings" },
               ];
             } else if (isSS || isSup) {
               // Unify Site Supervisor + legacy Supervisor with Site Manager style nav
@@ -222,21 +216,17 @@ function Nav() {
                 { to: `${base}/dashboard`, label: "Dashboard" },
                 { to: `${base}/projects`, label: "Projects" },
                 { to: `${base}/financial`, label: "Financial" },
-                { to: `${base}/reports`, label: "Reports" },
                 { to: `${base}/communication`, label: "Communication" },
                 { to: `${base}/inventory`, label: "Inventory" },
-                { to: `${base}/settings`, label: "Settings" },
               ];
             } else if (isLabor) {
               const base = "/labor";
               links = [
                 { to: `${base}/dashboard`, label: "Dashboard" },
                 { to: `${base}/projects`, label: "Projects" },
-                { to: `${base}/reports`, label: "Reports" },
                 { to: `${base}/services`, label: "Services" },
                 { to: `${base}/communication`, label: "Communication" },
                 { to: `${base}/inventory`, label: "Inventory" },
-                { to: `${base}/settings`, label: "Settings" },
               ];
             } else {
               // Guest
@@ -370,18 +360,6 @@ function Nav() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                   View Profile
-                </Link>
-                
-                <Link
-                  to="/settings"
-                  onClick={() => setDropdownOpen(false)}
-                  className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Settings
                 </Link>
 
                 <div className="border-t border-gray-200 my-2"></div>

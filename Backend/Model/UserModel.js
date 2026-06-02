@@ -50,6 +50,9 @@ const userSchema = new Schema({
     at: { type: Date, default: Date.now }
   }],
   lastLogin: { type: Date },
+  // Password reset fields (dev-friendly implementation)
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date },
   password: { type: String, required: true, minlength: 6 }
 }, { timestamps: true });
 

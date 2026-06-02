@@ -22,9 +22,9 @@ function SignIn() {
   const validate = () => {
     const e = {};
     if (!form.gmail || !validateEmail(form.gmail))
-      e.gmail = "Enter a valid gmail"; // Changed email to gmail
+      e.gmail = "Enter a valid gmail address";
     if (!form.password || form.password.length < 6)
-      e.password = "Password must be 6+ chars";
+      e.password = "Password must be at least 6 characters";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -37,22 +37,16 @@ function SignIn() {
       setLoading(true);
       setApiError("");
 
-      console.log("Attempting login with:", { gmail: form.gmail }); // Debug
-
       const response = await axios.post("http://localhost:5000/login", {
         gmail: form.gmail, // Changed from email to gmail
         password: form.password,
       });
-
-      console.log("Login response:", response.data); // Debug
 
       if (response.data.success) {
         // Store token and user data
         localStorage.setItem("authToken", response.data.token);
         localStorage.setItem("userData", JSON.stringify(response.data.user));
         localStorage.setItem("ad_role", response.data.user.role);
-
-        console.log("User role from server:", response.data.user.role); // Debug
 
         // Role-based redirect
         const role = response.data.user.role;
@@ -67,7 +61,6 @@ function SignIn() {
           Supervisor: "/site-supervisor/dashboard", // legacy supervisor now mapped to site-supervisor
         };
         const finalPath = roleMap[role] || "/";
-        console.log(`Redirecting to: ${finalPath}`); // Debug log
         navigate(finalPath);
       }
     } catch (error) {
@@ -82,52 +75,61 @@ function SignIn() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-b from-[#0B3954] to-[#092638]">
-      <div className="w-full max-w-md bg-white/95 rounded-xl shadow-xl p-8">
+      <div className="w-full max-w-md bg-white/95 rounded-xl shadow-xl p-8 animate-fade-up">
         <h1 className="text-2xl font-bold text-[#0B3954] mb-1">Welcome back</h1>
         <p className="text-sm text-gray-500 mb-6">
           Sign in to continue to AD Construction
         </p>
 
         {apiError && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+          <div role="alert" aria-live="assertive" className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
             {apiError}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           {/* Role selection removed: role resolved automatically from server */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="signin-gmail" className="block text-sm font-medium text-gray-700 mb-1">
               Gmail
             </label>
             <input
+              id="signin-gmail"
               type="email"
               name="gmail"
               value={form.gmail}
               onChange={handleChange}
+              autoComplete="username"
+              aria-invalid={Boolean(errors.gmail)}
+              aria-describedby={errors.gmail ? "signin-gmail-error" : undefined}
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#F5CB5C]"
               placeholder="you@gmail.com"
             />
             {errors.gmail && (
-              <p className="text-sm text-red-600 mt-1">{errors.gmail}</p>
+              <p id="signin-gmail-error" className="text-sm text-red-600 mt-1">{errors.gmail}</p>
             )}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="signin-password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
             <div className="relative">
               <input
+                id="signin-password"
                 type={showPassword ? "text" : "password"}
                 name="password"
                 value={form.password}
                 onChange={handleChange}
+                autoComplete="current-password"
+                aria-invalid={Boolean(errors.password)}
+                aria-describedby={errors.password ? "signin-password-error" : undefined}
                 className="w-full border rounded-lg px-3 py-2 pr-12 focus:outline-none focus:ring-2 focus:ring-[#F5CB5C]"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
               >
                 {showPassword ? (
@@ -168,27 +170,27 @@ function SignIn() {
               </button>
             </div>
             {errors.password && (
-              <p className="text-sm text-red-600 mt-1">{errors.password}</p>
+              <p id="signin-password-error" className="text-sm text-red-600 mt-1">{errors.password}</p>
             )}
           </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#F5CB5C] text-[#0B3954] font-semibold py-2 rounded-lg hover:bg-[#e5bb4f] transition disabled:opacity-70"
+            className="w-full bg-[#F5CB5C] text-[#0B3954] font-semibold py-2 rounded-lg hover:bg-[#e5bb4f] transition disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
 
-        <p className="text-sm text-gray-600 mt-6 text-center">
-          Don't have an account? {""}
-          <Link
-            to="/signup"
-            className="text-[#0B3954] font-semibold hover:underline"
-          >
-            Sign Up
-          </Link>
-        </p>
+        <div className="mt-4 flex justify-between text-sm">
+          <div>
+            Don't have an account? {" "}
+            <Link to="/signup" className="text-[#0B3954] font-semibold hover:underline">Sign Up</Link>
+          </div>
+          <div>
+            <Link to="/forgot-password" className="text-gray-600 hover:underline">Forgot password?</Link>
+          </div>
+        </div>
       </div>
     </div>
   );

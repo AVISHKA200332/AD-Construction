@@ -18,6 +18,8 @@ const profileRouter = require('./Route/ProfileRoutes');
 const inventoryRouter = require('./Route/inventoryItemRoute');
 const buyerInventoryRouter = require('./Route/BuyerInventoryRoute');
 const projectAssignmentRouter = require('./Route/ProjectAssignmentRoutes');
+const documentRouter = require('./Route/DocumentRoute');
+const passwordRouter = require('./Route/PasswordRoutes');
 
 const app = express();
 
@@ -48,9 +50,13 @@ app.use('/profile', profileRouter);
 app.use('/inventory', inventoryRouter);
 app.use('/buyer-inventory', buyerInventoryRouter);
 app.use('/project-assign', projectAssignmentRouter);
+// Document uploads (file routes)
+app.use('/', documentRouter);
+// Password reset endpoints
+app.use('/password', passwordRouter);
 
-// Database and server
-const PORT = process.env.PORT || 5000;
+// Database and server (BACKEND_PORT avoids clashing with React's PORT=3000 in shell/.env)
+const PORT = Number(process.env.BACKEND_PORT) || 5000;
 const MONGODB_URI =
   process.env.MONGODB_URI ||
   'mongodb+srv://Admin:1jRinOK59GDesfiB@cluster0.pmkuy4i.mongodb.net/';
