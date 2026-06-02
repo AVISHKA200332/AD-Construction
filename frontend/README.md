@@ -68,3 +68,19 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## UI Polish Screenshots
+
+Use this folder to store before/after screenshots for the auth recovery flow:
+
+- `public/images/screenshots/forgot-password-before.png`
+- `public/images/screenshots/forgot-password-after.png`
+- `public/images/screenshots/reset-password-before.png`
+- `public/images/screenshots/reset-password-after.png`
+
+Suggested capture views:
+
+- Mobile width (~390px): form layout and button placement
+- Desktop width (>=1280px): centered card and spacing
+- Error state: invalid email, missing token, password mismatch
+- Success state: reset link sent and password reset complete
