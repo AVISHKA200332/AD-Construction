@@ -197,7 +197,7 @@ export default function SSProjects() {
     setLaborLoading(true); setLaborError('');
     setTaskForm({ title:'', description:'', dueDate:'', dueTime:'', laborIds:[], bankAccount:'' });
     try {
-      const res = await userService.getAllUsers({ role: 'Labor', limit: 200 });
+      const res = await userService.getUserDirectory({ role: 'Labor' });
       const list = Array.isArray(res?.users) ? res.users : [];
       setLabors(list);
     } catch (e) {

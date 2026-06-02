@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import financeService from '../../../services/financeService';
 import './AddFinance.css';
 
 const MAX_BANK_SLIP_SIZE = 2 * 1024 * 1024; // 2 MB
@@ -141,11 +141,7 @@ function AddFinance() {
             formData.append("bankSlip", bankSlip);
         }
 
-        await axios.post(`http://localhost:5000/finances`, formData, {
-            headers: {
-                "Content-Type": "multipart/form-data"
-            }
-        }).then(res => res.data);
+        await financeService.create(formData);
     };
 
     return (

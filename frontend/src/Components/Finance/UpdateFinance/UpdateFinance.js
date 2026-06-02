@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import financeService from '../../../services/financeService';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import './UpdateFinance.css';
 
@@ -49,13 +49,7 @@ function UpdateFinance() {
             formData.append("bankSlipPath", inputs.bankSlipPath);
         }
 
-        await axios
-            .put(`http://localhost:5000/finances/${id}`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data"
-                }
-            })
-            .then((res) => res.data);
+        await financeService.update(id, formData);
     };
 
     const handleChange = (e) => {

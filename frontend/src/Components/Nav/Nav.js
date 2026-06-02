@@ -105,7 +105,11 @@ function Nav() {
   useEffect(() => {
     const loadUsers = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/users");
+        const token = localStorage.getItem("authToken");
+        if (!token) return;
+        const res = await axios.get("http://localhost:5000/users/directory", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setUsers(res.data.users || []);
       } catch (_) {}
     };

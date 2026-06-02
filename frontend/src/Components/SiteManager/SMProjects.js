@@ -62,8 +62,8 @@ export default function SMProjects() {
     setSupModal(true);
     setSupLoading(true);
     try {
-      const ss1 = await userService.getAllUsers({ role: 'Site Supervisor', limit: 100 });
-      const ss2 = await userService.getAllUsers({ role: 'Supervisor', limit: 100 });
+      const ss1 = await userService.getUserDirectory({ role: 'Site Supervisor' });
+      const ss2 = await userService.getUserDirectory({ role: 'Supervisor' });
       const arr = [...(ss1.users||[]), ...(ss2.users||[])];
       // unique by _id
       const map = new Map();

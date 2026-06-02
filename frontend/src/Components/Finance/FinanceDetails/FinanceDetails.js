@@ -1,13 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import Finance from '../Finance';
+import financeService from '../../../services/financeService';
 import './FinanceDetails.css';
 
-const URL = `http://localhost:5000/finances`; 
-
-const fetchHandler = async () => {
-  return await axios.get(URL).then((res) => res.data);
-};
+const fetchHandler = async () => financeService.getAll();
 
 function FinanceDetails() {
   const [finances, setFinance] = useState([]);

@@ -19,6 +19,7 @@ import logo from '../../assets/logo.png';
 import '../css-resources/FinanceDashboard.css';
 import inventoryService from '../../services/inventoryService';
 import projectService from '../../services/projectService';
+import financeService from '../../services/financeService';
 
 // Register Chart.js components
 ChartJS.register(
@@ -52,9 +53,8 @@ function FinanceDashboard() {
 
   const fetchFinanceData = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/finances');
-      // Ensure response.data is an array
-      const data = Array.isArray(response.data.finance) ? response.data.finance : [];
+      const response = await financeService.getAll();
+      const data = Array.isArray(response.finance) ? response.finance : [];
       setFinanceData(data);
       setLoading(false);
     } catch (error) {

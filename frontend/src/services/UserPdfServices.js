@@ -1,27 +1,31 @@
-
 import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const API_URL = "/users";  // Simple path without /api
+const API_URL = "http://localhost:5000/users";
+
+function authHeaders() {
+  const token = localStorage.getItem("authToken");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 const getAllUsers = async (params) => {
-  const res = await axios.get(API_URL, { params });
+  const res = await axios.get(API_URL, { params, headers: authHeaders() });
   return res.data;
 };
 
 const createUser = async (user) => {
-  const res = await axios.post(API_URL, user);
+  const res = await axios.post(API_URL, user, { headers: authHeaders() });
   return res.data;
 };
 
 const updateUser = async (id, user) => {
-  const res = await axios.put(`${API_URL}/${id}`, user);
+  const res = await axios.put(`${API_URL}/${id}`, user, { headers: authHeaders() });
   return res.data;
 };
 
 const deleteUser = async (id) => {
-  const res = await axios.delete(`${API_URL}/${id}`);
+  const res = await axios.delete(`${API_URL}/${id}`, { headers: authHeaders() });
   return res.data;
 };
 

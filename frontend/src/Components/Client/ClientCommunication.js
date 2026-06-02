@@ -25,7 +25,7 @@ export default function ClientCommunication() {
     try { const res = await axios.get(`${BASE}/messages/sent`, { headers: token ? { Authorization: `Bearer ${token}` } : {} }); setSent(res.data.messages || []); } catch (_) { setSent([]); }
   }, [BASE, token]);
 
-  useEffect(() => { fetchInbox(); fetchSent(); (async ()=>{ try{ const r = await axios.get(`${BASE}/users`); setUsers(r.data.users||[]); }catch{} })(); }, [fetchInbox, fetchSent]);
+  useEffect(() => { fetchInbox(); fetchSent(); (async ()=>{ try{ const token = localStorage.getItem('authToken'); const r = await axios.get(`${BASE}/users/directory`, { headers: token ? { Authorization: `Bearer ${token}` } : {} }); setUsers(r.data.users||[]); }catch{} })(); }, [fetchInbox, fetchSent]);
 
   // refresh lists when another part of the app notifies a message was read
   useEffect(() => {

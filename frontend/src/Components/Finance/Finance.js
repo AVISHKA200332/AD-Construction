@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import financeService from '../../services/financeService';
 import './Finance.css';
 
 function Finance(props) {
@@ -34,9 +34,7 @@ function Finance(props) {
   const deleteHandler = async () => {
     if (isPaid) return;
 
-    await axios.delete(`http://localhost:5000/finances/${_id}`)
-      .then(res => res.data)
-      .then(() => {
+    await financeService.remove(_id).then(() => {
         navigate("/financeRecords");
         window.location.reload();
       });
