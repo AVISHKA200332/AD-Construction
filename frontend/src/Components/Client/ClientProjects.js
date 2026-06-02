@@ -34,7 +34,7 @@ function ClientProjects() {
   // Fetch documents for a project
   const fetchDocuments = async (projectId) => {
     try {
-      const res = await fetch(`/api/projects/${projectId}`);
+      const res = await fetch(`/projects/${projectId}`);
       if (!res.ok) return;
       const data = await res.json();
       setDocuments((prev) => ({ ...prev, [projectId]: data.project.documents || [] }));
@@ -49,7 +49,7 @@ function ClientProjects() {
       const formData = new FormData();
       formData.append('document', file);
       const token = localStorage.getItem('authToken');
-      const res = await fetch(`/api/projects/${projectId}/upload-document`, {
+      const res = await fetch(`/projects/${projectId}/upload-document`, {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,

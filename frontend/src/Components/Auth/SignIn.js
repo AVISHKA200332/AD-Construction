@@ -180,15 +180,15 @@ function SignIn() {
           </button>
         </form>
 
-        <p className="text-sm text-gray-600 mt-6 text-center">
-          Don't have an account? {""}
-          <Link
-            to="/signup"
-            className="text-[#0B3954] font-semibold hover:underline"
-          >
-            Sign Up
-          </Link>
-        </p>
+        <div className="mt-4 flex justify-between text-sm">
+          <div>
+            Don't have an account? {" "}
+            <Link to="/signup" className="text-[#0B3954] font-semibold hover:underline">Sign Up</Link>
+          </div>
+          <div>
+            <Link to="/forgot-password" className="text-gray-600 hover:underline">Forgot password?</Link>
+          </div>
+        </div>
       </div>
     </div>
   );

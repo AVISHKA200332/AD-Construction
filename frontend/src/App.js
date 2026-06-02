@@ -11,6 +11,8 @@ import Foot from "./Components/Footer/Footer";
 import Home from "./Components/Home/Home";
 import SignIn from "./Components/Auth/SignIn";
 import SignUp from "./Components/Auth/SignUp";
+import ForgotPassword from "./Components/Auth/ForgotPassword";
+import ResetPassword from "./Components/Auth/ResetPassword";
 import ClientDashboard from "./Components/Client/ClientDashboard";
 import ClientProjects from "./Components/Client/ClientProjects";
 import ClientFinancial from "./Components/Client/ClientFinancial";
@@ -73,7 +75,7 @@ import LaborServices from "./Components/Labor/LaborServices";
 
 function AppContent() {
   const location = useLocation();
-  const hideNavOn = ["/", "/signin", "/signup"]; // Hide Nav on public pages
+  const hideNavOn = ["/", "/signin", "/signup", "/forgot-password", "/reset-password"]; // Hide Nav on public/auth pages
   const showNav = !hideNavOn.includes(location.pathname);
   const hideFootOn = ["/signin", "/signup"]; // Hide Footer on auth pages
   const showFoot = !hideFootOn.includes(location.pathname);
@@ -85,6 +87,8 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/apply" element={<ApplyJob />} />
         {/* Client Routes */}
         <Route path="/client/dashboard" element={<ClientDashboard />} />

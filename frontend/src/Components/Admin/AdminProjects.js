@@ -160,7 +160,19 @@ function Project({ initialProjects = [] }) {
       }
   // Set client string from selected client user
   const selected = clientUsers.find(u => String(u._id) === String(newProject.linkedClientUserId));
-  const payload = { ...newProject, client: selected?.name || '' };
+      // Ensure numeric fields are normalized before sending to backend
+      const payload = { ...newProject, client: selected?.name || '' };
+      if (payload.budget) {
+        const clean = String(payload.budget).replace(/[,\s]/g, '');
+        payload.budget = Number(clean);
+      }
+      if (payload.completion !== undefined && payload.completion !== '') {
+        payload.completion = Number(payload.completion);
+      }
+      if (payload.projectManager) {
+        if (payload.projectManager.age !== undefined && payload.projectManager.age !== '') payload.projectManager.age = Number(payload.projectManager.age);
+        if (payload.projectManager.experience !== undefined && payload.projectManager.experience !== '') payload.projectManager.experience = Number(payload.projectManager.experience);
+      }
 
       if (isEditing && editIndex !== null) {
         // Update existing project

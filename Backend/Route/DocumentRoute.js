@@ -4,11 +4,18 @@ const multer = require('multer');
 const path = require('path');
 const Project = require('../Model/ProjectModel');
 const authMiddleware = require('../middleware/authMiddleware');
+const fs = require('fs');
 
 // Configure multer for file storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../../uploads/documents'));
+    const dest = path.join(__dirname, '../../uploads/documents');
+    try {
+      fs.mkdirSync(dest, { recursive: true });
+    } catch (e) {
+      // ignore mkdir errors, multer will handle if directory missing
+    }
+    cb(null, dest);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -17,11 +24,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// POST /api/projects/:id/upload-document
-// Secure all document routes for logged-in users
-router.use(authMiddleware);
-
-router.post('/projects/:id/upload-document', upload.single('document'), async (req, res) => {
+// POST /projects/:id/upload-document
+// Protect only the upload route; avoid applying auth middleware globally
+router.post('/projects/:id/upload-document', authMiddleware, upload.single('document'), async (req, res) => {
   try {
     const projectId = req.params.id;
     const file = req.file;
