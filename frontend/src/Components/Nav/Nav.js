@@ -151,7 +151,7 @@ function Nav() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur bg-[#0B3954]/80 text-white px-6 py-3 border-b border-white/10 shadow-lg">
+    <nav className="sticky top-0 z-50 bg-[#0B3954] text-white px-6 py-3 border-b border-white/10 shadow-lg">
       {/* Accent gradient bar */}
       <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-[#F5CB5C] via-transparent to-[#F5CB5C]/60 pointer-events-none"></div>
       <div className="relative flex items-center justify-between">
