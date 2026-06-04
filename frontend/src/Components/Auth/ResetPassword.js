@@ -39,7 +39,7 @@ function ResetPassword() {
     }
     setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/password/reset', { token, password });
+      const res = await axios.post('https://ad-construction-1.onrender.com/password/reset', { token, password });
       setMessageType('success');
       setMessage(res.data.message || 'Password reset successful');
       if (res.data.token) {

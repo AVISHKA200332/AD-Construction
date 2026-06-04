@@ -46,7 +46,7 @@ function SignUp() {
       setApiError("");
 
       // Call backend signup API. Expecting { name, gmail, password }
-      const response = await axios.post("http://localhost:5000/signup", {
+      const response = await axios.post("https://ad-construction-1.onrender.com/signup", {
         name: form.name,
         gmail: form.gmail, // Changed from email to gmail
         password: form.password

@@ -19,7 +19,7 @@ function ForgotPassword() {
     setLoading(true);
     setMessage('');
     try {
-      const res = await axios.post('http://localhost:5000/password/forgot', { gmail: gmail.trim() });
+      const res = await axios.post('https://ad-construction-1.onrender.com/password/forgot', { gmail: gmail.trim() });
       setMessageType('success');
       setMessage(res.data.message || 'If an account exists, check your gmail for the reset link.');
     } catch (err) {
