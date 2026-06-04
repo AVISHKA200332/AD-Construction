@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:5000/finances';
+const API_BASE_URL = 'https://ad-construction-1.onrender.com/finances';
 
 const api = axios.create({ baseURL: API_BASE_URL });
 

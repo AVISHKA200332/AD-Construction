@@ -1,8 +1,8 @@
 import axios from "axios";
 
 // Base URLs
-const API_URL = "http://localhost:5000/users";
-const PROFILE_URL = "http://localhost:5000/profile";
+const API_URL = "https://ad-construction-1.onrender.com/users";
+const PROFILE_URL = "https://ad-construction-1.onrender.com/profile";
 
 // Helper to attach Authorization header
 function authHeaders() {

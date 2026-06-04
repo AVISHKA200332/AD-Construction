@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://ad-construction-1.onrender.com';
 
 // Helper to build query string
 function buildQuery(params = {}) {

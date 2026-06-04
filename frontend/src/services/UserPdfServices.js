@@ -2,7 +2,7 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const API_URL = "http://localhost:5000/users";
+const API_URL = "https://ad-construction-1.onrender.com/users";
 
 function authHeaders() {
   const token = localStorage.getItem("authToken");
