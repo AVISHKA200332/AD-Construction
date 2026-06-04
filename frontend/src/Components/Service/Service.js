@@ -36,7 +36,7 @@ const Service = () => {
   };
 
 
-  const BASE_URL = 'https://ad-construction-1.onrender.com';
+  const BASE_URL = 'http://localhost:5000';
   const fetchServices = async () => {
     setFetchError(null);
     try {
