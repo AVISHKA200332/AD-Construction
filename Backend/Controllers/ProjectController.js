@@ -1,4 +1,14 @@
 const Project = require("../Model/ProjectModel");
+const {
+  canListProjects,
+  canCreateProject,
+  canDeleteProject,
+  canUpdateProject,
+  canViewProjectStats,
+  canViewAuditLogs,
+  canAccessProject,
+  applyProjectListFilter,
+} = require("../utils/accessControl");
 
 // Helper function to get client IP
 const getClientIP = (req) => {
@@ -36,6 +46,10 @@ const addAuditLog = async (project, action, field, oldValue, newValue, req) => {
 // Get all projects with enhanced filtering and pagination
 const getAllProject = async (req, res, next) => {
   try {
+    if (!canListProjects(req.user)) {
+      return res.status(403).json({ message: "Forbidden: insufficient permissions to list projects" });
+    }
+
     const { 
       page = 1, 
       limit = 10, 
@@ -48,8 +62,7 @@ const getAllProject = async (req, res, next) => {
       sortOrder = 'desc'
     } = req.query;
 
-  // Build filter object
-  const filter = {};
+  let filter = {};
     if (status) filter.status = status;
     if (priority) filter.priority = priority;
     if (search) {
@@ -60,7 +73,6 @@ const getAllProject = async (req, res, next) => {
       ];
     }
 
-    // Client-assignment filters
     if (clientName) {
       filter.client = { $regex: clientName, $options: 'i' };
     }
@@ -68,7 +80,8 @@ const getAllProject = async (req, res, next) => {
       filter['clientContact.email'] = { $regex: `^${clientEmail}$`, $options: 'i' };
     }
 
-    // Build sort object
+    filter = applyProjectListFilter(filter, req.user);
+
     const sort = {};
     sort[sortBy] = sortOrder === 'desc' ? -1 : 1;
 
@@ -109,7 +122,9 @@ const getProjectById = async (req, res, next) => {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    // Note: RBAC for project access is enforced via separate role-ops endpoints to avoid changing existing admin flows
+    if (!canAccessProject(req.user, project)) {
+      return res.status(403).json({ message: "Forbidden: you do not have access to this project" });
+    }
 
     // Add audit log for view action
     await addAuditLog(project, 'VIEW', 'single', null, `Project ${project.projectId} viewed`, req);
@@ -124,6 +139,10 @@ const getProjectById = async (req, res, next) => {
 // Get project statistics (60-30-10 rule implementation)
 const getProjectStats = async (req, res, next) => {
   try {
+    if (!canViewProjectStats(req.user)) {
+      return res.status(403).json({ message: "Forbidden: insufficient permissions for project statistics" });
+    }
+
     const stats = await Project.getProjectStats();
     
     if (stats.length === 0) {
@@ -148,7 +167,10 @@ const getProjectStats = async (req, res, next) => {
 // Add new project with comprehensive validation
 const addProject = async (req, res, next) => {
   try {
-    // Note: Creation permissions are handled at the router level for admin flows; preserving existing behavior
+    if (!canCreateProject(req.user)) {
+      return res.status(403).json({ message: "Forbidden: only administrators can create projects" });
+    }
+
     // Validate required fields
     const requiredFields = ['name', 'client', 'startDate', 'endDate', 'budget'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
@@ -224,7 +246,12 @@ const updateProject = async (req, res, next) => {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    // Note: Update permissions are not altered here to avoid impacting existing admin flows
+    if (!canUpdateProject(req.user)) {
+      return res.status(403).json({ message: "Forbidden: insufficient permissions to update projects" });
+    }
+    if (!canAccessProject(req.user, existingProject)) {
+      return res.status(403).json({ message: "Forbidden: you do not have access to this project" });
+    }
 
     // Store old values for audit log
     const oldValues = {
@@ -296,7 +323,10 @@ const deleteProject = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    // Note: Delete permissions unchanged here to preserve existing behavior
+    if (!canDeleteProject(req.user)) {
+      return res.status(403).json({ message: "Forbidden: only administrators can delete projects" });
+    }
+
     const project = await Project.findById(id);
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
@@ -322,9 +352,16 @@ const getProjectAuditLogs = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const project = await Project.findById(id).select('auditLog projectId name');
+    const project = await Project.findById(id).select('auditLog projectId name supervisors siteManager');
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
+    }
+
+    if (!canViewAuditLogs(req.user)) {
+      return res.status(403).json({ message: "Forbidden: insufficient permissions for audit logs" });
+    }
+    if (!canAccessProject(req.user, project)) {
+      return res.status(403).json({ message: "Forbidden: you do not have access to this project" });
     }
 
     return res.status(200).json({ 

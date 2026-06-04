@@ -1,6 +1,11 @@
 const User = require("../Model/UserModel");
+const {
+    canViewUser,
+    canUpdateUser,
+    isAdmin,
+} = require("../utils/accessControl");
 
-// Get all users with pagination
+// Get all users with pagination (Admin only — enforced on route)
 const getAllUsers = async (req, res, next) => {
     try {
         const { 
@@ -62,7 +67,7 @@ const getAllUsers = async (req, res, next) => {
     }
 };
 
-// Create new user
+// Create new user (Admin only — enforced on route)
 const addUsers = async (req, res, next) => {
     try {
         const { name, gmail, phone, role, age, address, password, profileImage } = req.body;
@@ -72,7 +77,9 @@ const addUsers = async (req, res, next) => {
         // Don't hash password here - let the UserModel pre-save hook handle it
         let user = new User({ name, gmail, phone, role, age, address, password });
         await user.save();
-        return res.status(200).json({ user });
+        const safe = user.toObject();
+        delete safe.password;
+        return res.status(200).json({ user: safe });
     } catch (err) {
         return res.status(500).json({ message: "Server error while creating user" });
     }
@@ -81,15 +88,11 @@ const addUsers = async (req, res, next) => {
 // Get user by ID
 const getById = async (req, res, next) => {
     try {
-        if (!req.user) {
-            return res.status(401).json({ message: "Unauthorized: No user context (auth required)" });
-        }
         const id = req.params.id;
-        // Only allow self or admin
-        if (String(req.user._id) !== String(id) && req.user.role !== "Admin") {
+        if (!canViewUser(req.user, id)) {
             return res.status(403).json({ message: "Forbidden: You can only view your own profile." });
         }
-        let user = await User.findById(id);
+        let user = await User.findById(id).select("-password");
         if (!user) {
             return res.status(404).json({ message: "User Not Found" });
         }
@@ -104,17 +107,18 @@ const getById = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
     try {
         const id = req.params.id;
+        if (!canUpdateUser(req.user, id)) {
+            return res.status(403).json({ message: "Forbidden: You can only update your own profile." });
+        }
         const { name, gmail, phone, role, age, address, password } = req.body;
-        // Find the user first
         let user = await User.findById(id);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        // Update fields
         if (name) user.name = name;
         if (gmail) user.gmail = gmail;
         if (phone) user.phone = phone;
-        if (role) user.role = role;
+        if (role && isAdmin(req.user)) user.role = role;
         if (age !== undefined) user.age = age;
         if (address) user.address = address;
         if (password && password.length >= 6) {
@@ -128,14 +132,16 @@ const updateUser = async (req, res, next) => {
         }
         // Save the user (this will trigger updatedAt update and password hashing if needed)
         await user.save();
-        return res.status(200).json({ user });
+        const safe = user.toObject();
+        delete safe.password;
+        return res.status(200).json({ user: safe });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ message: "Server error while updating user" });
     }
 };
 
-// Delete user
+// Delete user (Admin only — enforced on route)
 const deleteUser = async (req, res, next) => {
     try {
         const id = req.params.id;
@@ -152,7 +158,31 @@ const deleteUser = async (req, res, next) => {
     }
 };
 
+// Minimal user list for messaging / compose (any authenticated user)
+const getUserDirectory = async (req, res) => {
+    try {
+        const { role, search } = req.query;
+        const query = {};
+        if (role) query.role = role;
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { gmail: { $regex: search, $options: "i" } },
+            ];
+        }
+        const users = await User.find(query)
+            .select("name gmail role")
+            .sort({ name: 1 })
+            .lean();
+        return res.status(200).json({ users });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ message: "Server error while fetching user directory" });
+    }
+};
+
 exports.getAllUsers = getAllUsers;
+exports.getUserDirectory = getUserDirectory;
 exports.addUsers = addUsers;
 exports.getById = getById;
 exports.updateUser = updateUser;

@@ -49,7 +49,10 @@ const Message = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/users`);
+      const token = localStorage.getItem('authToken');
+      const res = await axios.get(`${BASE_URL}/users/directory`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       setUsers(res.data.users || []);
     } catch (e) {
       // Non-blocking

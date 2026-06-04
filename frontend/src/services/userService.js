@@ -10,6 +10,21 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+const getUserDirectory = async (params = {}) => {
+  try {
+    const queryParams = new URLSearchParams();
+    if (params.role) queryParams.append("role", params.role);
+    if (params.search) queryParams.append("search", params.search);
+    const qs = queryParams.toString();
+    const url = qs ? `${API_URL}/directory?${qs}` : `${API_URL}/directory`;
+    const res = await axios.get(url, { headers: authHeaders() });
+    return res.data;
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
+};
+
 const getAllUsers = async (params = {}) => {
   try {
     const queryParams = new URLSearchParams();
@@ -101,7 +116,7 @@ const changeMyPassword = async (currentPassword, newPassword) => {
 
 const profileService = { getMyProfile, updateMyProfile, uploadMyProfileImage, getMyActivity, changeMyPassword };
 
-const userService = { getAllUsers, getUserById, createUser, updateUser, deleteUser, profile: profileService };
+const userService = { getUserDirectory, getAllUsers, getUserById, createUser, updateUser, deleteUser, profile: profileService };
 
 export default userService;
 export { userService };

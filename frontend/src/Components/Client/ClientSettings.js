@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import userService from "../../services/userService";
 
 function ClientSettings() {
   const [user, setUser] = useState(null);
@@ -23,12 +24,7 @@ function ClientSettings() {
         const raw = localStorage.getItem("userData");
         const parsed = raw ? JSON.parse(raw) : null;
         if (!parsed?._id) return;
-        const token = localStorage.getItem("authToken");
-        const res = await fetch(`/api/users/${parsed._id}`, { 
-          headers: token ? { Authorization: `Bearer ${token}` } : {} 
-        });
-        if (!res.ok) throw new Error("Failed to fetch profile");
-        const data = await res.json();
+        const data = await userService.getUserById(parsed._id);
         setUser(data.user);
         setForm({
           name: data.user.name || "",
@@ -58,17 +54,7 @@ function ClientSettings() {
     setError("");
     setSuccess("");
     try {
-      const token = localStorage.getItem("authToken");
-      const formData = new FormData();
-      Object.entries(form).forEach(([k, v]) => {
-        if (v) formData.append(k, v);
-      });
-      const res = await fetch(`/api/users/${user._id}`, {
-        method: "PUT",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
-      });
-      if (!res.ok) throw new Error("Update failed");
+      await userService.updateUser(user._id, form);
       setSuccess("Profile updated!");
       setEditMode(false);
     } catch (e) {

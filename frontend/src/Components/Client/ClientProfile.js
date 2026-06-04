@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import userService from "../../services/userService";
 
 function ClientProfile() {
   const [user, setUser] = useState(null);
@@ -9,12 +10,14 @@ function ClientProfile() {
       const raw = localStorage.getItem("userData");
       const parsed = raw ? JSON.parse(raw) : null;
       if (!parsed?._id) return;
-      const token = localStorage.getItem("authToken");
-      const res = await fetch(`/api/users/${parsed._id}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
-      if (!res.ok) return;
-      const data = await res.json();
-      setUser(data.user);
-      setLoading(false);
+      try {
+        const data = await userService.getUserById(parsed._id);
+        setUser(data.user);
+      } catch {
+        /* ignore */
+      } finally {
+        setLoading(false);
+      }
     }
     fetchUser();
   }, []);
